@@ -1,13 +1,10 @@
-import { ArrowLeft, Star, Sparkles, MessageSquare, Phone, Mail, User, Headset } from 'lucide-react'
+import { ArrowLeft, Star, Sparkles, Phone, Mail, User, Headset, Clock, Calendar, MessageCircle } from 'lucide-react'
 import type { Campaign } from '@/lib/campaigns'
 import type { Survey, SurveyQuestion, RatingQuestion, OpenQuestion } from '@/lib/surveys'
 import { SurveyStatusPill } from '@/components/feedback-intelligence/SurveysList'
 
-/* ============================================================
- * SurveyDetailPage — Level 3 view for an individual survey.
- * Shows customer / interaction / agent context plus the full
- * 3-question Q&A transcript with AI-generation provenance.
- * ============================================================ */
+const F = 'var(--lyra-font-sans, var(--font-sans))'
+
 export function SurveyDetailPage({
   survey,
   campaign,
@@ -18,214 +15,300 @@ export function SurveyDetailPage({
   onBack: () => void
 }) {
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-[#e2e8f0] px-6 lg:px-8 py-4">
+    <div style={{ minHeight: '100vh', background: 'var(--lyra-color-bg-surface-canvas)', fontFamily: F, display: 'flex', flexDirection: 'column' }}>
+
+      {/* ── Page header ── */}
+      <header style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        padding: '18px 40px 22px',
+      }}>
         <button
           onClick={onBack}
-          className="inline-flex items-center gap-1 text-[12px] font-medium text-[#64748b] hover:text-[#0f172a] mb-3 outline-none focus:outline-none transition-colors"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+            font: '500 12px/16px ' + F,
+            color: 'var(--lyra-color-fg-secondary)',
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '4px 6px', borderRadius: 6, marginBottom: 16, marginLeft: -6,
+            transition: 'background 0.12s, color 0.12s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--lyra-color-state-bg-hover-opacity)'; e.currentTarget.style.color = 'var(--lyra-color-fg-default)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--lyra-color-fg-secondary)' }}
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft style={{ width: 13, height: 13 }} />
           Back to campaign dashboard
         </button>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6366f1] mb-1">
-              Survey · {survey.id}
-            </div>
-            <h1 className="text-[24px] font-semibold text-[#0f172a] leading-tight">
-              {campaign ? campaign.name : 'Survey detail'}{' '}
-              {campaign && <span className="text-[#94a3b8] font-medium">{campaign.version}</span>}
-            </h1>
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <SurveyStatusPill status={survey.status} />
-              <span className="text-[12px] text-[#94a3b8]">·</span>
-              <span className="text-[12px] text-[#64748b]">
-                Sent {formatDateTime(survey.surveySentAt)}
-              </span>
-              {survey.surveyCompletedAt && (
-                <>
-                  <span className="text-[12px] text-[#94a3b8]">·</span>
-                  <span className="text-[12px] text-[#64748b]">
-                    Completed {formatDateTime(survey.surveyCompletedAt)}
-                  </span>
-                </>
-              )}
-              {survey.csat !== null && (
-                <>
-                  <span className="text-[12px] text-[#94a3b8]">·</span>
-                  <span className="text-[12px] text-[#64748b]">
-                    CSAT <span className="font-semibold text-[#0f172a]">{survey.csat}</span>
-                  </span>
-                </>
-              )}
-              <span className="text-[12px] text-[#94a3b8]">·</span>
-              <span className="text-[12px] text-[#64748b]">
-                VU <span className="font-semibold text-[#0f172a]">{survey.vu}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="p-6 lg:px-8 space-y-6 flex-1">
-        {/* Three-up meta cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <CustomerCard survey={survey} />
-          <InteractionCard survey={survey} />
-          <AgentCard survey={survey} />
+        <div style={{ font: '500 11px/14px ' + F, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--lyra-color-fg-active-strong)', marginBottom: 8 }}>
+          Survey · {survey.id}
         </div>
+        <h1 style={{ font: '600 22px/28px ' + F, letterSpacing: '-0.018em', color: 'var(--lyra-color-fg-default)', margin: '0 0 12px', display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          {campaign ? campaign.name : 'Survey'}
+          {campaign?.version && <span style={{ font: '400 20px/28px ' + F, color: 'var(--lyra-color-fg-secondary)' }}>{campaign.version}</span>}
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <SurveyStatusPill status={survey.status} />
+          <Dot />
+          <span style={{ font: '400 12px/16px ' + F, color: 'var(--lyra-color-fg-secondary)' }}>Sent {formatDateTime(survey.surveySentAt)}</span>
+          {survey.surveyCompletedAt && <><Dot /><span style={{ font: '400 12px/16px ' + F, color: 'var(--lyra-color-fg-secondary)' }}>Completed {formatDateTime(survey.surveyCompletedAt)}</span></>}
+          {survey.csat !== null && <><Dot /><span style={{ font: '400 12px/16px ' + F, color: 'var(--lyra-color-fg-secondary)' }}>CSAT <strong style={{ fontWeight: 600, color: 'var(--lyra-color-fg-default)' }}>{survey.csat}</strong></span></>}
+          <Dot />
+          <span style={{ font: '400 12px/16px ' + F, color: 'var(--lyra-color-fg-secondary)' }}>VU <strong style={{ fontWeight: 600, color: 'var(--lyra-color-fg-default)' }}>{survey.vu}</strong></span>
+        </div>
+      </header>
 
-        {/* Survey responses */}
-        <section>
-          <div className="flex items-baseline justify-between mb-3">
-            <h2 className="text-[16px] font-semibold text-[#0f172a]">Survey responses</h2>
-            <span className="text-[11px] text-[#94a3b8]">
+      {/* ── Two-column body ── */}
+      <div style={{ flex: 1, display: 'flex' }}>
+
+        {/* Left: Q&A */}
+        <main style={{ flex: 1, padding: '36px 40px 64px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {/* Section label */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ font: '600 14px/20px ' + F, letterSpacing: '-0.01em', color: 'var(--lyra-color-fg-default)' }}>Survey responses</div>
+            <div style={{ font: '400 12px/18px ' + F, color: 'var(--lyra-color-fg-secondary)', marginTop: 3 }}>
               3 questions · AI-generated based on interaction signals
-            </span>
+            </div>
           </div>
-          <div className="space-y-3">
+
+          {/* Question cards stacked with generous gap */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {survey.questions.map((q, i) => (
               <QuestionCard key={i} index={i + 1} question={q} />
             ))}
           </div>
-        </section>
+        </main>
+
+        {/* Right: context sidebar — wider, more padding */}
+        <aside style={{
+          width: 340, flexShrink: 0,
+          borderLeft: '1px solid var(--lyra-color-border-subtle)',
+          padding: '36px 32px 64px',
+          display: 'flex', flexDirection: 'column', gap: 36,
+          overflowY: 'auto',
+        }}>
+          <CustomerPanel survey={survey} />
+          <Divider />
+          <InteractionPanel survey={survey} />
+          <Divider />
+          <AgentPanel survey={survey} />
+        </aside>
+
       </div>
     </div>
   )
 }
 
-/* ---------- Meta cards ---------- */
-function CustomerCard({ survey }: { survey: Survey }) {
+/* ── Shared primitives ── */
+function Dot() {
+  return <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--lyra-color-fg-disabled)', display: 'inline-block', flexShrink: 0 }} />
+}
+
+function Divider() {
+  return <div style={{ height: 1, background: 'var(--lyra-color-border-subtle)', margin: '0 -32px' }} />
+}
+
+function SectionLabel({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-7 w-7 rounded-full bg-[#eef2ff] flex items-center justify-center">
-          <User className="h-3.5 w-3.5 text-[#6366f1]" />
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 16 }}>
+      <span style={{ color: 'var(--lyra-color-fg-secondary)', display: 'flex' }}>{icon}</span>
+      <span style={{ font: '500 10px/14px ' + F, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--lyra-color-fg-secondary)' }}>
+        {children}
+      </span>
+    </div>
+  )
+}
+
+function InfoRow({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+      <span style={{ color: 'var(--lyra-color-fg-secondary)', display: 'flex', marginTop: 1, flexShrink: 0 }}>{icon}</span>
+      <span style={{ font: '400 13px/20px ' + F, color: 'var(--lyra-color-fg-secondary)', minWidth: 0, flex: 1 }}>{children}</span>
+    </div>
+  )
+}
+
+function Chip({ bg, color, children }: { bg: string; color: string; children: React.ReactNode }) {
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      background: bg, color, borderRadius: 5,
+      padding: '3px 9px', font: '500 11px/16px ' + F,
+    }}>{children}</span>
+  )
+}
+
+/* ── Sidebar panels ── */
+function CustomerPanel({ survey }: { survey: Survey }) {
+  return (
+    <div>
+      <SectionLabel icon={<User style={{ width: 13, height: 13 }} />}>Customer</SectionLabel>
+
+      {/* Avatar + name */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+          background: 'var(--lyra-brand-50)',
+          color: 'var(--lyra-brand-700)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          font: '600 14px/1 ' + F,
+        }}>
+          {survey.customer.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
         </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-          Customer
+        <div style={{ font: '600 15px/20px ' + F, color: 'var(--lyra-color-fg-default)' }}>
+          {survey.customer.name}
         </div>
       </div>
-      <div className="text-[16px] font-semibold text-[#0f172a] mb-3">{survey.customer.name}</div>
-      <div className="space-y-2 text-[12px]">
-        <div className="flex items-center gap-2 text-[#475569]">
-          <Phone className="h-3 w-3 text-[#94a3b8] flex-shrink-0" />
-          <span className="tabular-nums">{survey.customer.phone}</span>
-        </div>
-        <div className="flex items-center gap-2 text-[#475569]">
-          <Mail className="h-3 w-3 text-[#94a3b8] flex-shrink-0" />
-          <span className="truncate">{survey.customer.email}</span>
-        </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <InfoRow icon={<Phone style={{ width: 13, height: 13 }} />}>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{survey.customer.phone}</span>
+        </InfoRow>
+        <InfoRow icon={<Mail style={{ width: 13, height: 13 }} />}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{survey.customer.email}</span>
+        </InfoRow>
       </div>
     </div>
   )
 }
 
-function InteractionCard({ survey }: { survey: Survey }) {
+function InteractionPanel({ survey }: { survey: Survey }) {
   const { interaction } = survey
-  const sentimentBg =
-    interaction.sentiment > 5
-      ? '#dcfce7'
-      : interaction.sentiment < -5
-      ? '#fee2e2'
-      : '#f1f5f9'
-  const sentimentText =
-    interaction.sentiment > 5
-      ? '#15803d'
-      : interaction.sentiment < -5
-      ? '#b91c1c'
-      : '#475569'
+  const pos = interaction.sentiment > 5
+  const neg = interaction.sentiment < -5
+  const sentBg   = pos ? 'var(--lyra-color-status-success-subtle)'  : neg ? 'var(--lyra-color-status-critical-subtle)'  : 'var(--lyra-slate-100)'
+  const sentText = pos ? 'var(--lyra-color-status-success-strong)'  : neg ? 'var(--lyra-color-status-critical-strong)'  : 'var(--lyra-color-fg-secondary)'
+
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-7 w-7 rounded-full bg-[#eff6ff] flex items-center justify-center">
-          <MessageSquare className="h-3.5 w-3.5 text-[#3b82f6]" />
-        </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-          Interaction
-        </div>
-      </div>
-      <div className="text-[13px] font-medium text-[#0f172a] mb-2">
-        {formatDateTime(interaction.date)}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 mb-3 text-[12px] text-[#64748b]">
-        <span className="inline-flex items-center rounded-md bg-[#eff6ff] px-2 py-0.5 text-[11px] font-medium text-[#1d4ed8]">
-          {interaction.channel}
-        </span>
+    <div>
+      <SectionLabel icon={<MessageCircle style={{ width: 13, height: 13 }} />}>Interaction</SectionLabel>
+
+      {/* Date + duration */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+        <InfoRow icon={<Calendar style={{ width: 13, height: 13 }} />}>{formatDateTime(interaction.date)}</InfoRow>
         {interaction.durationMinutes > 0 && (
-          <>
-            <span className="text-[#cbd5e1]">·</span>
-            <span>{interaction.durationMinutes}m</span>
-          </>
+          <InfoRow icon={<Clock style={{ width: 13, height: 13 }} />}>{interaction.durationMinutes} minutes</InfoRow>
         )}
-        <span className="text-[#cbd5e1]">·</span>
-        <span
-          className="inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold tabular-nums"
-          style={{ backgroundColor: sentimentBg, color: sentimentText }}
-        >
-          Sentiment {interaction.sentiment > 0 ? '+' : ''}
-          {interaction.sentiment}
-        </span>
       </div>
-      <div className="mb-3">
-        <div className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-[0.05em] mb-1">
+
+      {/* Channel + Sentiment */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 20 }}>
+        <Chip bg="var(--lyra-color-status-info-subtle)" color="var(--lyra-color-status-info-strong)">{interaction.channel}</Chip>
+        <Chip bg={sentBg} color={sentText}>
+          Sentiment {interaction.sentiment > 0 ? '+' : ''}{interaction.sentiment}
+        </Chip>
+      </div>
+
+      {/* Topics */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ font: '500 10px/14px ' + F, textTransform: 'uppercase', letterSpacing: '0.09em', color: 'var(--lyra-color-fg-secondary)', marginBottom: 8 }}>
           Topics detected
         </div>
-        <div className="flex flex-wrap gap-1.5">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {interaction.topicsDetected.map(t => (
-            <span
-              key={t}
-              className="inline-flex items-center rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[11px] font-medium text-[#475569]"
-            >
-              {t}
-            </span>
+            <Chip key={t} bg="var(--lyra-slate-100)" color="var(--lyra-color-fg-secondary)">{t}</Chip>
           ))}
         </div>
       </div>
-      <p className="text-[12px] text-[#64748b] leading-snug italic">"{interaction.summary}"</p>
+
+      {/* Summary quote */}
+      <p style={{
+        font: '400 12px/20px ' + F,
+        color: 'var(--lyra-color-fg-secondary)',
+        fontStyle: 'italic', margin: 0,
+        padding: '12px 14px',
+        background: 'var(--lyra-slate-50)',
+        borderRadius: 8,
+        borderLeft: '3px solid var(--lyra-color-border-soft)',
+      }}>
+        "{interaction.summary}"
+      </p>
     </div>
   )
 }
 
-function AgentCard({ survey }: { survey: Survey }) {
+function AgentPanel({ survey }: { survey: Survey }) {
+  const initials = survey.agent.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-7 w-7 rounded-full bg-[#f3e8ff] flex items-center justify-center">
-          <Headset className="h-3.5 w-3.5 text-[#9333ea]" />
-        </div>
-        <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-          Agent
+    <div>
+      <SectionLabel icon={<Headset style={{ width: 13, height: 13 }} />}>Agent</SectionLabel>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+          background: 'var(--lyra-color-bg-active-moderate)',
+          color: 'var(--lyra-color-fg-active-strong)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          font: '600 14px/1 ' + F, textTransform: 'uppercase',
+        }}>{initials}</div>
+        <div>
+          <div style={{ font: '600 14px/20px ' + F, color: 'var(--lyra-color-fg-default)' }}>{survey.agent.name}</div>
+          <div style={{ font: '400 12px/18px ' + F, color: 'var(--lyra-color-fg-secondary)', marginTop: 2 }}>{survey.agent.id}</div>
         </div>
       </div>
-      <div className="text-[16px] font-semibold text-[#0f172a] mb-1">{survey.agent.name}</div>
-      <div className="text-[12px] text-[#94a3b8] tabular-nums">{survey.agent.id}</div>
     </div>
   )
 }
 
-/* ---------- Question cards ---------- */
+/* ── Question cards ── */
 function QuestionCard({ index, question }: { index: number; question: SurveyQuestion }) {
-  if (question.kind === 'rating') {
-    return <RatingQuestionCard index={index} question={question} />
-  }
+  if (question.kind === 'rating') return <RatingQuestionCard index={index} question={question} />
   return <OpenQuestionCard index={index} question={question} />
+}
+
+const cardShell: React.CSSProperties = {
+  background: 'var(--lyra-color-bg-surface-base)',
+  border: '1px solid var(--lyra-color-border-subtle)',
+  borderRadius: 12,
+  overflow: 'hidden',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+}
+
+function QMeta({ index, kind, topic, isAI = false }: { index: number; kind: string; topic: string; isAI?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+      <span style={{
+        width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+        background: 'var(--lyra-color-bg-active-moderate)',
+        color: 'var(--lyra-color-fg-active-strong)',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        font: '600 10px/1 ' + F,
+      }}>Q{index}</span>
+
+      <span style={{ font: '500 11px/14px ' + F, textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--lyra-color-fg-secondary)' }}>{kind}</span>
+
+      <span style={{ width: 1, height: 10, background: 'var(--lyra-color-border-soft)', display: 'inline-block', flexShrink: 0 }} />
+
+      <span style={{
+        background: 'var(--lyra-slate-100)', color: 'var(--lyra-color-fg-secondary)',
+        borderRadius: 99, padding: '2px 9px', font: '500 11px/16px ' + F,
+      }}>{topic}</span>
+
+      {isAI && (
+        <span style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          background: 'var(--lyra-color-bg-ai)',
+          border: '1px solid rgba(77,58,122,0.16)',
+          borderRadius: 99, padding: '2px 9px',
+          font: '500 11px/16px ' + F, color: 'var(--lyra-purple-700)',
+        }}>
+          <Sparkles style={{ width: 10, height: 10, fill: 'currentColor', stroke: 'none' }} />
+          AI-generated
+        </span>
+      )}
+    </div>
+  )
 }
 
 function RatingQuestionCard({ index, question }: { index: number; question: RatingQuestion }) {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-5">
-      <div className="flex items-baseline justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-            Q{index} · Rating
-          </span>
-          <TopicChip topic={question.topic} />
-        </div>
+    <div style={cardShell}>
+      <div style={{ padding: '20px 24px 22px' }}>
+        <div style={{ marginBottom: 16 }}><QMeta index={index} kind="Rating" topic={question.topic} /></div>
+        <p style={{ font: '500 15px/24px ' + F, color: 'var(--lyra-color-fg-default)', margin: '0 0 20px' }}>
+          {question.prompt}
+        </p>
+        <RatingDisplay rating={question.response} max={question.max} />
       </div>
-      <p className="text-[14px] font-medium text-[#0f172a] mb-3">{question.prompt}</p>
-      <RatingDisplay rating={question.response} max={question.max} />
     </div>
   )
 }
@@ -233,109 +316,87 @@ function RatingQuestionCard({ index, question }: { index: number; question: Rati
 function OpenQuestionCard({ index, question }: { index: number; question: OpenQuestion }) {
   const provenance =
     question.generatedFrom.source === 'interaction'
-      ? `Generated from interaction sentiment (${formatSigned(
-          question.generatedFrom.sentiment
-        )}) on topic "${question.generatedFrom.topic ?? question.topic}"`
-      : `Generated from your Q${index - 1} response sentiment (${formatSigned(
-          question.generatedFrom.sentiment
-        )})`
+      ? `Generated from interaction sentiment (${formatSigned(question.generatedFrom.sentiment)}) on topic "${question.generatedFrom.topic ?? question.topic}"`
+      : `Generated from your Q${index - 1} response sentiment (${formatSigned(question.generatedFrom.sentiment)})`
 
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-5">
-      <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-            Q{index} · Open
-          </span>
-          <TopicChip topic={question.topic} />
-          <span className="inline-flex items-center gap-1 rounded-full bg-[#eef2ff] border border-[#c7d2fe] px-2 py-0.5 text-[10px] font-semibold text-[#4f46e5]">
-            <Sparkles className="h-2.5 w-2.5" fill="#6366f1" />
-            AI-generated
-          </span>
-        </div>
+    <div style={cardShell}>
+      <div style={{ padding: '20px 24px 22px' }}>
+        <div style={{ marginBottom: 14 }}><QMeta index={index} kind="Open" topic={question.topic} isAI /></div>
+        <p style={{ font: '400 11px/17px ' + F, color: 'var(--lyra-color-fg-secondary)', fontStyle: 'italic', margin: '0 0 12px' }}>
+          {provenance}
+        </p>
+        <p style={{ font: '500 15px/24px ' + F, color: 'var(--lyra-color-fg-default)', margin: '0 0 16px' }}>
+          {question.prompt}
+        </p>
+        {question.response ? (
+          <div style={{
+            background: 'var(--lyra-slate-50)',
+            borderRadius: 8, padding: '16px 18px',
+          }}>
+            <p style={{ font: '400 14px/23px ' + F, color: 'var(--lyra-color-fg-default)', margin: '0 0 12px' }}>
+              "{question.response}"
+            </p>
+            {question.responseSentiment !== null && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ font: '500 10px/14px ' + F, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--lyra-color-fg-secondary)' }}>
+                  Response sentiment
+                </span>
+                <SentimentBadge value={question.responseSentiment} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ background: 'var(--lyra-slate-50)', border: '1px dashed var(--lyra-color-border-soft)', borderRadius: 8, padding: '14px 18px' }}>
+            <p style={{ font: '400 12px/18px ' + F, color: 'var(--lyra-color-fg-secondary)', fontStyle: 'italic', margin: 0 }}>
+              No response — customer did not answer.
+            </p>
+          </div>
+        )}
       </div>
-      <p className="text-[11px] text-[#94a3b8] italic mb-2 leading-snug">{provenance}</p>
-      <p className="text-[14px] font-medium text-[#0f172a] mb-3">{question.prompt}</p>
-      {question.response ? (
-        <div className="bg-[#f8fafc] border border-[#e2e8f0] rounded-[8px] px-4 py-3">
-          <p className="text-[13px] text-[#0f172a] leading-relaxed">"{question.response}"</p>
-          {question.responseSentiment !== null && (
-            <div className="mt-2 flex items-center gap-1.5">
-              <span className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-[0.05em]">
-                Response sentiment
-              </span>
-              <SentimentBadge value={question.responseSentiment} />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="bg-[#f8fafc] border border-dashed border-[#e2e8f0] rounded-[8px] px-4 py-3">
-          <p className="text-[12px] text-[#94a3b8] italic">No response — customer did not answer.</p>
-        </div>
-      )}
     </div>
-  )
-}
-
-function TopicChip({ topic }: { topic: string }) {
-  return (
-    <span className="inline-flex items-center rounded-full bg-[#f1f5f9] px-2 py-0.5 text-[10px] font-medium text-[#475569]">
-      {topic}
-    </span>
   )
 }
 
 function RatingDisplay({ rating, max }: { rating: number | null; max: number }) {
   if (rating === null) {
     return (
-      <div className="bg-[#f8fafc] border border-dashed border-[#e2e8f0] rounded-[8px] px-4 py-3">
-        <p className="text-[12px] text-[#94a3b8] italic">No response — customer did not rate.</p>
+      <div style={{ background: 'var(--lyra-slate-50)', border: '1px dashed var(--lyra-color-border-soft)', borderRadius: 8, padding: '12px 16px' }}>
+        <p style={{ font: '400 12px/18px ' + F, color: 'var(--lyra-color-fg-secondary)', fontStyle: 'italic', margin: 0 }}>No response — customer did not rate.</p>
       </div>
     )
   }
-  const stars = Array.from({ length: max }, (_, i) => i < rating)
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-0.5">
-        {stars.map((filled, i) => (
-          <Star
-            key={i}
-            className="h-5 w-5"
-            fill={filled ? '#f59e0b' : 'none'}
-            stroke={filled ? '#f59e0b' : '#cbd5e1'}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', gap: 3 }}>
+        {Array.from({ length: max }, (_, i) => (
+          <Star key={i} style={{ width: 24, height: 24 }}
+            fill={i < rating ? '#f59e0b' : 'none'}
+            stroke={i < rating ? '#f59e0b' : 'var(--lyra-slate-300)'}
             strokeWidth={1.5}
           />
         ))}
       </div>
-      <span className="text-[14px] font-semibold text-[#0f172a] tabular-nums">
-        {rating} / {max}
-      </span>
+      <span style={{ font: '600 16px/20px ' + F, color: 'var(--lyra-color-fg-default)', fontVariantNumeric: 'tabular-nums' }}>{rating} / {max}</span>
     </div>
   )
 }
 
 function SentimentBadge({ value }: { value: number }) {
-  const tone = value > 5 ? 'pos' : value < -5 ? 'neg' : 'neu'
-  const bg = tone === 'pos' ? '#dcfce7' : tone === 'neg' ? '#fee2e2' : '#f1f5f9'
-  const text = tone === 'pos' ? '#15803d' : tone === 'neg' ? '#b91c1c' : '#475569'
-  const label = value > 0 ? `+${value}` : `${value}`
+  const pos = value > 5, neg = value < -5
   return (
-    <span
-      className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums"
-      style={{ backgroundColor: bg, color: text }}
-    >
-      {label}
-    </span>
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      background: pos ? 'var(--lyra-color-status-success-subtle)' : neg ? 'var(--lyra-color-status-critical-subtle)' : 'var(--lyra-slate-100)',
+      color: pos ? 'var(--lyra-color-status-success-strong)' : neg ? 'var(--lyra-color-status-critical-strong)' : 'var(--lyra-color-fg-secondary)',
+      borderRadius: 4, padding: '2px 8px',
+      font: '600 11px/16px ' + F, fontVariantNumeric: 'tabular-nums',
+    }}>{value > 0 ? `+${value}` : value}</span>
   )
 }
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString('en-GB', { month: 'short', day: 'numeric', year: 'numeric' }) +
-    ' · ' +
-    d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 }
-
-function formatSigned(n: number): string {
-  return n > 0 ? `+${n}` : `${n}`
-}
+function formatSigned(n: number): string { return n > 0 ? `+${n}` : `${n}` }

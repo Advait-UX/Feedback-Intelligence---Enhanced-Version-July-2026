@@ -16,6 +16,9 @@ import type { Campaign } from '@/lib/campaigns'
  * Funnel · suppression · VU tier mix · per-question landing
  * Reached from the FI Dashboard's "View campaign operations" link.
  * ============================================================ */
+
+const FONT = 'var(--lyra-font-sans)'
+
 export function CampaignMonitorPage({
   campaign,
   onBack,
@@ -26,14 +29,25 @@ export function CampaignMonitorPage({
   const [showInsights, setShowInsights] = useState(true)
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--lyra-color-bg-surface-canvas)', fontFamily: FONT }}
+    >
       <Header
         campaign={campaign}
         onBack={onBack}
         showInsights={showInsights}
         onToggleInsights={() => setShowInsights(v => !v)}
       />
-      <div className="p-6 lg:px-8 space-y-6 flex-1">
+      <div
+        className="flex-1"
+        style={{
+          padding: 'var(--space-6) var(--space-7) var(--space-7)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-7)',
+        }}
+      >
         <FilterRow />
         <HeroKpis />
 
@@ -42,7 +56,7 @@ export function CampaignMonitorPage({
           title="Delivery & funnel health"
           subtitle="Is the campaign reaching the customers it should be reaching, on the channels it should be reaching them on?"
         />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3" style={{ gap: 'var(--space-5)' }}>
           <FunnelCard className="col-span-2" />
           <SuppressionCard />
         </div>
@@ -68,7 +82,7 @@ export function CampaignMonitorPage({
           title="VU & topic signal quality"
           subtitle="Are we surveying interactions worth surveying, or is the campaign drifting toward low-urgency noise?"
         />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3" style={{ gap: 'var(--space-5)' }}>
           <VuTierMixCard className="col-span-2" />
           <TopTopicsCard />
         </div>
@@ -131,6 +145,7 @@ function Header({
   // Defaults preserve the demo story if no campaign is wired through
   const name = campaign?.name ?? 'Flight Disruption Recovery'
   const version = campaign?.version ?? 'v2.1'
+
   const statusLabel =
     campaign?.status === 'paused'
       ? 'Paused'
@@ -139,71 +154,160 @@ function Header({
       : campaign?.status === 'ended'
       ? 'Ended'
       : 'Active'
+
   const statusBg =
-    campaign?.status === 'paused'
-      ? '#fef3c7'
-      : campaign?.status === 'draft'
-      ? '#e2e8f0'
-      : campaign?.status === 'ended'
-      ? '#f1f5f9'
-      : '#dcfce7'
+    campaign?.status === 'paused' ? 'var(--lyra-color-status-warning-subtle)'
+    : campaign?.status === 'draft'  ? 'var(--lyra-slate-100)'
+    : campaign?.status === 'ended'  ? 'var(--lyra-slate-200)'
+    : 'var(--lyra-color-status-success-subtle)'
+
   const statusText =
-    campaign?.status === 'paused'
-      ? '#b45309'
-      : campaign?.status === 'draft'
-      ? '#475569'
-      : campaign?.status === 'ended'
-      ? '#64748b'
-      : '#15803d'
+    campaign?.status === 'paused' ? 'var(--lyra-color-status-warning-strong)'
+    : campaign?.status === 'draft'  ? 'var(--lyra-slate-600)'
+    : campaign?.status === 'ended'  ? 'var(--lyra-slate-500)'
+    : 'var(--lyra-color-status-success-strong)'
+
+  const statusBorder =
+    campaign?.status === 'paused' ? 'rgba(142,104,0,0.18)'
+    : campaign?.status === 'draft'  ? 'rgba(0,0,0,0.10)'
+    : campaign?.status === 'ended'  ? 'rgba(0,0,0,0.10)'
+    : 'rgba(35,114,45,0.18)'
+
   const days = campaign?.daysRunning ?? 14
   const channels = campaign?.channels?.join(' · ') ?? 'SMS · WhatsApp · AI Agent (Cognigy)'
   const trigger = campaign?.trigger ?? 'Flight Disruption OR Baggage Claim, VU ≥ 32'
 
   return (
-    <div className="bg-white border-b border-[#e2e8f0] px-6 lg:px-8 py-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
+    <div
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        padding: 'var(--space-4) var(--space-7)',
+        fontFamily: FONT,
+      }}
+    >
+      <div className="flex items-center justify-between" style={{ gap: 'var(--space-4)' }}>
+        <div className="flex items-start" style={{ gap: 'var(--space-4)' }}>
           <button
             onClick={onBack}
-            className="mt-1 inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-medium text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition-colors outline-none focus:outline-none"
+            className="mt-1 inline-flex items-center transition-colors"
+            style={{
+              gap: 'var(--space-1)',
+              borderRadius: 'var(--radius-md)',
+              padding: '4px 8px',
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: FONT,
+              color: 'var(--lyra-color-fg-secondary)',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'var(--lyra-color-state-bg-hover-opacity)'
+              ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--lyra-color-fg-default)'
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+              ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--lyra-color-fg-secondary)'
+            }}
+            onFocus={e => {
+              (e.currentTarget as HTMLButtonElement).style.outline = '2px solid var(--lyra-color-border-focus-default)'
+              ;(e.currentTarget as HTMLButtonElement).style.outlineOffset = '2px'
+            }}
+            onBlur={e => {
+              (e.currentTarget as HTMLButtonElement).style.outline = 'none'
+            }}
             title="Back to campaign dashboard"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft style={{ width: 14, height: 14 }} />
             Back to dashboard
           </button>
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#6366f1] mb-1">
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--lyra-slate-600)',
+                marginBottom: 4,
+                fontFamily: FONT,
+              }}
+            >
               Campaign operations
             </div>
-            <h1 className="text-[24px] font-semibold text-[#0f172a] leading-tight">
-              {name} <span className="text-[#94a3b8] font-medium">{version}</span>
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 600,
+                lineHeight: '28px',
+                letterSpacing: '-0.02em',
+                color: 'var(--lyra-color-fg-default)',
+                fontFamily: FONT,
+                margin: 0,
+              }}
+            >
+              {name}{' '}
+              <span style={{ color: 'var(--lyra-color-fg-disabled)', fontWeight: 500 }}>{version}</span>
             </h1>
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center" style={{ gap: 'var(--space-2)', marginTop: 8 }}>
               <span
-                className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                style={{ backgroundColor: statusBg, color: statusText }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  borderRadius: 'var(--radius-full)', padding: '2px 8px',
+                  fontSize: 12, fontWeight: 500, lineHeight: '16px', letterSpacing: '0.01em',
+                  fontFamily: FONT, whiteSpace: 'nowrap',
+                  background: statusBg, color: statusText,
+                  border: `1px solid ${statusBorder}`,
+                }}
               >
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', flexShrink: 0 }} />
                 {statusLabel}
               </span>
-              <span className="text-[12px] text-[#64748b]">·</span>
-              <span className="text-[12px] text-[#64748b]">{days} days running</span>
-              <span className="text-[12px] text-[#64748b]">·</span>
-              <span className="text-[12px] text-[#64748b]">{channels}</span>
-              <span className="text-[12px] text-[#64748b]">·</span>
-              <span className="text-[12px] text-[#64748b]">Trigger: {trigger}</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>·</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>{days} days running</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>·</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>{channels}</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>·</span>
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', fontFamily: FONT }}>Trigger: {trigger}</span>
             </div>
           </div>
         </div>
         <button
           onClick={onToggleInsights}
-          className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[12px] font-medium transition-colors outline-none focus:outline-none ${
-            showInsights
-              ? 'bg-[#eef2ff] border-[#c7d2fe] text-[#4f46e5]'
-              : 'bg-white border-[#e2e8f0] text-[#64748b] hover:text-[#0f172a]'
-          }`}
+          className="inline-flex items-center transition-colors"
+          style={{
+            gap: 6,
+            borderRadius: 'var(--radius-md)',
+            border: showInsights
+              ? '1px solid var(--lyra-brand-200)'
+              : '1px solid var(--lyra-color-border-soft)',
+            padding: '6px 12px',
+            fontSize: 12,
+            fontWeight: 500,
+            fontFamily: FONT,
+            cursor: 'pointer',
+            outline: 'none',
+            background: showInsights
+              ? 'var(--lyra-color-bg-ai)'
+              : 'var(--lyra-color-bg-surface-base)',
+            color: showInsights ? '#4E39A8' : 'var(--lyra-color-fg-secondary)',
+          }}
+          onFocus={e => {
+            (e.currentTarget as HTMLButtonElement).style.outline = '2px solid var(--lyra-color-border-focus-default)'
+            ;(e.currentTarget as HTMLButtonElement).style.outlineOffset = '2px'
+          }}
+          onBlur={e => {
+            (e.currentTarget as HTMLButtonElement).style.outline = 'none'
+          }}
           title={showInsights ? 'Hide AI insights' : 'Reveal AI insights'}
         >
-          <Sparkles className="h-3.5 w-3.5" fill={showInsights ? '#6366f1' : 'none'} />
+          <Sparkles
+            style={{ width: 14, height: 14, color: showInsights ? '#4E39A8' : 'var(--lyra-color-fg-secondary)' }}
+            fill={showInsights ? '#4E39A8' : 'none'}
+          />
           {showInsights ? 'Insights on' : 'Insights off'}
         </button>
       </div>
@@ -215,18 +319,43 @@ function Header({
 function FilterRow() {
   const filters = ['Last 14 days', 'All channels', 'Compare: prior period']
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-3">
+    <div
+      className="flex items-center justify-between"
+      style={{
+        background: 'var(--lyra-color-bg-surface-shell)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-5)',
+      }}
+    >
+      <div className="flex items-center" style={{ gap: 'var(--space-3)' }}>
         {filters.map(label => (
           <select
             key={label}
-            className="h-[32px] px-3 bg-white border border-[#e2e8f0] rounded-[8px] text-[12px] text-[#0f172a] font-medium hover:border-[#cbd5e1] focus:outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M6%208L2%204h8z%22%2F%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[center_right_10px] pr-8"
+            style={{
+              height: 32,
+              padding: '0 32px 0 12px',
+              background: 'var(--lyra-color-bg-surface-base)',
+              border: '1px solid var(--lyra-color-border-soft)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: FONT,
+              color: 'var(--lyra-color-fg-default)',
+              cursor: 'pointer',
+              outline: 'none',
+              appearance: 'none',
+              backgroundImage: "url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M6%208L2%204h8z%22%2F%3E%3C%2Fsvg%3E')",
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center right 10px',
+            }}
           >
             <option>{label}</option>
           </select>
         ))}
       </div>
-      <div className="text-[12px] text-[#94a3b8]">Jun 1, 2026 · 09:14 · Auto-refresh 5m</div>
+      <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', fontFamily: FONT }}>
+        Jun 1, 2026 · 09:14 · Auto-refresh 5m
+      </div>
     </div>
   )
 }
@@ -234,10 +363,43 @@ function FilterRow() {
 /* ---------- Section header ---------- */
 function SectionHeader({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <div className="pt-2">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6366f1] mb-1">{eyebrow}</div>
-      <h2 className="text-[18px] font-semibold text-[#0f172a] leading-tight">{title}</h2>
-      <p className="text-[13px] text-[#64748b] mt-1 max-w-2xl leading-snug">{subtitle}</p>
+    <div style={{ paddingTop: 8, fontFamily: FONT }}>
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 500,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: 'var(--lyra-slate-600)',
+          marginBottom: 4,
+        }}
+      >
+        {eyebrow}
+      </div>
+      <h2
+        style={{
+          fontSize: 20,
+          fontWeight: 600,
+          lineHeight: '24px',
+          letterSpacing: '-0.01em',
+          color: 'var(--lyra-color-fg-default)',
+          margin: 0,
+        }}
+      >
+        {title}
+      </h2>
+      <p
+        style={{
+          fontSize: 14,
+          color: 'var(--lyra-color-fg-secondary)',
+          marginTop: 4,
+          maxWidth: '42rem',
+          lineHeight: '20px',
+          margin: '4px 0 0',
+        }}
+      >
+        {subtitle}
+      </p>
     </div>
   )
 }
@@ -282,7 +444,7 @@ const HERO_KPIS: HeroKpi[] = [
 
 function HeroKpis() {
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-4" style={{ gap: 'var(--space-5)' }}>
       {HERO_KPIS.map(k => (
         <HeroKpiCard key={k.label} kpi={k} />
       ))}
@@ -291,25 +453,66 @@ function HeroKpis() {
 }
 
 function HeroKpiCard({ kpi }: { kpi: HeroKpi }) {
+  // positive emphasis → brand blue; caution → AI purple (used here as a data metric color, not a feature color)
+  // Using brand tokens for positive, and status-warning for caution to stay Lyra-compliant
   const valueColor =
-    kpi.emphasis === 'positive' ? '#3b82f6' : kpi.emphasis === 'caution' ? '#8b5cf6' : '#0f172a'
-  const deltaColor = kpi.delta.tone === 'up' ? '#16a34a' : kpi.delta.tone === 'down' ? '#dc2626' : '#64748b'
+    kpi.emphasis === 'positive'
+      ? 'var(--lyra-brand-600)'
+      : kpi.emphasis === 'caution'
+      ? 'var(--lyra-color-status-warning-strong)'
+      : 'var(--lyra-color-fg-default)'
+  const deltaColor =
+    kpi.delta.tone === 'up'
+      ? 'var(--lyra-color-status-success-strong)'
+      : kpi.delta.tone === 'down'
+      ? 'var(--lyra-color-status-critical-strong)'
+      : 'var(--lyra-color-fg-secondary)'
 
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] p-4">
-      <div className="text-[10px] font-medium text-[#94a3b8] uppercase tracking-[0.5px] mb-2 leading-none">
+    <div
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        padding: 'var(--space-5) var(--space-6)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 500,
+          color: 'var(--lyra-color-fg-secondary)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          marginBottom: 8,
+          lineHeight: 1,
+        }}
+      >
         {kpi.label}
       </div>
-      <div className="flex items-baseline gap-3 mb-2">
-        <div className="text-[32px] font-bold leading-[1] tracking-[-0.02em]" style={{ color: valueColor }}>
+      <div className="flex items-baseline" style={{ gap: 'var(--space-3)', marginBottom: 8 }}>
+        <div
+          style={{
+            fontSize: 32,
+            fontWeight: 600,
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            color: valueColor,
+          }}
+        >
           {kpi.value}
         </div>
-        <div className="flex items-center gap-1 text-[12px] font-semibold leading-none" style={{ color: deltaColor }}>
+        <div
+          className="flex items-center"
+          style={{ gap: 4, fontSize: 12, fontWeight: 600, lineHeight: 1, color: deltaColor }}
+        >
           <span>{kpi.delta.arrow}</span>
           <span>{kpi.delta.text}</span>
         </div>
       </div>
-      <div className="text-[11px] text-[#64748b] leading-snug">{kpi.note}</div>
+      <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', lineHeight: '16px' }}>{kpi.note}</div>
     </div>
   )
 }
@@ -340,59 +543,126 @@ const FUNNEL_STAGES: FunnelStage[] = [
 function FunnelCard({ className = '' }: { className?: string }) {
   const top = FUNNEL_STAGES[0].count
   return (
-    <div className={`bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden ${className}`}>
-      <div className="px-4 py-3 border-b border-[#e2e8f0]">
-        <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">End-to-end funnel</h3>
-        <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+    <div
+      className={`overflow-hidden ${className}`}
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+          End-to-end funnel
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
           Each stage shows count and conversion from the previous stage
         </p>
       </div>
-      <div className="p-4 space-y-2.5">
+      <div style={{ padding: 'var(--space-5) var(--space-6)', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {FUNNEL_STAGES.map(stage => {
           const widthPct = (stage.count / top) * 100
+          // Lyra-compliant bar colors using status tokens
           const barColor =
-            stage.tone === 'leak' ? '#fde68a' : stage.tone === 'expected' ? '#c7d2fe' : '#bfdbfe'
+            stage.tone === 'leak'
+              ? 'var(--lyra-color-status-warning-subtle)'
+              : stage.tone === 'expected'
+              ? 'var(--lyra-brand-100)'
+              : 'var(--lyra-brand-50)'
           const barAccent =
-            stage.tone === 'leak' ? '#f59e0b' : stage.tone === 'expected' ? '#6366f1' : '#3b82f6'
+            stage.tone === 'leak'
+              ? 'var(--lyra-color-status-warning-strong)'
+              : stage.tone === 'expected'
+              ? 'var(--lyra-brand-600)'
+              : 'var(--lyra-brand-500)'
           const convColor =
-            stage.tone === 'leak' ? '#b45309' : stage.tone === 'expected' ? '#4338ca' : '#15803d'
+            stage.tone === 'leak'
+              ? 'var(--lyra-color-status-warning-strong)'
+              : stage.tone === 'expected'
+              ? 'var(--lyra-brand-700)'
+              : 'var(--lyra-color-status-success-strong)'
 
           return (
             <div key={stage.label} className="group">
-              <div className="flex items-baseline justify-between mb-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[13px] font-medium text-[#0f172a]">{stage.label}</span>
+              <div className="flex items-baseline justify-between" style={{ marginBottom: 4 }}>
+                <div className="flex items-center" style={{ gap: 8 }}>
+                  <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)' }}>
+                    {stage.label}
+                  </span>
                   {stage.tone === 'leak' && (
-                    <span className="inline-flex items-center rounded-full bg-[#fef3c7] px-1.5 py-0.5 text-[10px] font-semibold text-[#b45309]">
+                    <span
+                      className="inline-flex items-center"
+                      style={{
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--lyra-color-status-warning-subtle)',
+                        padding: '2px 6px',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: 'var(--lyra-color-status-warning-strong)',
+                      }}
+                    >
                       leak
                     </span>
                   )}
                   {stage.tone === 'expected' && (
-                    <span className="inline-flex items-center rounded-full bg-[#eef2ff] px-1.5 py-0.5 text-[10px] font-semibold text-[#4338ca]">
+                    <span
+                      className="inline-flex items-center"
+                      style={{
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--lyra-brand-50)',
+                        padding: '2px 6px',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: 'var(--lyra-brand-700)',
+                      }}
+                    >
                       by rule
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 text-[12px]">
-                  <span className="text-[#0f172a] font-semibold tabular-nums">{stage.count.toLocaleString()}</span>
+                <div className="flex items-center" style={{ gap: 12, fontSize: 12 }}>
+                  <span style={{ color: 'var(--lyra-color-fg-default)', fontWeight: 600 }} className="tabular-nums">
+                    {stage.count.toLocaleString()}
+                  </span>
                   {stage.conv !== undefined && (
-                    <span className="font-semibold tabular-nums" style={{ color: convColor }}>
+                    <span style={{ fontWeight: 600, color: convColor }} className="tabular-nums">
                       {Math.round(stage.conv * 100)}%
                     </span>
                   )}
                 </div>
               </div>
-              <div className="relative h-6 bg-[#f1f5f9] rounded-md overflow-hidden">
+              <div
+                className="relative overflow-hidden"
+                style={{
+                  height: 24,
+                  background: 'var(--lyra-color-bg-surface-shell)',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+              >
                 <div
-                  className="h-full rounded-md transition-all duration-500"
-                  style={{ width: `${widthPct}%`, backgroundColor: barColor }}
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${widthPct}%`,
+                    backgroundColor: barColor,
+                    borderRadius: 'var(--radius-sm)',
+                  }}
                 />
                 <div
-                  className="absolute top-0 left-0 h-full w-[3px]"
-                  style={{ backgroundColor: barAccent }}
+                  className="absolute top-0 left-0 h-full"
+                  style={{ width: 3, backgroundColor: barAccent }}
                 />
               </div>
-              <div className="text-[11px] text-[#94a3b8] mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', marginTop: 2 }}
+              >
                 {stage.rule}
               </div>
             </div>
@@ -404,12 +674,16 @@ function FunnelCard({ className = '' }: { className?: string }) {
 }
 
 /* ---------- Suppression breakdown (Section 1) ---------- */
+// Using brand and slate primitives for donut segments — these are data/chart colors
 const SUPPRESSION_ROWS = [
-  { reason: 'Opt-out recency', count: 51, color: '#6366f1', rule: 'Customer surveyed in last 30 days' },
-  { reason: 'Open complaint', count: 28, color: '#8b5cf6', rule: 'Active case in CXone' },
-  { reason: 'Recency window', count: 12, color: '#a78bfa', rule: 'Customer opted out in last 60 days' },
-  { reason: 'Internal interaction', count: 6, color: '#c4b5fd', rule: 'Agent-to-agent transfer' },
+  { reason: 'Opt-out recency', count: 51, color: 'var(--lyra-brand-600)', rule: 'Customer surveyed in last 30 days' },
+  { reason: 'Open complaint', count: 28, color: 'var(--lyra-brand-500)', rule: 'Active case in CXone' },
+  { reason: 'Recency window', count: 12, color: 'var(--lyra-brand-300)', rule: 'Customer opted out in last 60 days' },
+  { reason: 'Internal interaction', count: 6, color: 'var(--lyra-brand-100)', rule: 'Agent-to-agent transfer' },
 ]
+
+// Resolved hex values for SVG stroke (SVG cannot consume CSS variables)
+const SUPPRESSION_HEX_COLORS = ['#166cca', '#3d81e7', '#72a6e8', '#cfe0f8']
 
 function SuppressionCard() {
   const total = SUPPRESSION_ROWS.reduce((sum, r) => sum + r.count, 0)
@@ -418,25 +692,44 @@ function SuppressionCard() {
   const circumference = 2 * Math.PI * radius
 
   let offset = 0
-  const arcs = SUPPRESSION_ROWS.map(r => {
+  const arcs = SUPPRESSION_ROWS.map((r, i) => {
     const pct = r.count / total
     const dash = pct * circumference
-    const arc = { dash, gap: circumference - dash, offset, color: r.color }
+    const arc = { dash, gap: circumference - dash, offset, color: SUPPRESSION_HEX_COLORS[i] }
     offset -= dash
     return arc
   })
 
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0]">
-        <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">Suppression breakdown</h3>
-        <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+          Suppression breakdown
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
           Why {total} eligible interactions were dropped
         </p>
       </div>
-      <div className="p-4 flex flex-col items-center gap-4">
+      <div
+        className="flex flex-col items-center"
+        style={{ padding: 'var(--space-5) var(--space-6)', gap: 'var(--space-4)' }}
+      >
         <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r={radius} fill="none" stroke="#f1f5f9" strokeWidth={stroke} />
+          <circle cx="80" cy="80" r={radius} fill="none" stroke="#eef0f2" strokeWidth={stroke} />
           {arcs.map((a, i) => (
             <circle
               key={i}
@@ -452,19 +745,26 @@ function SuppressionCard() {
               strokeLinecap="butt"
             />
           ))}
-          <text x="80" y="76" textAnchor="middle" fontSize="22" fontWeight="600" fill="#0f172a">
+          <text x="80" y="76" textAnchor="middle" fontSize="22" fontWeight="600" fill="rgba(0,0,0,0.8)">
             {total}
           </text>
-          <text x="80" y="92" textAnchor="middle" fontSize="10" fill="#94a3b8" letterSpacing="0.5">
+          <text x="80" y="92" textAnchor="middle" fontSize="10" fill="rgba(0,0,0,0.3)" letterSpacing="0.5">
             SUPPRESSED
           </text>
         </svg>
-        <div className="w-full space-y-2">
-          {SUPPRESSION_ROWS.map(r => (
-            <div key={r.reason} className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: r.color }} />
-              <span className="text-[12px] text-[#0f172a] flex-1 truncate">{r.reason}</span>
-              <span className="text-[12px] font-semibold text-[#0f172a] tabular-nums">{r.count}</span>
+        <div className="w-full" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {SUPPRESSION_ROWS.map((r, i) => (
+            <div key={r.reason} className="flex items-center" style={{ gap: 8 }}>
+              <span
+                className="flex-shrink-0"
+                style={{ width: 10, height: 10, borderRadius: 'var(--radius-full)', backgroundColor: SUPPRESSION_HEX_COLORS[i] }}
+              />
+              <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-default)', flex: 1 }} className="truncate">
+                {r.reason}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--lyra-color-fg-default)' }} className="tabular-nums">
+                {r.count}
+              </span>
             </div>
           ))}
         </div>
@@ -491,14 +791,30 @@ const CHANNELS: ChannelHealth[] = [
 
 function ChannelHealthCard() {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0]">
-        <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">Send health by channel</h3>
-        <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+          Send health by channel
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
           Funnel performance per delivery channel · flags isolate where opens are leaking
         </p>
       </div>
-      <div className="grid grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-3" style={{ gap: 'var(--space-4)', padding: 'var(--space-5) var(--space-6)' }}>
         {CHANNELS.map(c => {
           const openRate = c.opened / c.delivered
           const completionRate = c.completed / c.opened
@@ -506,32 +822,48 @@ function ChannelHealthCard() {
           return (
             <div
               key={c.channel}
-              className={`rounded-[10px] border p-3 ${
-                isLeak ? 'border-[#fde68a] bg-[#fffbeb]' : 'border-[#e2e8f0] bg-white'
-              }`}
+              style={{
+                borderRadius: 'var(--radius-lg)',
+                border: isLeak
+                  ? '1px solid var(--lyra-color-status-warning-medium)'
+                  : '1px solid var(--lyra-color-border-subtle)',
+                background: isLeak ? 'var(--lyra-color-status-warning-subtle)' : 'var(--lyra-color-bg-surface-canvas)',
+                padding: 'var(--space-3) var(--space-4)',
+              }}
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[13px] font-medium text-[#0f172a]">{c.channel}</span>
+              <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)' }}>{c.channel}</span>
                 {isLeak && (
-                  <span className="inline-flex items-center rounded-full bg-[#fef3c7] px-1.5 py-0.5 text-[10px] font-semibold text-[#b45309]">
+                  <span
+                    className="inline-flex items-center"
+                    style={{
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--lyra-color-status-warning-subtle)',
+                      border: '1px solid var(--lyra-color-status-warning-medium)',
+                      padding: '2px 6px',
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: 'var(--lyra-color-status-warning-strong)',
+                    }}
+                  >
                     open leak
                   </span>
                 )}
               </div>
-              <ChannelBar label="Sent" value={c.sent} max={c.sent} color="#bfdbfe" />
-              <ChannelBar label="Delivered" value={c.delivered} max={c.sent} color="#93c5fd" />
+              <ChannelBar label="Sent" value={c.sent} max={c.sent} colorToken="var(--lyra-brand-100)" />
+              <ChannelBar label="Delivered" value={c.delivered} max={c.sent} colorToken="var(--lyra-brand-200)" />
               <ChannelBar
                 label="Opened"
                 value={c.opened}
                 max={c.sent}
-                color={isLeak ? '#f59e0b' : '#3b82f6'}
+                colorToken={isLeak ? 'var(--lyra-color-status-warning-medium)' : 'var(--lyra-brand-400)'}
                 rateLabel={`${Math.round(openRate * 100)}% of delivered`}
               />
               <ChannelBar
                 label="Completed"
                 value={c.completed}
                 max={c.sent}
-                color="#1d4ed8"
+                colorToken="var(--lyra-brand-700)"
                 rateLabel={`${Math.round(completionRate * 100)}% of opened`}
               />
             </div>
@@ -546,78 +878,139 @@ function ChannelBar({
   label,
   value,
   max,
-  color,
+  colorToken,
   rateLabel,
 }: {
   label: string
   value: number
   max: number
-  color: string
+  colorToken: string
   rateLabel?: string
 }) {
   const pct = (value / max) * 100
   return (
-    <div className="mb-2 last:mb-0">
-      <div className="flex items-baseline justify-between mb-0.5">
-        <span className="text-[11px] text-[#64748b]">{label}</span>
-        <div className="flex items-baseline gap-2">
-          {rateLabel && <span className="text-[10px] text-[#94a3b8]">{rateLabel}</span>}
-          <span className="text-[12px] font-semibold text-[#0f172a] tabular-nums">{value}</span>
+    <div style={{ marginBottom: 8 }} className="last:mb-0">
+      <div className="flex items-baseline justify-between" style={{ marginBottom: 2 }}>
+        <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)' }}>{label}</span>
+        <div className="flex items-baseline" style={{ gap: 8 }}>
+          {rateLabel && <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)' }}>{rateLabel}</span>}
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--lyra-color-fg-default)' }} className="tabular-nums">
+            {value}
+          </span>
         </div>
       </div>
-      <div className="h-1.5 bg-[#f1f5f9] rounded-full overflow-hidden">
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+      <div
+        className="overflow-hidden"
+        style={{ height: 6, background: 'var(--lyra-color-bg-surface-shell)', borderRadius: 'var(--radius-full)' }}
+      >
+        <div
+          className="h-full"
+          style={{ width: `${pct}%`, backgroundColor: colorToken, borderRadius: 'var(--radius-full)' }}
+        />
       </div>
     </div>
   )
 }
 
 /* ---------- VU tier mix (Section 2) ---------- */
+// Chart data colors — using brand scale for ordered data
 const VU_TIERS = [
-  { tier: 'A+', label: 'Critical', range: '≥ 50', pct: 18, count: 868, color: '#1d4ed8' },
-  { tier: 'A', label: 'High', range: '35–49', pct: 34, count: 1639, color: '#3b82f6' },
-  { tier: 'B', label: 'Medium', range: '25–34', pct: 41, count: 1976, color: '#60a5fa' },
-  { tier: 'C', label: 'Standard', range: '20–24', pct: 6, count: 289, color: '#bfdbfe' },
-  { tier: 'D', label: 'Low', range: '< 20', pct: 1, count: 48, color: '#dbeafe' },
+  { tier: 'A+', label: 'Critical', range: '≥ 50', pct: 18, count: 868, colorToken: 'var(--lyra-brand-800)', hexColor: '#164479' },
+  { tier: 'A', label: 'High', range: '35–49', pct: 34, count: 1639, colorToken: 'var(--lyra-brand-600)', hexColor: '#166cca' },
+  { tier: 'B', label: 'Medium', range: '25–34', pct: 41, count: 1976, colorToken: 'var(--lyra-brand-400)', hexColor: '#4896ec' },
+  { tier: 'C', label: 'Standard', range: '20–24', pct: 6, count: 289, colorToken: 'var(--lyra-brand-200)', hexColor: '#a6c6f0' },
+  { tier: 'D', label: 'Low', range: '< 20', pct: 1, count: 48, colorToken: 'var(--lyra-brand-100)', hexColor: '#cfe0f8' },
 ]
 
 function VuTierMixCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden ${className}`}>
-      <div className="px-4 py-3 border-b border-[#e2e8f0] flex items-center justify-between">
+    <div
+      className={`overflow-hidden ${className}`}
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        className="flex items-center justify-between"
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
         <div>
-          <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">VU grade-tier mix</h3>
-          <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+            VU grade-tier mix
+          </h3>
+          <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
             How the 4,820 triggered interactions split across urgency tiers
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef2ff] border border-[#c7d2fe] px-2.5 py-1 text-[11px] font-semibold text-[#4f46e5]">
+        <span
+          className="inline-flex items-center"
+          style={{
+            gap: 6,
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--lyra-brand-50)',
+            border: '1px solid var(--lyra-brand-200)',
+            padding: '4px 10px',
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'var(--lyra-brand-700)',
+          }}
+        >
           Sampling: A+/A 100% · B 50% · C/D 0%
         </span>
       </div>
-      <div className="p-4">
-        <div className="flex h-9 rounded-md overflow-hidden mb-4">
+      <div style={{ padding: 'var(--space-5) var(--space-6)' }}>
+        <div
+          className="flex overflow-hidden"
+          style={{ height: 36, borderRadius: 'var(--radius-md)', marginBottom: 16 }}
+        >
           {VU_TIERS.map(t => (
             <div
               key={t.tier}
-              className="flex items-center justify-center text-[11px] font-semibold text-white"
-              style={{ width: `${t.pct}%`, backgroundColor: t.color }}
+              className="flex items-center justify-center"
+              style={{
+                width: `${t.pct}%`,
+                backgroundColor: t.hexColor,
+                fontSize: 12,
+                fontWeight: 600,
+                color: t.pct >= 34 ? 'var(--lyra-color-fg-inverse)' : 'var(--lyra-brand-800)',
+              }}
               title={`${t.tier} (${t.label}) — ${t.count.toLocaleString()} interactions`}
             >
               {t.pct >= 6 ? `${t.pct}%` : ''}
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5" style={{ gap: 8 }}>
           {VU_TIERS.map(t => (
-            <div key={t.tier} className="rounded-md bg-[#f8fafc] border border-[#e2e8f0] px-2.5 py-2">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
-                <span className="text-[12px] font-semibold text-[#0f172a]">{t.tier}</span>
-                <span className="text-[10px] text-[#94a3b8]">{t.range}</span>
+            <div
+              key={t.tier}
+              style={{
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--lyra-color-bg-surface-canvas)',
+                border: '1px solid var(--lyra-color-border-subtle)',
+                padding: '8px 10px',
+              }}
+            >
+              <div className="flex items-center" style={{ gap: 6 }}>
+                <span
+                  className="flex-shrink-0"
+                  style={{ width: 8, height: 8, borderRadius: 'var(--radius-full)', backgroundColor: t.hexColor }}
+                />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--lyra-color-fg-default)' }}>{t.tier}</span>
+                <span style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)' }}>{t.range}</span>
               </div>
-              <div className="text-[11px] text-[#64748b] mt-0.5">{t.label}</div>
-              <div className="text-[14px] font-semibold text-[#0f172a] mt-1 tabular-nums">
+              <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', marginTop: 2 }}>{t.label}</div>
+              <div
+                style={{ fontSize: 14, fontWeight: 600, color: 'var(--lyra-color-fg-default)', marginTop: 4 }}
+                className="tabular-nums"
+              >
                 {t.count.toLocaleString()}
               </div>
             </div>
@@ -648,36 +1041,83 @@ const TOPICS: TopicRow[] = [
 
 function TopTopicsCard() {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0]">
-        <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">Top topics surfacing</h3>
-        <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+          Top topics surfacing
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
           Topics firing the trigger · ranked by volume
         </p>
       </div>
-      <div className="divide-y divide-[#f1f5f9]">
+      <div>
         {TOPICS.map(t => {
           const deltaColor =
-            t.delta.tone === 'up' ? '#16a34a' : t.delta.tone === 'down' ? '#dc2626' : '#94a3b8'
+            t.delta.tone === 'up'
+              ? 'var(--lyra-color-status-success-strong)'
+              : t.delta.tone === 'down'
+              ? 'var(--lyra-color-status-critical-strong)'
+              : 'var(--lyra-color-fg-disabled)'
           const Icon = t.delta.tone === 'up' ? TrendingUp : t.delta.tone === 'down' ? TrendingDown : Minus
           return (
-            <div key={t.topic} className="px-4 py-2.5 flex items-center gap-3">
+            <div
+              key={t.topic}
+              className="flex items-center"
+              style={{
+                padding: '10px var(--space-6)',
+                gap: 12,
+                borderBottom: '1px solid rgba(0,0,0,0.05)',
+              }}
+            >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-medium text-[#0f172a] truncate">{t.topic}</span>
+                <div className="flex items-center" style={{ gap: 6 }}>
+                  <span
+                    style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)' }}
+                    className="truncate"
+                  >
+                    {t.topic}
+                  </span>
                   {t.flag === 'rising' && (
-                    <span className="inline-flex items-center rounded-full bg-[#dcfce7] px-1.5 py-0.5 text-[9px] font-semibold text-[#15803d] uppercase tracking-[0.05em]">
+                    <span
+                      className="inline-flex items-center"
+                      style={{
+                        borderRadius: 'var(--radius-full)',
+                        background: 'var(--lyra-color-status-success-subtle)',
+                        padding: '2px 6px',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        color: 'var(--lyra-color-status-success-strong)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
                       not in brief
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-[#64748b] mt-0.5 tabular-nums">
+                <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', marginTop: 2 }} className="tabular-nums">
                   {t.volume.toLocaleString()} · avg VU {t.avgVu}
                 </div>
               </div>
-              <div className="flex items-center gap-1" style={{ color: deltaColor }}>
-                <Icon className="h-3.5 w-3.5" />
-                <span className="text-[12px] font-semibold tabular-nums">{t.delta.text}</span>
+              <div className="flex items-center" style={{ gap: 4, color: deltaColor }}>
+                <Icon style={{ width: 14, height: 14 }} />
+                <span style={{ fontSize: 12, fontWeight: 600 }} className="tabular-nums">
+                  {t.delta.text}
+                </span>
               </div>
             </div>
           )
@@ -722,26 +1162,44 @@ function VuDriftCard() {
   const yTicks = [30, 40, 50]
 
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0] flex items-center justify-between">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        className="flex items-center justify-between"
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
         <div>
-          <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">Average VU over campaign</h3>
-          <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+            Average VU over campaign
+          </h3>
+          <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
             Drift signal — declining trend = campaign sampling lower-urgency interactions
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-[#94a3b8]">
+        <div className="flex items-center" style={{ gap: 8, fontSize: 12, color: 'var(--lyra-color-fg-disabled)' }}>
           <span>14 days</span>
           <span>·</span>
-          <span className="text-[#dc2626] font-semibold">−4 net</span>
+          <span style={{ color: 'var(--lyra-color-status-critical-strong)', fontWeight: 600 }}>−4 net</span>
         </div>
       </div>
-      <div className="p-4">
+      <div style={{ padding: 'var(--space-5) var(--space-6)' }}>
+        {/* VU drift line uses brand-600 (#166cca) instead of indigo/violet */}
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
           <defs>
             <linearGradient id="vu-area" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+              <stop offset="0%" stopColor="#166cca" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#166cca" stopOpacity="0" />
             </linearGradient>
           </defs>
           {yTicks.map(t => (
@@ -751,11 +1209,11 @@ function VuDriftCard() {
                 y1={ys(t)}
                 x2={width - padding.right}
                 y2={ys(t)}
-                stroke="#e2e8f0"
+                stroke="#d2d8db"
                 strokeDasharray="3 5"
                 strokeWidth="1"
               />
-              <text x={padding.left - 8} y={ys(t) + 4} textAnchor="end" fill="#cbd5e1" fontSize="10">
+              <text x={padding.left - 8} y={ys(t) + 4} textAnchor="end" fill="#a8b3bb" fontSize="10">
                 {t}
               </text>
             </g>
@@ -764,12 +1222,12 @@ function VuDriftCard() {
             d={`${linePath} L ${xs(VU_DRIFT.length - 1)} ${ys(min)} L ${xs(0)} ${ys(min)} Z`}
             fill="url(#vu-area)"
           />
-          <path d={linePath} fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" />
+          <path d={linePath} fill="none" stroke="#166cca" strokeWidth="2" strokeLinecap="round" />
           {VU_DRIFT.map((v, i) => (
-            <circle key={i} cx={xs(i)} cy={ys(v)} r="2.5" fill="#8b5cf6" />
+            <circle key={i} cx={xs(i)} cy={ys(v)} r="2.5" fill="#166cca" />
           ))}
           {[0, 6, 13].map(i => (
-            <text key={i} x={xs(i)} y={height - 6} textAnchor="middle" fill="#94a3b8" fontSize="10">
+            <text key={i} x={xs(i)} y={height - 6} textAnchor="middle" fill="#a8b3bb" fontSize="10">
               {i === 0 ? 'Day 1' : i === 13 ? 'Today' : 'Day 7'}
             </text>
           ))}
@@ -782,14 +1240,30 @@ function VuDriftCard() {
 /* ---------- Response & completion funnel (Section 3) ---------- */
 function ResponseCompletionCard() {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0]">
-        <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">Response & completion</h3>
-        <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
+          Response & completion
+        </h3>
+        <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
           From survey delivery to a fully completed response
         </p>
       </div>
-      <div className="grid grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-4" style={{ gap: 'var(--space-4)', padding: 'var(--space-5) var(--space-6)' }}>
         <ResponseStat label="Opens" value="1,210" rate="75%" of="of delivered" />
         <ResponseStat label="Started" value="1,114" rate="92%" of="of opened" />
         <ResponseStat label="Completed" value="780" rate="70%" of="of started" />
@@ -801,13 +1275,28 @@ function ResponseCompletionCard() {
 
 function ResponseStat({ label, value, rate, of }: { label: string; value: string; rate: string; of: string }) {
   return (
-    <div className="rounded-md bg-[#f8fafc] border border-[#e2e8f0] px-3 py-3">
-      <div className="text-[11px] text-[#64748b] mb-1">{label}</div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-[22px] font-bold text-[#0f172a] tabular-nums">{value}</span>
-        {rate && <span className="text-[13px] font-semibold text-[#3b82f6]">{rate}</span>}
+    <div
+      style={{
+        borderRadius: 'var(--radius-md)',
+        background: 'var(--lyra-color-bg-surface-canvas)',
+        border: '1px solid var(--lyra-color-border-subtle)',
+        padding: 'var(--space-3) var(--space-4)',
+        fontFamily: FONT,
+      }}
+    >
+      <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-secondary)', marginBottom: 4 }}>{label}</div>
+      <div className="flex items-baseline" style={{ gap: 8 }}>
+        <span
+          style={{ fontSize: 22, fontWeight: 600, color: 'var(--lyra-color-fg-default)' }}
+          className="tabular-nums"
+        >
+          {value}
+        </span>
+        {rate && (
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--lyra-brand-600)' }}>{rate}</span>
+        )}
       </div>
-      {of && <div className="text-[11px] text-[#94a3b8] mt-0.5">{of}</div>}
+      {of && <div style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', marginTop: 2 }}>{of}</div>}
     </div>
   )
 }
@@ -869,40 +1358,140 @@ const QUESTIONS: QuestionRow[] = [
 
 function QuestionLandingCard() {
   return (
-    <div className="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#e2e8f0] flex items-center justify-between">
+    <div
+      className="overflow-hidden"
+      style={{
+        background: 'var(--lyra-color-bg-surface-base)',
+        border: '1px solid var(--lyra-color-border-soft)',
+        borderRadius: 'var(--radius-xl)',
+        boxShadow: 'var(--sol-effect-shadowmd)',
+        fontFamily: FONT,
+      }}
+    >
+      <div
+        className="flex items-center justify-between"
+        style={{
+          padding: 'var(--space-4) var(--space-6)',
+          borderBottom: '1px solid var(--lyra-color-border-subtle)',
+        }}
+      >
         <div>
-          <h3 className="text-[14px] font-semibold text-[#0f172a] leading-tight">
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: 'var(--lyra-color-fg-default)', lineHeight: '18px', margin: 0 }}>
             Per-question landing
           </h3>
-          <p className="text-[12px] text-[#94a3b8] leading-tight mt-0.5">
+          <p style={{ fontSize: 12, color: 'var(--lyra-color-fg-disabled)', lineHeight: '16px', marginTop: 2, marginBottom: 0 }}>
             AI-generated question variants clustered semantically · top 5 by usage
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eef2ff] border border-[#c7d2fe] px-2.5 py-1 text-[11px] font-semibold text-[#4f46e5]">
-          <Sparkles className="h-3 w-3" fill="#6366f1" />
+        {/* AI badge — uses AI color treatment per Lyra spec */}
+        <span
+          className="inline-flex items-center"
+          style={{
+            gap: 6,
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--lyra-color-bg-ai)',
+            border: '1px solid #4E39A8',
+            padding: '4px 10px',
+            fontSize: 12,
+            fontWeight: 500,
+            color: '#4E39A8',
+          }}
+        >
+          <Sparkles style={{ width: 12, height: 12 }} fill="#4E39A8" />
           AI-generated per interaction
         </span>
       </div>
-      <table className="w-full text-[13px]">
+      <table className="w-full" style={{ fontSize: 14 }}>
         <thead>
-          <tr className="border-b border-[#f1f5f9] bg-[#fafbfc]">
-            <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+          <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <th
+              scope="col"
+              className="text-left"
+              style={{
+                padding: '10px var(--space-6)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Question variant
             </th>
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+            <th
+              scope="col"
+              className="text-right"
+              style={{
+                padding: '10px var(--space-4)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Used in
             </th>
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+            <th
+              scope="col"
+              className="text-right"
+              style={{
+                padding: '10px var(--space-4)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Answer rate
             </th>
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+            <th
+              scope="col"
+              className="text-right"
+              style={{
+                padding: '10px var(--space-4)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Avg length
             </th>
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+            <th
+              scope="col"
+              className="text-right"
+              style={{
+                padding: '10px var(--space-4)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Abandon
             </th>
-            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-[0.05em] text-[#64748b]">
+            <th
+              scope="col"
+              className="text-right"
+              style={{
+                padding: '10px var(--space-6)',
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--lyra-color-fg-secondary)',
+                background: 'transparent',
+              }}
+            >
               Validation alignment
             </th>
           </tr>
@@ -913,35 +1502,83 @@ function QuestionLandingCard() {
             return (
               <tr
                 key={q.question}
-                className={`border-b border-[#f1f5f9] last:border-b-0 ${isKill ? 'bg-[#fffbeb]' : ''}`}
+                style={{
+                  borderBottom: '1px solid rgba(0,0,0,0.05)',
+                  background: isKill ? 'var(--lyra-color-status-warning-subtle)' : 'transparent',
+                }}
               >
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px] text-[#0f172a]">"{q.question}"</span>
+                <td style={{ padding: 'var(--space-3) var(--space-6)' }}>
+                  <div className="flex items-center" style={{ gap: 8 }}>
+                    <span style={{ fontSize: 14, color: 'var(--lyra-color-fg-default)' }}>"{q.question}"</span>
                     {isKill && (
-                      <span className="inline-flex items-center rounded-full bg-[#fef3c7] px-1.5 py-0.5 text-[10px] font-semibold text-[#b45309]">
+                      <span
+                        className="inline-flex items-center"
+                        style={{
+                          borderRadius: 'var(--radius-full)',
+                          background: 'var(--lyra-color-status-warning-subtle)',
+                          border: '1px solid var(--lyra-color-status-warning-medium)',
+                          padding: '2px 6px',
+                          fontSize: 12,
+                          fontWeight: 500,
+                          color: 'var(--lyra-color-status-warning-strong)',
+                        }}
+                      >
                         kill step
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right text-[#0f172a] tabular-nums">{q.uses}</td>
-                <td className="px-4 py-3 text-right tabular-nums">
-                  <span className={q.answerRate < 70 ? 'text-[#dc2626] font-semibold' : 'text-[#0f172a]'}>
+                <td
+                  className="text-right tabular-nums"
+                  style={{ padding: 'var(--space-3) var(--space-4)', color: 'var(--lyra-color-fg-default)' }}
+                >
+                  {q.uses}
+                </td>
+                <td className="text-right tabular-nums" style={{ padding: 'var(--space-3) var(--space-4)' }}>
+                  <span
+                    style={{
+                      color:
+                        q.answerRate < 70
+                          ? 'var(--lyra-color-status-critical-strong)'
+                          : 'var(--lyra-color-fg-default)',
+                      fontWeight: q.answerRate < 70 ? 600 : 400,
+                    }}
+                  >
                     {q.answerRate}%
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right text-[#64748b] tabular-nums">{q.avgLength}</td>
-                <td className="px-4 py-3 text-right tabular-nums">
-                  <span className={q.abandon >= 15 ? 'text-[#dc2626] font-semibold' : 'text-[#0f172a]'}>
+                <td
+                  className="text-right tabular-nums"
+                  style={{ padding: 'var(--space-3) var(--space-4)', color: 'var(--lyra-color-fg-secondary)' }}
+                >
+                  {q.avgLength}
+                </td>
+                <td className="text-right tabular-nums" style={{ padding: 'var(--space-3) var(--space-4)' }}>
+                  <span
+                    style={{
+                      color:
+                        q.abandon >= 15
+                          ? 'var(--lyra-color-status-critical-strong)'
+                          : 'var(--lyra-color-fg-default)',
+                      fontWeight: q.abandon >= 15 ? 600 : 400,
+                    }}
+                  >
                     {q.abandon}%
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums">
+                <td className="text-right tabular-nums" style={{ padding: 'var(--space-3) var(--space-6)' }}>
                   {q.validation === null ? (
-                    <span className="text-[#94a3b8]">n/a (open)</span>
+                    <span style={{ color: 'var(--lyra-color-fg-disabled)' }}>n/a (open)</span>
                   ) : (
-                    <span className={q.validation < 75 ? 'text-[#dc2626] font-semibold' : 'text-[#0f172a]'}>
+                    <span
+                      style={{
+                        color:
+                          q.validation < 75
+                            ? 'var(--lyra-color-status-critical-strong)'
+                            : 'var(--lyra-color-fg-default)',
+                        fontWeight: q.validation < 75 ? 600 : 400,
+                      }}
+                    >
                       {q.validation}%
                     </span>
                   )}
@@ -975,15 +1612,57 @@ function InsightBlock({
 
   if (status === 'done') {
     return (
-      <div className="rounded-[10px] bg-[#f0fdf4] border border-[#bbf7d0] px-3 py-2 flex items-center gap-2">
-        <div className="h-4 w-4 rounded-full bg-[#16a34a] flex items-center justify-center flex-shrink-0">
-          <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+      <div
+        className="flex items-center"
+        style={{
+          borderRadius: 'var(--radius-lg)',
+          background: 'var(--lyra-color-status-success-subtle)',
+          border: '1px solid var(--lyra-color-status-success-medium)',
+          padding: '8px 12px',
+          gap: 8,
+          fontFamily: FONT,
+        }}
+      >
+        <div
+          className="flex items-center justify-center flex-shrink-0"
+          style={{
+            width: 16,
+            height: 16,
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--lyra-color-status-success-strong)',
+          }}
+        >
+          <Check style={{ width: 10, height: 10, color: 'white' }} strokeWidth={3} />
         </div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#16a34a]">Done · {TODAY}</span>
-        <span className="text-[12px] text-[#166534] flex-1 truncate">· {action}</span>
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'var(--lyra-color-status-success-strong)',
+          }}
+        >
+          Done · {TODAY}
+        </span>
+        <span
+          style={{ fontSize: 12, color: 'var(--lyra-color-status-success-strong)', flex: 1 }}
+          className="truncate"
+        >
+          · {action}
+        </span>
         <button
           onClick={() => setStatus('pending')}
-          className="text-[11px] font-medium text-[#16a34a] hover:underline"
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'var(--lyra-color-status-success-strong)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontFamily: FONT,
+          }}
         >
           Undo
         </button>
@@ -992,16 +1671,52 @@ function InsightBlock({
   }
   if (status === 'dismissed') {
     return (
-      <div className="rounded-[10px] bg-[#f8fafc] border border-[#e2e8f0] px-3 py-2 flex items-center gap-2">
-        <div className="h-4 w-4 rounded-full bg-[#94a3b8] flex items-center justify-center flex-shrink-0">
-          <X className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+      <div
+        className="flex items-center"
+        style={{
+          borderRadius: 'var(--radius-lg)',
+          background: 'var(--lyra-color-bg-surface-shell)',
+          border: '1px solid var(--lyra-color-border-soft)',
+          padding: '8px 12px',
+          gap: 8,
+          fontFamily: FONT,
+        }}
+      >
+        <div
+          className="flex items-center justify-center flex-shrink-0"
+          style={{
+            width: 16,
+            height: 16,
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--lyra-color-fg-disabled)',
+          }}
+        >
+          <X style={{ width: 10, height: 10, color: 'white' }} strokeWidth={3} />
         </div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8] flex-1">
+        <span
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: 'var(--lyra-color-fg-disabled)',
+            flex: 1,
+          }}
+        >
           Dismissed · {TODAY}
         </span>
         <button
           onClick={() => setStatus('pending')}
-          className="text-[11px] font-medium text-[#64748b] hover:underline"
+          style={{
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'var(--lyra-color-fg-secondary)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontFamily: FONT,
+          }}
         >
           Undo
         </button>
@@ -1009,59 +1724,186 @@ function InsightBlock({
     )
   }
 
+  // AI insight block — uses AI color treatment per Lyra spec
   return (
-    <div className="rounded-[10px] bg-[#eff6ff] border border-[#dbeafe] overflow-hidden">
+    <div
+      className="overflow-hidden"
+      style={{
+        borderRadius: 'var(--radius-lg)',
+        background: 'var(--lyra-color-bg-ai)',
+        border: '1px solid #4E39A8',
+        fontFamily: FONT,
+      }}
+    >
       <button
         onClick={() => setExpanded(v => !v)}
-        className="w-full px-3 py-2.5 flex items-start gap-2 text-left hover:bg-[#e0ecfe] transition-colors outline-none focus:outline-none"
+        className="w-full text-left transition-colors"
+        style={{
+          padding: '10px 12px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 8,
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          outline: 'none',
+          fontFamily: FONT,
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLButtonElement).style.background = 'rgba(78,57,168,0.06)'
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLButtonElement).style.background = 'transparent'
+        }}
+        onFocus={e => {
+          (e.currentTarget as HTMLButtonElement).style.outline = '2px solid var(--lyra-color-border-focus-default)'
+          ;(e.currentTarget as HTMLButtonElement).style.outlineOffset = '2px'
+        }}
+        onBlur={e => {
+          (e.currentTarget as HTMLButtonElement).style.outline = 'none'
+        }}
       >
-        <Sparkles className="h-3.5 w-3.5 text-[#6366f1] flex-shrink-0 mt-0.5" fill="#6366f1" />
+        <Sparkles
+          style={{ width: 14, height: 14, color: '#4E39A8', flexShrink: 0, marginTop: 2 }}
+          fill="#4E39A8"
+        />
         <div className="flex-1">
-          <p className="text-[13px] font-semibold text-[#1e3a8a] leading-snug">{headline}</p>
-          <span className="text-[11px] font-medium text-[#6366f1] inline-flex items-center gap-1 mt-1">
-            <ChevronDown className={`h-3 w-3 transition-transform ${expanded ? '' : '-rotate-90'}`} strokeWidth={2.5} />
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#4E39A8', lineHeight: '20px', margin: 0 }}>
+            {headline}
+          </p>
+          <span
+            className="inline-flex items-center"
+            style={{ fontSize: 12, fontWeight: 500, color: '#4E39A8', marginTop: 4, gap: 4 }}
+          >
+            <ChevronDown
+              style={{
+                width: 12,
+                height: 12,
+                transition: 'transform 150ms',
+                transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+              }}
+              strokeWidth={2.5}
+            />
             {expanded ? 'Hide insight & action' : 'See insight & action'}
           </span>
         </div>
       </button>
       {expanded && (
-        <div className="border-t border-[#dbeafe] px-3 py-3 space-y-3">
-          <ul className="space-y-1">
+        <div
+          style={{
+            borderTop: '1px solid rgba(78,57,168,0.2)',
+            padding: '12px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 12,
+          }}
+        >
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
             {bullets.map((b, i) => (
-              <li key={i} className="flex items-start gap-1.5 text-[12px] text-[#1e3a8a] leading-snug">
-                <span className="text-[#6366f1] font-bold flex-shrink-0">•</span>
+              <li key={i} className="flex items-start" style={{ gap: 6, fontSize: 12, color: '#4E39A8', lineHeight: '16px' }}>
+                <span style={{ color: '#4E39A8', fontWeight: 600, flexShrink: 0 }}>•</span>
                 <span>{b}</span>
               </li>
             ))}
           </ul>
-          <div className="pt-2 border-t border-[#dbeafe]">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#64748b] mb-1">
+          <div style={{ paddingTop: 8, borderTop: '1px solid rgba(78,57,168,0.2)' }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: 'var(--lyra-color-fg-secondary)',
+                marginBottom: 4,
+              }}
+            >
               Expected impact
             </div>
-            <ul className="space-y-1">
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {impact.map((b, i) => (
-                <li key={i} className="flex items-start gap-1.5 text-[12px] text-[#0f172a] leading-snug">
-                  <span className="text-[#16a34a] font-bold flex-shrink-0">•</span>
+                <li key={i} className="flex items-start" style={{ gap: 6, fontSize: 12, color: 'var(--lyra-color-fg-default)', lineHeight: '16px' }}>
+                  <span style={{ color: 'var(--lyra-color-status-success-strong)', fontWeight: 600, flexShrink: 0 }}>•</span>
                   <span>{b}</span>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="pt-2 border-t border-[#dbeafe]">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6366f1] mb-1.5">
+          <div style={{ paddingTop: 8, borderTop: '1px solid rgba(78,57,168,0.2)' }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                color: '#4E39A8',
+                marginBottom: 6,
+              }}
+            >
               Recommended action
             </div>
-            <p className="text-[12px] text-[#1e3a8a] mb-2 leading-snug">{action}</p>
-            <div className="flex items-center gap-1.5">
+            <p style={{ fontSize: 12, color: '#4E39A8', marginBottom: 8, lineHeight: '16px', margin: '0 0 8px' }}>{action}</p>
+            <div className="flex items-center" style={{ gap: 6 }}>
               <button
                 onClick={() => setStatus('done')}
-                className="text-[11px] font-semibold text-white bg-[#6366f1] hover:bg-[#4f46e5] rounded-[4px] px-2.5 py-1 transition-colors outline-none focus:outline-none"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--lyra-color-fg-on-primary)',
+                  background: 'var(--lyra-color-bg-primary)',
+                  borderRadius: 'var(--radius-xs)',
+                  padding: '4px 10px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  fontFamily: FONT,
+                  transition: 'background 150ms',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--lyra-color-state-bg-hover-primary)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--lyra-color-bg-primary)'
+                }}
+                onFocus={e => {
+                  (e.currentTarget as HTMLButtonElement).style.outline = '2px solid var(--lyra-color-border-focus-default)'
+                  ;(e.currentTarget as HTMLButtonElement).style.outlineOffset = '2px'
+                }}
+                onBlur={e => {
+                  (e.currentTarget as HTMLButtonElement).style.outline = 'none'
+                }}
               >
                 Approve
               </button>
               <button
                 onClick={() => setStatus('dismissed')}
-                className="text-[11px] font-semibold text-[#64748b] bg-white border border-[#c7d2fe] hover:bg-[#f8fafc] hover:text-[#0f172a] rounded-[4px] px-2.5 py-1 transition-colors outline-none focus:outline-none"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'var(--lyra-color-fg-secondary)',
+                  background: 'var(--lyra-color-bg-surface-base)',
+                  border: '1px solid var(--lyra-color-border-soft)',
+                  borderRadius: 'var(--radius-xs)',
+                  padding: '4px 10px',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  fontFamily: FONT,
+                  transition: 'background 150ms',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--lyra-color-state-bg-hover-opacity)'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--lyra-color-fg-default)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = 'var(--lyra-color-bg-surface-base)'
+                  ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--lyra-color-fg-secondary)'
+                }}
+                onFocus={e => {
+                  (e.currentTarget as HTMLButtonElement).style.outline = '2px solid var(--lyra-color-border-focus-default)'
+                  ;(e.currentTarget as HTMLButtonElement).style.outlineOffset = '2px'
+                }}
+                onBlur={e => {
+                  (e.currentTarget as HTMLButtonElement).style.outline = 'none'
+                }}
               >
                 Dismiss
               </button>

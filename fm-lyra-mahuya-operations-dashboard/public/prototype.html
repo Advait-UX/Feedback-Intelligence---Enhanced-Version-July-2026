@@ -35,7 +35,7 @@
 .info-banner{
   display: flex; align-items: flex-start;
   gap: var(--space-2);                                 /* 8px between icon and text */
-  margin: var(--space-6) var(--space-8) var(--space-3); /* 24px top, 32px sides, 12px bottom */
+  margin: 0 var(--space-8) var(--space-8);             /* 0 top (table-wrap provides 24px), 32px sides, 32px bottom */
   padding: var(--space-3) var(--space-4);              /* 12px vertical, 16px horizontal */
   background: var(--color-bg-active-subtle);           /* Lyra: bg/active/subtle = var(--color-bg-active-subtle) */
   border: 1px solid rgba(24,91,164,0.20);              /* Subtle brand border (border/active @ 20%) */
@@ -324,7 +324,7 @@ textarea.fi-input,
 select.fi-input,
 button.fi-input {
   background: var(--lyra-white);                       /* Lyra: bg/field */
-  border: 1px solid var(--color-border-soft);          /* Lyra: border/soft = rgba(0,0,0,0.16) */
+  border: 1px solid rgba(0,0,0,0.22);                  /* slightly stronger than border/soft for clear field affordance */
   border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
   /* Lyra Body-md: Inter Regular 14/20, letter-spacing 0 */
   font-family: var(--font-sans);
@@ -351,7 +351,7 @@ textarea.fi-input {
 
 /* Hover — border deepens from soft (0.16) to strong (0.46) per Lyra render */
 .fi-input:hover:not(:focus):not(:disabled):not([readonly]) {
-  border-color: rgba(0,0,0,0.46);                      /* Lyra: border/strong */
+  border-color: rgba(0,0,0,0.34);                      /* mid-step between resting 0.22 and focus blue */
 }
 /* Active (focused) — Lyra brand-700 border + 3px glow ring */
 .fi-input:focus {
@@ -422,9 +422,9 @@ select.fi-input {
 }
 .field-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-4);
-  padding: var(--space-6) 0;
+  grid-template-columns: minmax(0, 400px) minmax(0, 400px);
+  gap: var(--space-5);
+  padding: var(--space-2) 0 0;
 }
 .field-grid-2 + .field-row,
 .field-row + .field-grid-2,
@@ -461,7 +461,7 @@ select.fi-input {
   font-weight: 600;
   letter-spacing: -0.01rem;
   color: var(--color-fg-default);
-  padding: var(--space-3) 0 var(--space-2);
+  padding: 0 0 var(--space-2);
 }
 
 /* ─── Lyra Checkbox (node 16926:21017) ─────────────────────────────────────── */
@@ -520,13 +520,14 @@ select.fi-input {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-sm);
 }
 .sr-section-head {
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: var(--lyra-slate-100);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-bottom: none;
 }
 .sr-section-num {
   width: 22px; height: 22px; border-radius: 50%;
@@ -651,36 +652,43 @@ select.fi-input {
 /* Segmented control — Lyra Toggle Group */
 .seg {
   display: inline-flex;
-  background: var(--lyra-slate-200);
-  border-radius: var(--radius-sm);
-  padding: 2px;
+  background: var(--lyra-white);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: var(--radius-md);
+  padding: 3px;
   gap: 2px;
+  box-shadow: var(--shadow-sm);
 }
 .seg button {
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 5px var(--space-3);
+  padding: 5px var(--space-4);
   font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
-  color: var(--lyra-slate-600);
-  border-radius: var(--radius-xs);
+  color: var(--color-fg-secondary);
+  border-radius: var(--radius-sm);
   letter-spacing: 0;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.15s, color 0.15s;
   white-space: nowrap;
 }
+.seg button:hover:not(.on):not(:disabled) {
+  background: var(--lyra-slate-100);
+  color: var(--color-fg-default);
+}
 .seg button.on {
-  background: var(--lyra-white);
-  color: var(--lyra-slate-900);
+  background: var(--lyra-color-bg-active-strong, var(--color-bg-primary));
+  color: var(--lyra-white);
   font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.14);
 }
 .seg button:disabled {
-  color: var(--lyra-slate-400);
+  color: var(--color-fg-disabled);
   cursor: not-allowed;
   pointer-events: none;
+  opacity: 0.5;
 }
 
 /* Toggle */
@@ -753,9 +761,10 @@ select.fi-input {
 /* Suppression toggles list */
 .sup-row {
   display: flex; align-items: flex-start; gap: 14px;
-  padding: var(--space-5) 0;
+  padding: 0;
+  margin-top: var(--space-8); /* 32px between sections */
 }
-.sup-row:first-child { border-top: 0 }
+.sup-row:first-child { margin-top: 0; }
 .sup-row .meta { flex: 1 }
 .sup-row .meta .title {
   font: var(--text-h-sm); color: var(--lyra-slate-900); letter-spacing: 0;
@@ -849,50 +858,63 @@ select.fi-input {
 
 /* ─── Template, Identity &amp; Scope two-section layout ─────────────────────── */
 .setup-section {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
+  border: none;
+  border-radius: 0;
   padding: 0;
-  background: var(--lyra-white);
-  overflow: hidden;
+  background: transparent;
+  overflow: visible;
 }
 .setup-section + .setup-section {
-  margin-top: var(--space-4);
+  margin-top: 36px;
+  padding-top: 0;
+  border-top: none;
 }
-/* "Choose a Template" panel gets a subtle brand tint — only when it has siblings */
+/* "Choose a Template" panel — brand tint only when it has siblings */
 .setup-section:first-child:not(:last-child) {
-  background: var(--color-bg-active-subtle, #e9f1fc);
-  border-color: rgba(22,108,202,0.18);
+  background: transparent;
+  border-color: transparent;
 }
 .setup-section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-6);
-  border-bottom: 1px solid var(--color-border-subtle);
-  background: var(--lyra-white);
+  padding: 0 0 var(--space-3) 0;
+  border-bottom: none;
+  background: transparent;
 }
-/* first-child:not(:last-child) head stays brand-tinted */
 .setup-section:first-child:not(:last-child) .setup-section-head {
-  background: var(--color-bg-active-subtle, #e9f1fc);
+  background: transparent;
 }
 .setup-section-body {
-  padding: var(--space-5) var(--space-6);
+  padding: 0;
 }
-/* Survey template form — constrain field content to 70% while cards stay full-width */
-.sv-form .setup-section-body {
-  max-width: 70%;
+/* Survey template form — sub-section heads are compact group labels */
+.sv-form .wz-step-content {
+  max-width: 840px; /* matches campaign wizard: two 400px columns + 20px gap */
 }
-/* Survey template — no divider between section header and body */
 .sv-form .setup-section-head {
   border-bottom: none;
-  padding-bottom: var(--space-2);
+  padding: 0 0 var(--space-4) 0;
+  background: transparent;
+}
+.sv-form .setup-section-title {
+  font: 600 15px/22px var(--font-sans);
+  color: var(--color-fg-default);
+  margin: 0 0 3px;
+  letter-spacing: -0.01em;
+}
+.sv-form .setup-section-sub {
+  font: 400 13px/20px var(--font-sans);
+  letter-spacing: 0;
+  color: var(--color-fg-secondary);
+  margin: 0;
 }
 /* Survey wizard sub-groups within a step */
 .sc-group {
-  margin-top: var(--space-6);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border-subtle);
+  margin-top: 36px;
+  padding-top: 0;
+  border-top: none;
 }
 .sc-group:first-child {
   margin-top: 0;
@@ -938,34 +960,36 @@ select.fi-input {
 
 /* ─── Horizontal Wizard ───────────────────────────────────────────── */
 .wz-bar {
+  /* Floating shell card — same treatment as .toolbar filter bar */
   display: flex;
   justify-content: center;
-  padding: 16px 32px 0;
   flex-shrink: 0;
-  background: var(--lyra-white);
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin: var(--space-6) var(--space-8) 0;   /* 24px top from pane-head, 32px sides */
+  padding: var(--space-4) var(--space-6);    /* 16px vertical, 24px horizontal */
+  background: var(--color-bg-surface-shell, #f5f7f9);
+  border-radius: var(--radius-lg);           /* 12px — matches toolbar */
+  border-bottom: none;
 }
 .wz-bar-inner {
   display: flex;
   align-items: center;
   width: auto;
-  padding-bottom: 14px;
 }
 .wz-step {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   cursor: pointer;
   flex-shrink: 0;
 }
 .wz-node {
-  width: 26px; height: 26px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font: var(--text-h-xs);
+  font: 500 12px/16px var(--font-sans);
   border: 1.5px solid rgba(0,0,0,0.18);
-  color: rgba(0,0,0,0.40);
+  color: rgba(0,0,0,0.35);
   background: var(--lyra-white);
   transition: background 0.15s, border-color 0.15s;
   flex-shrink: 0;
@@ -995,12 +1019,13 @@ select.fi-input {
 .wz-step.done   .wz-label { color: var(--color-fg-secondary); }
 .wz-step.error  .wz-label { color: var(--color-fg-destructive); font-weight: 500; }
 .wz-line {
-  width: 40px;
+  width: 56px;
   flex-shrink: 0;
   height: 1.5px;
   background: var(--color-border-subtle);
   border-radius: 1px;
   align-self: center;
+  margin: 0 var(--space-1);
 }
 .wz-line.done   { background: var(--lyra-green-500); }
 .wz-line.active { background: var(--color-bg-active-strong); }
@@ -1017,12 +1042,33 @@ select.fi-input {
 .wz-scroll-area::-webkit-scrollbar-track { background: transparent; }
 .wz-scroll-area::-webkit-scrollbar-thumb { background: var(--lyra-slate-300, #d2d8db); border-radius: 9999px; }
 .wz-scroll-area::-webkit-scrollbar-thumb:hover { background: var(--lyra-slate-400, #a8b3bb); }
+/* Two-column outer layout: form left, summary right — sits below wizard bar */
+.wz-content-area {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.wz-content-left {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden; /* clips scroll within this column */
+}
+/* Sticky summary rail — always visible, aligned to wizard bar bottom */
+.wz-summary-rail {
+  flex-shrink: 0;
+  width: 280px;
+  padding: var(--space-8) var(--space-6) var(--space-6) 0; /* 32px top aligns with section header */
+  overflow-y: auto;
+  align-self: stretch;
+}
+
 .wz-body {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-6) var(--space-6);
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-6) var(--space-6);
 }
 .wz-body > .form-pane {
   display: flex;
@@ -1030,26 +1076,64 @@ select.fi-input {
   padding: var(--space-6) 0;
   min-width: 0;
 }
-.wz-body > .summary-pane {
-  position: sticky; top: var(--space-2);
-  align-self: start;
-  padding-top: 20px;
-  display: flex; flex-direction: column;
-  gap: var(--space-3);
-}
 
-/* step content area */
+/* Wizard form content — 80% width cap, consistent across campaign & survey template wizards */
 .wz-step-content {
   flex: 1;
   padding: 0;
+  max-width: 80%;
 }
-/* Card wrapper for steps 1-3 content */
+
+/* step content area — removed, merged into rule above */
+/* Card wrapper for steps 1-3 content — borderless, consistent with step 0 */
 .wz-content-card {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5) var(--space-6);
-  background: var(--lyra-white);
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
 }
+
+/* ── Full-width step section header (outside wz-body grid) ─────────────── */
+/* Sits between the wizard bar and the scrollable content.                   */
+/* 32px top margin from wizard bar; subtle divider underneath.               */
+.wz-section-header {
+  flex-shrink: 0;
+  margin: var(--space-8) var(--space-6) 0;   /* 32px top, 24px sides — aligns with wz-body */
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.wz-section-header h2 {
+  font: 600 16px/24px var(--font-sans);
+  color: var(--color-fg-default);
+  margin: 0 0 var(--space-1);
+}
+.wz-section-header p {
+  font: 400 13px/20px var(--font-sans);
+  letter-spacing: 0.01rem;
+  color: var(--color-fg-secondary);
+  margin: 0;
+}
+
+/* ── Wizard form sub-sections — borderless, divider-separated ── */
+.wz-form-section {
+  padding-top: 0;
+  margin-top: 36px;
+  border-top: none;
+}
+.wz-form-section:first-child {
+  padding-top: 0;
+  margin-top: 0;
+  border-top: none;
+}
+.wz-form-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-1);
+}
+
+/* Legacy in-card step head — keep for backward compat but no longer rendered */
 .wz-step-head {
   margin-bottom: var(--space-5);
   padding-bottom: 0;
@@ -1081,12 +1165,12 @@ select.fi-input {
 .detail-layout {
   flex: 1;
   display: flex; align-items: flex-start;
-  gap: var(--space-5);
+  gap: var(--space-6);
   padding: var(--space-5) var(--space-8) var(--space-8);
   background: var(--color-bg-canvas);
 }
 .detail-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); }
-.detail-sidebar { flex: 0 0 260px; }
+.detail-sidebar { flex: 0 0 280px; }
 
 /* ── Campaign Summary sidebar card ───────────────────────────────────── */
 .detail-summary-card {
@@ -1161,7 +1245,7 @@ select.fi-input {
 
 /* ── DefRow ─────────────────────────────────────────────────────────── */
 .def-row { display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-3) 0; font-family: var(--font-sans); font-size: 14px; line-height: 20px; color: var(--color-fg-default); }
-.def-row-label { flex: 0 0 180px; font-weight: 500; color: var(--color-fg-secondary); font-size: 13px; }
+.def-row-label { flex: 0 0 200px; font-weight: 400; color: var(--color-fg-secondary); font-size: 14px; }
 .def-row-value { flex: 1; font-weight: 400; color: var(--color-fg-default); }
 
 /* Campaign Summary card — wizard right rail */
@@ -1170,40 +1254,45 @@ select.fi-input {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 .summary-card-head {
   padding: var(--space-3) var(--space-4);
-  font: 500 12px/16px var(--font-sans);
+  font: 600 11px/16px var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-fg-secondary);
-  border-bottom: 1px solid var(--color-border-subtle);
-  background: var(--lyra-slate-100);
+  letter-spacing: 0.07em;
+  color: var(--color-fg-default);
+  border-bottom: none;
+  background: var(--lyra-white);
 }
-.summary-card-rows { display: flex; flex-direction: column; }
+.summary-card-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6); /* 24px between rows, no dividers */
+  padding: var(--space-5) var(--space-4);
+}
 .summary-card-row {
   display: flex; align-items: flex-start; gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 0;
+  border-bottom: none;
 }
-.summary-card-row:last-child { border-bottom: none; }
 .summary-card-icon {
-  width: 28px; height: 28px; flex-shrink: 0;
+  width: 30px; height: 30px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--lyra-slate-200);
-  color: var(--lyra-slate-600);
+  background: var(--lyra-brand-50);
+  color: var(--lyra-brand-700);
   border-radius: var(--radius-md);
   margin-top: 1px;
 }
-.summary-card-row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.summary-card-row-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .summary-card-label {
-  font: var(--text-h-xs);
+  font: 500 11px/14px var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--color-fg-secondary);
 }
 .summary-card-value {
-  font: var(--text-body-md);
+  font: 500 13px/18px var(--font-sans);
   color: var(--color-fg-default);
   word-break: break-word;
 }
@@ -1263,20 +1352,44 @@ select.fi-input {
 /* Topbar is always var(--color-bg-surface-container) in both WFM and FI modes */
 /* (no fi-shell override needed — white topbar with border-bottom is the Lyra standard) */
 
-/* Toast */
-.toast {
-  position: fixed; bottom: 24px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-bg-surface-inverse);          /* Lyra: dark inverse surface */
-  color: var(--color-fg-inverse);                       /* Lyra: white on dark */
-  padding: 10px 18px;
-  border-radius: var(--radius-md);                      /* Lyra: radius-md = 8px */
-  font: var(--text-h-sm);                               /* Lyra: 500 14px/20px Inter */
-  box-shadow: var(--elev-4);                            /* Lyra: elevation tier 4 */
-  z-index: 100;
-  display: flex; align-items: center; gap: 10px;
+/* Toast — Lyra inverse surface notification */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-.toast svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8 }
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-surface-inverse);   /* #2A2D32 — Lyra dark surface */
+  color: var(--color-fg-inverse);                /* #FFFFFF */
+  border-radius: var(--radius-lg);
+  font: 500 14px/20px var(--font-sans);
+  box-shadow: 0px 12px 24px 0px rgba(0,0,0,0.18);
+  z-index: 9999;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 300px; max-width: 480px;
+  animation: toast-in 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+.toast-icon {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(100,185,111,0.18);   /* success-medium at 18% on dark */
+  border-radius: 50%;
+  color: #64b96f;                        /* --lyra-color-status-success-medium */
+}
+.toast-icon svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.toast-msg { color: var(--color-fg-inverse); flex: 1; }
+.toast-close {
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-xs);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer; border: none; background: transparent;
+  margin-left: var(--space-1);
+}
+.toast-close:hover { background: rgba(255,255,255,0.08); color: var(--color-fg-inverse); }
+.toast-close svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Search highlight (NEW dot for FI nav) */
 .nav-new-dot {
@@ -1397,14 +1510,18 @@ select.fi-input {
 }
 
 /* Campaign State — inline dot + label */
-@keyframes state-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+@keyframes working-ping {
+  0%   { box-shadow: 0 0 0 0px rgba(143,115,227,0.55); }
+  60%  { box-shadow: 0 0 0 5px rgba(143,115,227,0); }
+  100% { box-shadow: 0 0 0 5px rgba(143,115,227,0); }
+}
 .cs-dot {
   display: inline-block; width: 8px; height: 8px;
   border-radius: 50%; flex-shrink: 0; vertical-align: middle; margin-top: -1px;
 }
 .cs-dot.live    { background: #278a33; }
 .cs-dot.draft   { background: var(--lyra-slate-500); }
-.cs-dot.working { background: var(--lyra-purple-500); animation: state-pulse 2.4s ease-in-out infinite; }
+.cs-dot.working { background: var(--lyra-purple-500); animation: working-ping 3s ease-out infinite; }
 
 
 /* Nav-leaf becomes a flex row so isNew dot floats right */
@@ -1416,27 +1533,28 @@ select.fi-input {
 .welcome-mode-radio {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 .welcome-mode-option {
   position: relative;
   display: flex;
-  gap: 10px;
-  padding: 12px var(--space-3);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-md);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: var(--radius-lg);
   background: var(--lyra-white);
   cursor: pointer;
   align-items: flex-start;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
 }
 .welcome-mode-option:hover {
-  border-color: var(--color-border-strong);
-  background: var(--color-bg-state-hover);
+  border-color: var(--color-border-medium);
+  background: var(--lyra-slate-50);
 }
 .welcome-mode-option.on {
   border-color: var(--color-border-active);
-  background: var(--lyra-white);
+  background: var(--color-bg-active-subtle);
   box-shadow: 0 0 0 1px var(--color-border-active);
 }
 .welcome-mode-option input[type="radio"] {
@@ -1469,19 +1587,19 @@ select.fi-input {
 .welcome-mode-option .body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .welcome-mode-option .title {
-  font: var(--text-h-sm);
+  font: 500 13px/20px var(--font-sans);
   color: var(--color-fg-default);
   letter-spacing: 0;
 }
 .welcome-mode-option .desc {
-  font: var(--text-body-sm);
+  font: 400 12px/18px var(--font-sans);
   color: var(--color-fg-secondary);
 }
-.welcome-mode-option.on .title { color: var(--color-fg-default); }
+.welcome-mode-option.on .title { color: var(--lyra-brand-700); }
 
 /* Kicker label inside invitation block */
 .kicker {
@@ -2111,13 +2229,17 @@ select.fi-input {
   display: flex; flex-direction: column; gap: var(--space-3);
 }
 .intel-sub-section > .form-section-head {
-  margin-left: calc(-1 * var(--space-6));
-  margin-right: calc(-1 * var(--space-6));
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-sm);
 }
 .intel-sub-section + .intel-sub-section {
-  padding-top: var(--space-5);
-  margin-top: var(--space-5);
-  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 0;
+  margin-top: 36px;
+  border-top: none;
 }
 .intel-sub-label {
   display: flex; align-items: center; gap: var(--space-2);
@@ -2129,10 +2251,10 @@ select.fi-input {
 
 /* ─── Selected model summary (compact inline card in Section 4) ──────────── */
 .selected-model-summary {
-  border: 1.5px solid var(--lyra-brand-600);
+  border: 1px solid rgba(0,0,0,0.22);
   border-radius: var(--radius-lg);
   background: var(--lyra-white);
-  box-shadow: 0px 1px 2px 0px rgba(16,24,40,0.06), 0px 0px 0px 3px var(--color-bg-active-moderate);
+  box-shadow: var(--shadow-sm);
 }
 .selected-model-summary-inner {
   display: flex; align-items: flex-start; gap: var(--space-4);
@@ -3087,22 +3209,23 @@ button,input,select,textarea,table,th,td{font-family:inherit;font-size:inherit;f
 .crumbs{
   display: flex; align-items: center;
   gap: var(--space-2);
-  /* Lyra Body SM: Inter Regular 12/16, letter-spacing 0.01rem */
   font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
-  letter-spacing: 0.01rem;
+  font-size: 12px; font-weight: 400;
+  line-height: 16px; letter-spacing: 0.01rem;
   color: var(--color-fg-secondary);
-  padding: var(--space-3) var(--space-6) 0;            /* 12px / 24px (matches pane-head padding) */
+  padding: var(--space-5) var(--space-6) 0;            /* 20px top, 24px sides, 0 bottom */
 }
-.crumbs .sep{ opacity: 0.5 }
-.crumbs .last{
-  color: var(--color-fg-default);
-  font-weight: 500;                                    /* Body SM emphasis */
-}
+.crumbs .sep{ opacity: 0.4; margin: 0 2px; }
+.crumbs .last{ color: var(--color-fg-default); font-weight: 500; }
 .crumbs a{ color: inherit; text-decoration: none; }
 .crumbs a:hover{ color: var(--color-fg-default); }
+
+/* When breadcrumbs precede a pane-head: tighten top padding, remove double border */
+.crumbs + .pane-head{
+  min-height: unset;
+  padding-top: var(--space-2);                         /* 8px gap crumbs → title */
+  padding-bottom: var(--space-5);                      /* 20px below title */
+}
 
 /* ----- Buttons (Lyra _button/base node 16939:25772) ----- */
 .btn{
@@ -3154,12 +3277,14 @@ button,input,select,textarea,table,th,td{font-family:inherit;font-size:inherit;f
 }
 .btn.ghost:hover{ background: var(--color-state-bg-hover); }
 
-/* ----- Filter toolbar ----- */
+/* ----- Filter toolbar — floating card matching Operations Dashboard ----- */
 .toolbar{
   display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;
-  padding: var(--space-3) var(--space-6);
+  margin: var(--space-6) var(--space-8) 0;
+  padding: var(--space-5);
   background: var(--color-bg-surface-shell, #f5f7f9);
-  border-bottom: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  border-bottom: none;
 }
 /* ----- Lyra Search input (node 16926:20974): 32px h, white bg, border/strong ----- */
 .search{ position:relative; flex:0 0 240px; height:32px; }
@@ -3319,40 +3444,39 @@ button,input,select,textarea,table,th,td{font-family:inherit;font-size:inherit;f
 .kpi .v.green{ color:var(--lyra-green-700) }
 
 /* ----- Tables — Lyra Grid (node 17074:36996) ----- */
-.table-wrap{ flex:1; overflow:auto }
+.table-wrap{ flex:1; overflow:auto; margin-top: var(--space-6); padding: 0 var(--space-8) var(--space-8); }
 table{
   width:100%; border-collapse:collapse;
-  /* Lyra Body-md: Inter Regular 14/20 letter-spacing 0 */
   font-family: var(--font-sans);
   font-size: 14px; font-weight: 400; line-height: 20px;
   letter-spacing: 0;
 }
-/* GridHeader — comfortable density: 20px vertical padding (Lyra spacing/5) */
+/* GridHeader — compact: 10px vertical padding */
 thead th{
   text-align: left;
-  padding: var(--space-5) var(--space-4);                      /* 20px top/bottom, 16px sides */
-  background: var(--lyra-white);
-  border-bottom: 1px solid var(--color-border-subtle);         /* Lyra: border/subtle */
-  position: relative; z-index: 10;                             /* ensures th stacks above positioned tbody rows */
-  /* Lyra Body-md-emphasis: Inter Medium 14/20 */
-  font-weight: 500;
-  color: var(--color-fg-default);                              /* Lyra: fg/default */
-  letter-spacing: 0;
+  padding: var(--space-3) var(--space-4);                      /* 12px top/bottom, 16px sides */
+  background: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  position: relative; z-index: 10;
+  font: 500 12px/16px var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-fg-secondary);
   white-space: nowrap;
   vertical-align: middle;
 }
 thead th:first-child { padding-left: var(--space-6); }
 thead th:last-child  { padding-right: var(--space-6); }
 thead th[onClick]:hover, thead th[onclick]:hover { background: var(--color-state-bg-hover); }
-/* GridCell — comfortable density: 20px vertical padding for visual rest between rows */
+/* GridCell — compact: 12px vertical padding */
 tbody td{
-  padding: var(--space-5) var(--space-4);                      /* 20px top/bottom, 16px sides */
+  padding: var(--space-3) var(--space-4);                      /* 12px top/bottom, 16px sides */
   color: var(--color-fg-default);
   vertical-align: middle;
 }
 tbody td:first-child { padding-left: var(--space-6); }
 tbody td:last-child  { padding-right: var(--space-6); }
-/* Row state colors (Lyra GridRow) */
+/* Row dividers — very subtle */
 tbody tr{ position: relative; }
 tbody tr::after {
   content: '';
@@ -3361,9 +3485,9 @@ tbody tr::after {
   left: var(--space-6);
   right: var(--space-6);
   height: 1px;
-  background: var(--color-border-subtle);
+  background: rgba(0,0,0,0.05);
 }
-tbody tr:hover td{ background: var(--color-state-bg-hover); }  /* Lyra: state/bg/hover */
+tbody tr:hover td{ background: var(--color-state-bg-hover); }
 tbody tr.selected td{
   background: var(--color-bg-active-subtle);                                         /* Lyra: bg/active/subtle */
 }
@@ -3387,7 +3511,7 @@ tbody tr.selected td:first-child::before{
 .agent-link{
   color: var(--lyra-brand-700);                                /* Lyra: fg/link = brand-700 */
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 .agent-link:hover{ text-decoration: underline; }
 .row-warn td:nth-child(2){ background: var(--fi-red-bg) }
@@ -3536,14 +3660,14 @@ tbody tr.selected td:first-child::before{
 
 /* ----- Action menu (dot-dot-dot) ----- */
 .kebab{
-  width:36px; height:36px; border-radius:var(--radius-md);
+  width:32px; height:32px; border-radius:var(--radius-md);
   display:inline-flex; align-items:center; justify-content:center;
-  cursor:pointer; color:var(--lyra-slate-700);
-  background: var(--lyra-white);
-  border: 1px solid var(--color-border-soft);
-  transition: background 80ms, border-color 80ms;
+  cursor:pointer; color:var(--lyra-slate-500);
+  background: transparent;
+  border: none;
+  transition: background 80ms, color 80ms;
 }
-.kebab:hover{ background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.28); color:var(--lyra-slate-900); }
+.kebab:hover{ background: rgba(0,0,0,0.04); color:var(--lyra-slate-800); }
 .kebab svg{ width:16px;height:16px;stroke:currentColor;fill:currentColor }
 
 /* ----- Split-button (with chevron) ----- */
@@ -3578,7 +3702,7 @@ tbody tr.selected td:first-child::before{
 .info-banner{
   display: flex; align-items: flex-start;
   gap: var(--space-2);                                 /* 8px between icon and text */
-  margin: var(--space-6) var(--space-8) var(--space-3); /* 24px top, 32px sides, 12px bottom */
+  margin: 0 var(--space-8) var(--space-8);             /* 0 top (table-wrap provides 24px), 32px sides, 32px bottom */
   padding: var(--space-3) var(--space-4);              /* 12px vertical, 16px horizontal */
   background: var(--color-bg-active-subtle);           /* Lyra: bg/active/subtle = var(--color-bg-active-subtle) */
   border: 1px solid rgba(24,91,164,0.20);              /* Subtle brand border (border/active @ 20%) */
@@ -3730,14 +3854,13 @@ tbody tr.selected td:first-child::before{
 }
 
 /* Campaign State — inline dot + label (no background, no border) */
-@keyframes state-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 .cs-dot {
   display: inline-block; width: 8px; height: 8px;
   border-radius: 50%; flex-shrink: 0; vertical-align: middle; margin-top: -1px;
 }
 .cs-dot.live    { background: #278a33; }
 .cs-dot.draft   { background: var(--lyra-slate-500); }
-.cs-dot.working { background: var(--lyra-purple-500); animation: state-pulse 2.4s ease-in-out infinite; }
+.cs-dot.working { background: var(--lyra-purple-500); animation: working-ping 3s ease-out infinite; }
 /* CSS tooltip — Lyra bg-inverse surface */
 .ss-badge::after {
   content: attr(data-tip);
@@ -3934,7 +4057,7 @@ textarea.fi-input,
 select.fi-input,
 button.fi-input {
   background: var(--lyra-white);                       /* Lyra: bg/field */
-  border: 1px solid var(--color-border-soft);          /* Lyra: border/soft = rgba(0,0,0,0.16) */
+  border: 1px solid rgba(0,0,0,0.22);                  /* slightly stronger than border/soft for clear field affordance */
   border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
   /* Lyra Body-md: Inter Regular 14/20, letter-spacing 0 */
   font-family: var(--font-sans);
@@ -3961,7 +4084,7 @@ textarea.fi-input {
 
 /* Hover — border deepens from soft (0.16) to strong (0.46) per Lyra render */
 .fi-input:hover:not(:focus):not(:disabled):not([readonly]) {
-  border-color: rgba(0,0,0,0.46);                      /* Lyra: border/strong */
+  border-color: rgba(0,0,0,0.34);                      /* mid-step between resting 0.22 and focus blue */
 }
 /* Active (focused) — Lyra brand-700 border + 3px glow ring */
 .fi-input:focus {
@@ -4142,21 +4265,38 @@ select.fi-input {
 /* Segmented control */
 .seg {
   display: inline-flex;
-  background: var(--lyra-slate-200);
-  border-radius: var(--radius-sm);
-  padding: 2px;
+  background: var(--lyra-white);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: var(--radius-md);
+  padding: 3px;
   gap: 2px;
+  box-shadow: var(--shadow-sm);
 }
 .seg button {
   background: transparent; border: 0; cursor: pointer;
-  padding: 5px var(--space-3);
-  font: var(--text-h-sm); color: var(--lyra-slate-600);
-  border-radius: var(--radius-xs);
+  padding: 5px var(--space-4);
+  font-family: var(--font-sans); font-size: 14px; font-weight: 400; line-height: 20px;
+  color: var(--color-fg-secondary);
+  border-radius: var(--radius-sm);
   letter-spacing: 0;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.seg button:hover:not(.on):not(:disabled) {
+  background: var(--lyra-slate-100);
+  color: var(--color-fg-default);
 }
 .seg button.on {
-  background: var(--lyra-white); color: var(--lyra-slate-900);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  background: var(--lyra-color-bg-active-strong, var(--color-bg-primary));
+  color: var(--lyra-white);
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.14);
+}
+.seg button:disabled {
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 /* Toggle */
@@ -4229,10 +4369,10 @@ select.fi-input {
 /* Suppression toggles list */
 .sup-row {
   display: flex; align-items: flex-start; gap: 14px;
-  padding: 14px 0;
-  border-top: 1px solid rgba(0,0,0,0.06);
+  padding: 0;
+  margin-top: var(--space-8); /* 32px between sections */
 }
-.sup-row:first-child { border-top: 0 }
+.sup-row:first-child { margin-top: 0; }
 .sup-row .meta { flex: 1 }
 .sup-row .meta .title {
   font: var(--text-h-sm); color: var(--lyra-slate-900); letter-spacing: 0;
@@ -4330,40 +4470,45 @@ select.fi-input {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 .summary-card-head {
   padding: var(--space-3) var(--space-4);
-  font: 500 12px/16px var(--font-sans);
+  font: 600 11px/16px var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-fg-secondary);
-  border-bottom: 1px solid var(--color-border-subtle);
-  background: var(--lyra-slate-100);
+  letter-spacing: 0.07em;
+  color: var(--color-fg-default);
+  border-bottom: none;
+  background: var(--lyra-white);
 }
-.summary-card-rows { display: flex; flex-direction: column; }
+.summary-card-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-5) var(--space-4);
+}
 .summary-card-row {
   display: flex; align-items: flex-start; gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-subtle);
+  padding: 0;
+  border-bottom: none;
 }
-.summary-card-row:last-child { border-bottom: none; }
 .summary-card-icon {
-  width: 28px; height: 28px; flex-shrink: 0;
+  width: 30px; height: 30px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--lyra-slate-200);
-  color: var(--lyra-slate-600);
+  background: var(--lyra-brand-50);
+  color: var(--lyra-brand-700);
   border-radius: var(--radius-md);
   margin-top: 1px;
 }
-.summary-card-row-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.summary-card-row-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .summary-card-label {
-  font: var(--text-h-xs);
+  font: 500 11px/14px var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--color-fg-secondary);
 }
 .summary-card-value {
-  font: var(--text-body-md);
+  font: 500 13px/18px var(--font-sans);
   color: var(--color-fg-default);
   word-break: break-word;
 }
@@ -4423,20 +4568,44 @@ select.fi-input {
 /* Topbar is always var(--color-bg-surface-container) in both WFM and FI modes */
 /* (no fi-shell override needed — white topbar with border-bottom is the Lyra standard) */
 
-/* Toast */
-.toast {
-  position: fixed; bottom: 24px; left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-bg-surface-inverse);          /* Lyra: dark inverse surface */
-  color: var(--color-fg-inverse);                       /* Lyra: white on dark */
-  padding: 10px 18px;
-  border-radius: var(--radius-md);                      /* Lyra: radius-md = 8px */
-  font: var(--text-h-sm);                               /* Lyra: 500 14px/20px Inter */
-  box-shadow: var(--elev-4);                            /* Lyra: elevation tier 4 */
-  z-index: 100;
-  display: flex; align-items: center; gap: 10px;
+/* Toast — Lyra inverse surface notification */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-.toast svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8 }
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-bg-surface-inverse);   /* #2A2D32 — Lyra dark surface */
+  color: var(--color-fg-inverse);                /* #FFFFFF */
+  border-radius: var(--radius-lg);
+  font: 500 14px/20px var(--font-sans);
+  box-shadow: 0px 12px 24px 0px rgba(0,0,0,0.18);
+  z-index: 9999;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  min-width: 300px; max-width: 480px;
+  animation: toast-in 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+.toast-icon {
+  width: 20px; height: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(100,185,111,0.18);   /* success-medium at 18% on dark */
+  border-radius: 50%;
+  color: #64b96f;                        /* --lyra-color-status-success-medium */
+}
+.toast-icon svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.toast-msg { color: var(--color-fg-inverse); flex: 1; }
+.toast-close {
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-xs);
+  color: rgba(255,255,255,0.5);
+  cursor: pointer; border: none; background: transparent;
+  margin-left: var(--space-1);
+}
+.toast-close:hover { background: rgba(255,255,255,0.08); color: var(--color-fg-inverse); }
+.toast-close svg { width: 13px; height: 13px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 
 /* Search highlight (NEW dot for FI nav) */
 .nav-new-dot {
@@ -4566,27 +4735,28 @@ select.fi-input {
 .welcome-mode-radio {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 .welcome-mode-option {
   position: relative;
   display: flex;
-  gap: 10px;
-  padding: 12px var(--space-3);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-md);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid rgba(0,0,0,0.14);
+  border-radius: var(--radius-lg);
   background: var(--lyra-white);
   cursor: pointer;
   align-items: flex-start;
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
 }
 .welcome-mode-option:hover {
-  border-color: var(--color-border-strong);
-  background: var(--color-bg-state-hover);
+  border-color: var(--color-border-medium);
+  background: var(--lyra-slate-50);
 }
 .welcome-mode-option.on {
   border-color: var(--color-border-active);
-  background: var(--lyra-white);
+  background: var(--color-bg-active-subtle);
   box-shadow: 0 0 0 1px var(--color-border-active);
 }
 .welcome-mode-option input[type="radio"] {
@@ -4619,19 +4789,19 @@ select.fi-input {
 .welcome-mode-option .body {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: var(--space-1);
   min-width: 0;
 }
 .welcome-mode-option .title {
-  font: var(--text-h-sm);
+  font: 500 13px/20px var(--font-sans);
   color: var(--color-fg-default);
   letter-spacing: 0;
 }
 .welcome-mode-option .desc {
-  font: var(--text-body-sm);
+  font: 400 12px/18px var(--font-sans);
   color: var(--color-fg-secondary);
 }
-.welcome-mode-option.on .title { color: var(--color-fg-default); }
+.welcome-mode-option.on .title { color: var(--lyra-brand-700); }
 
 /* Kicker label inside invitation block */
 .kicker {
@@ -5261,12 +5431,17 @@ select.fi-input {
   display: flex; flex-direction: column; gap: var(--space-3);
 }
 .intel-sub-section > .form-section-head {
-  margin-left: calc(-1 * var(--space-6));
-  margin-right: calc(-1 * var(--space-6));
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid rgba(0,0,0,0.22);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-sm);
 }
 .intel-sub-section + .intel-sub-section {
-  padding-top: var(--space-4);
-  margin-top: var(--space-4);
+  padding-top: 0;
+  margin-top: 32px;
+  border-top: none;
 }
 .intel-sub-label {
   display: flex; align-items: center; gap: var(--space-2);
@@ -5278,10 +5453,10 @@ select.fi-input {
 
 /* ─── Selected model summary (compact inline card in Section 4) ──────────── */
 .selected-model-summary {
-  border: 1.5px solid var(--lyra-brand-600);
+  border: 1px solid rgba(0,0,0,0.22);
   border-radius: var(--radius-lg);
   background: var(--lyra-white);
-  box-shadow: 0px 1px 2px 0px rgba(16,24,40,0.06), 0px 0px 0px 3px var(--color-bg-active-moderate);
+  box-shadow: var(--shadow-sm);
 }
 .selected-model-summary-inner {
   display: flex; align-items: flex-start; gap: var(--space-4);
@@ -6221,7 +6396,7 @@ function CampaignStateInline({ status, hasWorkingCopy }) {
     dotClass = "live"; label = "Live"; color = "var(--lyra-green-700)";
   }
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, font: "500 12px/16px var(--font-sans)", color, marginTop: 3 }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, font: "500 12px/16px var(--font-sans)", color }}>
       <span className={`cs-dot ${dotClass}`}/>
       {label}
     </span>
@@ -6435,6 +6610,7 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
   const [modalDropBeforeId, setModalDropBeforeId] = React.useState(null);
   const [statusOverride, setStatusOverride] = React.useState({}); // id -> status
   const [deletedIds, setDeletedIds] = React.useState(() => new Set());
+  const [updatedTs, setUpdatedTs] = React.useState({}); // id -> timestamp, bumped on every status change
 
   const statusOf = (c) => statusOverride[c.id] || c.status;
   const toggleSelect = (id) => setSelectedIds(prev => {
@@ -6449,12 +6625,18 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
   const canDeactivate = selCount > 0 && selectedRows().some(c => statusOf(c) === "active");
   const canDelete = selCount > 0;
   const bulkSetStatus = (status) => {
+    const now = performance.now();
     setStatusOverride(prev => {
       const next = { ...prev };
       selectedRows().forEach(c => {
         if (status === "active" && statusOf(c) === "expired") return;
         next[c.id] = status;
       });
+      return next;
+    });
+    setUpdatedTs(prev => {
+      const next = { ...prev };
+      selectedRows().forEach(c => { next[c.id] = now; });
       return next;
     });
     clearSelection();
@@ -6468,8 +6650,16 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
     clearSelection();
   };
 
-  const rowActivate = (id) => setStatusOverride(prev => ({ ...prev, [id]: "active" }));
-  const rowDeactivate = (id) => setStatusOverride(prev => ({ ...prev, [id]: "inactive" }));
+  const rowActivate = (id) => {
+    const now = performance.now();
+    setStatusOverride(prev => ({ ...prev, [id]: "active" }));
+    setUpdatedTs(prev => ({ ...prev, [id]: now }));
+  };
+  const rowDeactivate = (id) => {
+    const now = performance.now();
+    setStatusOverride(prev => ({ ...prev, [id]: "inactive" }));
+    setUpdatedTs(prev => ({ ...prev, [id]: now }));
+  };
   const rowDelete = (id) => {
     const c = CAMPAIGNS.find(x => x.id === id);
     if (!window.confirm(`Delete "${c?.name}"? This cannot be undone.`)) return;
@@ -6532,7 +6722,17 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
 
   const rows = [...filteredRows].sort((a, b) => {
     let av, bv;
-    if (sortKey === "updated")  { av = a.updated;                bv = b.updated; }
+    if (sortKey === "updated") {
+      // updatedTs is a high-resolution timestamp set on status change; new campaigns use their numeric id.
+      // Fall back to the date string for unmodified seed campaigns.
+      const tsA = updatedTs[a.id] ?? (a.isNew ? a.id : null);
+      const tsB = updatedTs[b.id] ?? (b.isNew ? b.id : null);
+      if (tsA !== null || tsB !== null) {
+        const ta = tsA ?? -Infinity, tb = tsB ?? -Infinity;
+        if (ta !== tb) return sortDir === "asc" ? ta - tb : tb - ta;
+      }
+      av = a.updated; bv = b.updated;
+    }
     if (sortKey === "priority") {
       const activeOnly = c => statusOf(c) === "active";
       av = activeOnly(a) ? (priorityMap[a.id] ?? 999) : 999;
@@ -6584,7 +6784,7 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
       </div>
 
       {/* Lyra Filter Bar — Search on the left, filter chips, then Clear */}
-      <div className="toolbar" style={{ paddingTop: 14 }}>
+      <div className="toolbar">
         <div className="search">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input placeholder="Search campaigns"
@@ -6628,10 +6828,10 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
                          All priorities use the same style for consistency; the order itself conveys ranking. */
                       <div style={{
                         display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        minWidth: 28, height: 24, padding: "0 var(--space-2)", borderRadius: 6,
-                        background: "var(--color-bg-active-moderate)",   /* Lyra: #d3e6fd */
-                        color: "var(--color-fg-active-strong)",          /* Lyra: brand-700 */
-                        font: "600 14px/20px var(--font-sans)", letterSpacing: 0,   /* Lyra Heading-sm bold */
+                        minWidth: 32, height: 22, padding: "0 var(--space-2)", borderRadius: "var(--radius-sm)",
+                        background: "var(--color-bg-active-moderate)",
+                        color: "var(--color-fg-active-strong)",
+                        font: "600 14px/14px var(--font-sans)", letterSpacing: 0,
                       }}>
                         P{priorityMap[c.id]}
                       </div>
@@ -6643,10 +6843,15 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
                     <a className="agent-link" href="#" onClick={e => { e.preventDefault(); onOpen && onOpen(c); }}>
                       {c.name}
                     </a>
-                    <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginTop: 4 }}>
-                      Created {c.created}, {c.owner}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <CampaignStateInline status={s} hasWorkingCopy={c.hasWorkingCopy}/>
+                      {s !== "expired" && (
+                        <span style={{ width: 1, height: 10, background: "rgba(0,0,0,0.15)", flexShrink: 0 }}/>
+                      )}
+                      <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+                        Created {c.created}, {c.owner}
+                      </span>
                     </div>
-                    <CampaignStateInline status={s} hasWorkingCopy={c.hasWorkingCopy}/>
                   </td>
                   <td>
                     <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)", whiteSpace: "nowrap" }}>
@@ -6745,10 +6950,10 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
                         <td>
                           <div style={{
                             display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            minWidth: 28, height: 24, padding: "0 var(--space-2)", borderRadius: 6,
+                            minWidth: 32, height: 22, padding: "0 var(--space-2)", borderRadius: "var(--radius-sm)",
                             background: "var(--color-bg-active-moderate)",
                             color: "var(--color-fg-active-strong)",
-                            font: "600 14px/20px var(--font-sans)",
+                            font: "600 14px/14px var(--font-sans)",
                           }}>
                             {idx + 1}
                           </div>
@@ -7218,10 +7423,10 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   }
 
   const ALL_STEPS = [
-    { n: 0, label: "Campaign, Identity & Scope",   done: !!c.name },
-    { n: 1, label: "Suppression Rules",     done: true },
-    { n: 2, label: "Topic AI Model & Survey Template", done: !!c.aiModelId && !!c.surveyDesignId },
-    { n: 3, label: "Summary & Review",      done: false },
+    { n: 0, label: "Campaign, Identity & Scope",        desc: "Name the campaign, set its active dates, and choose the teams and interactions it should target.", done: !!c.name },
+    { n: 1, label: "Suppression Rules",                 desc: "Define when not to send surveys, even if an interaction otherwise qualifies.", done: true },
+    { n: 2, label: "Topic AI Model & Survey Template",  desc: "Choose the AI model and survey design for this campaign.", done: !!c.aiModelId && !!c.surveyDesignId },
+    { n: 3, label: "Summary & Review",                  desc: "Review all settings before activating your campaign.", done: false },
   ];
 
   const [triedSteps, setTriedSteps] = React.useState(new Set());
@@ -7274,7 +7479,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
           <span className="sep">/</span>
           <span className="last">Review &amp; Activate</span>
         </div>
-        <div className="pane-head" style={{ paddingTop: 6 }}>
+        <div className="pane-head">
           <div style={{ flex: 1 }}>
             <h1>Review &amp; Activate</h1>
             <p style={{ margin: "var(--space-1) 0 0", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
@@ -7340,7 +7545,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
         <span className="last">{editCampaign ? editCampaign.name : "Create New Survey Campaign"}</span>
       </div>
 
-      <div className="pane-head" style={{ paddingTop: 6 }}>
+      <div className="pane-head">
         <h1>{editCampaign ? editCampaign.name : "Create New Survey Campaign"}</h1>
       </div>
 
@@ -7395,10 +7600,22 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
         </div>
       </div>
 
-      {/* ── Wizard body: scrollable area + footer ── */}
-      <div className="wz-scroll-area">
-        <div className="wz-body">
-          <div className="form-pane">
+      {/* ── Content area: left = scrollable form, right = sticky summary ── */}
+      <div className="wz-content-area">
+
+        {/* Left: scrollable — section header + form both scroll together */}
+        <div className="wz-content-left">
+          <div className="wz-scroll-area">
+            {/* ── Full-width step section header — scrolls with content ── */}
+            {(() => { const s = ALL_STEPS[activeStep]; return s ? (
+              <div className="wz-section-header">
+                <h2>{s.label}</h2>
+                <p>{s.desc}</p>
+              </div>
+            ) : null; })()}
+
+            <div className="wz-body">
+              <div className="form-pane">
 
           {/* ── Step 0: Template, Identity &amp; Scope ── */}
           {activeStep === 0 && (()=>{
@@ -7409,112 +7626,131 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const endDateErr   = showErr && !c.ongoing && !c.endDate;
             return <div className="wz-step-content">
 
-              <div className="wz-step-head">
-                <h2>Campaign, Identity &amp; Scope</h2>
-                <p>Name the campaign, set its active dates, and choose the teams and interactions it should target.</p>
-              </div>
-
               {/* ── Campaign Identity ── */}
               <div className="setup-section">
                 <div className="setup-section-body">
-                <div className="field-grid-2">
-                  <div className="field-cell">
-                    <label className="field-label">Campaign Name<span className="req">*</span><span className="char-counter">{(c.name || "").length}/50</span></label>
-                    <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="Type" maxLength={50}
-                      aria-invalid={nameErr || undefined}
-                      value={c.name} onChange={e => set("name", e.target.value)}/>
-                    {nameErr && <div className="field-control"><span className="error-msg">
-                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                      Campaign name is required
-                    </span></div>}
-                  </div>
-                  <div className="field-cell">
-                    <label className="field-label">
-                      Description
-                      <span className="char-counter">{(c.description || "").length}/200</span>
-                    </label>
-                    <input className="fi-input" maxLength={200} placeholder="Type"
-                      value={c.description} onChange={e => set("description", e.target.value)}/>
-                  </div>
-                </div>
 
-                <div style={{ padding: "var(--space-6) 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
-                    <div className="section-heading" style={{ padding: 0 }}>Active Date Range</div>
-                    <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)", cursor: "pointer" }}>
-                      <Toggle checked={c.ongoing} onChange={v => set("ongoing", v)}/>
-                      <span>Ongoing</span>
-                    </label>
-                  </div>
-                  <div className="field-grid-2" style={{ padding: 0, borderTop: 0 }}>
+                  {/* Name + Description */}
+                  <div className="field-grid-2">
                     <div className="field-cell">
-                      <label className="field-label" style={{ fontWeight: 400 }}>Start Date<span className="req">*</span></label>
-                      <FiDatePicker value={c.startDate} onChange={v => set("startDate", v)} placeholder="Oct 30, 2025" error={startDateErr}/>
-                      {startDateErr && <span className="error-msg" style={{ marginTop: "var(--space-1)", display: "flex", alignItems: "center", gap: 4 }}>
+                      <label className="field-label">Campaign Name<span className="req">*</span><span className="char-counter">{(c.name || "").length}/50</span></label>
+                      <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="Type" maxLength={50}
+                        aria-invalid={nameErr || undefined}
+                        value={c.name} onChange={e => set("name", e.target.value)}/>
+                      {nameErr && <div className="field-control"><span className="error-msg">
                         <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        Start date is required
-                      </span>}
+                        Campaign name is required
+                      </span></div>}
                     </div>
                     <div className="field-cell">
-                      <label className="field-label" style={{ fontWeight: 400, color: c.ongoing ? "var(--color-fg-disabled)" : undefined }}>End Date{!c.ongoing && <span className="req">*</span>}</label>
-                      <FiDatePicker value={c.endDate} onChange={v => set("endDate", v)} disabled={c.ongoing} placeholder={c.ongoing ? "Ongoing" : "Oct 30, 2025"} error={endDateErr}/>
-                      {endDateErr && <span className="error-msg" style={{ marginTop: "var(--space-1)", display: "flex", alignItems: "center", gap: 4 }}>
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        End date is required
-                      </span>}
+                      <label className="field-label">Description<span className="char-counter">{(c.description || "").length}/200</span></label>
+                      <input className="fi-input" maxLength={200} placeholder="Type"
+                        value={c.description} onChange={e => set("description", e.target.value)}/>
                     </div>
                   </div>
-                </div>
 
-                <div className="section-heading" style={{ paddingTop: "var(--space-6)", paddingBottom: "var(--space-2)" }}>Agents</div>
-                <div className="field-grid-2" style={{ borderTop: "none", paddingTop: 0, paddingBottom: 0 }}>
-                  <div className="field-cell">
-                    <label className="field-label">Teams<span className="req">*</span></label>
-                    <MultiSelectField
-                      options={["Tier 1 Billing", "Tier 2 Support", "Sales", "Retention"]}
-                      value={c.queues || []}
-                      onChange={v => set("queues", v)}
-                      placeholder="Select Teams"
-                      error={teamsErr}
-                    />
-                    {teamsErr && <div className="field-control"><span className="error-msg">
-                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                      Select an agent team
-                    </span></div>}
-                  </div>
-                  <div className="field-cell">
-                    <label className="field-label">Group</label>
-                    <MultiSelectField
-                      options={["North America", "EMEA", "APAC"]}
-                      value={c.teams || []}
-                      onChange={v => set("teams", v)}
-                      placeholder="Select Group"
-                    />
-                  </div>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", marginTop: "var(--space-2)", padding: "0 var(--space-3)", height: 36, background: "var(--lyra-white)", border: "1px solid var(--color-border-soft)", borderRadius: "var(--radius-md)", font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                  Current Total Number Of Agents Selected: <strong style={{ marginLeft: 4 }}>{(c.queues?.length || 0) + (c.teams?.length || 0)}</strong>
-                </div>
-
-                <div style={{ paddingTop: "var(--space-6)" }}>
-                  <FieldRow label="Language">
-                    <label className="lyra-check disabled" style={{ pointerEvents: "none" }}>
-                      <input type="checkbox" checked readOnly disabled/>
-                      <span>English (Default)</span>
-                    </label>
-                  </FieldRow>
-                </div>
-
-                <div style={{ paddingTop: "var(--space-6)" }}>
-                  <FieldRow label="Interaction Length">
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, width: "50%" }}>
-                      <span style={{ color: "var(--color-fg-secondary)", fontSize: 13, flexShrink: 0 }}>Minimum</span>
-                      <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2} onChange={e => set("interactionLength", parseInt(e.target.value) || 1)} style={{ width: 72, textAlign: "center", flexShrink: 0 }}/>
-                      <span style={{ color: "var(--color-fg-secondary)", fontSize: 13, flexShrink: 0 }}>mins</span>
+                  {/* Active Date Range */}
+                  <div className="wz-form-section">
+                    <div className="wz-form-section-head">
+                      <span className="section-heading" style={{ padding: 0 }}>Active Date Range</span>
+                      <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)", cursor: "pointer" }}>
+                        <Toggle checked={c.ongoing} onChange={v => set("ongoing", v)}/>
+                        <span>Ongoing</span>
+                      </label>
                     </div>
-                    <div className="field-hint" style={{ marginTop: 6 }}>Only send survey if the interaction lasted at least this long.</div>
-                  </FieldRow>
-                </div>
+                    <div className="field-grid-2">
+                      <div className="field-cell">
+                        <label className="field-label">Start Date<span className="req">*</span></label>
+                        <FiDatePicker value={c.startDate} onChange={v => set("startDate", v)} placeholder="Oct 30, 2025" error={startDateErr}/>
+                        {startDateErr && <span className="error-msg" style={{ marginTop: "var(--space-1)", display: "flex", alignItems: "center", gap: 4 }}>
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          Start date is required
+                        </span>}
+                      </div>
+                      <div className="field-cell">
+                        <label className="field-label" style={{ color: c.ongoing ? "var(--color-fg-disabled)" : undefined }}>End Date{!c.ongoing && <span className="req">*</span>}</label>
+                        <FiDatePicker value={c.endDate} onChange={v => set("endDate", v)} disabled={c.ongoing} placeholder={c.ongoing ? "Ongoing" : "Oct 30, 2025"} error={endDateErr}/>
+                        {endDateErr && <span className="error-msg" style={{ marginTop: "var(--space-1)", display: "flex", alignItems: "center", gap: 4 }}>
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          End date is required
+                        </span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Agents */}
+                  <div className="wz-form-section">
+                    <div className="wz-form-section-head">
+                      <span className="section-heading" style={{ padding: 0 }}>Agents</span>
+                    </div>
+                    <div className="field-grid-2">
+                      <div className="field-cell">
+                        <label className="field-label">Teams<span className="req">*</span></label>
+                        <MultiSelectField
+                          options={["Tier 1 Billing", "Tier 2 Support", "Sales", "Retention"]}
+                          value={c.queues || []}
+                          onChange={v => set("queues", v)}
+                          placeholder="Select Teams"
+                          error={teamsErr}
+                        />
+                        {teamsErr && <div className="field-control"><span className="error-msg">
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          Select an agent team
+                        </span></div>}
+                      </div>
+                      <div className="field-cell">
+                        <label className="field-label">Group</label>
+                        <MultiSelectField
+                          options={["North America", "EMEA", "APAC"]}
+                          value={c.teams || []}
+                          onChange={v => set("teams", v)}
+                          placeholder="Select Group"
+                        />
+                      </div>
+                    </div>
+                    {/* Agent count summary — read-only stat, not an input */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
+                      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="var(--color-fg-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="6" cy="5" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h2"/><circle cx="11.5" cy="6" r="2"/><path d="M8 13.5c0-1.9 1.6-3.5 3.5-3.5s3.5 1.6 3.5 3.5"/>
+                      </svg>
+                      <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+                        Total agents selected:
+                      </span>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        minWidth: 24, height: 20, padding: "0 var(--space-2)",
+                        background: (c.queues?.length || 0) + (c.teams?.length || 0) > 0 ? "var(--lyra-brand-50)" : "var(--lyra-slate-100)",
+                        color: (c.queues?.length || 0) + (c.teams?.length || 0) > 0 ? "var(--lyra-brand-700)" : "var(--color-fg-secondary)",
+                        borderRadius: "var(--radius-full)",
+                        font: "600 12px/16px var(--font-sans)",
+                      }}>
+                        {(c.queues?.length || 0) + (c.teams?.length || 0)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Language */}
+                  <div className="wz-form-section">
+                    <FieldRow label="Language">
+                      <label className="lyra-check disabled" style={{ pointerEvents: "none" }}>
+                        <input type="checkbox" checked readOnly disabled/>
+                        <span>English (Default)</span>
+                      </label>
+                    </FieldRow>
+                  </div>
+
+                  {/* Interaction Length */}
+                  <div className="wz-form-section">
+                    <FieldRow label="Interaction Length">
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ color: "var(--color-fg-secondary)", fontSize: 13, flexShrink: 0 }}>Minimum</span>
+                        <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2} onChange={e => set("interactionLength", parseInt(e.target.value) || 1)} style={{ width: 72, textAlign: "center", flexShrink: 0 }}/>
+                        <span style={{ color: "var(--color-fg-secondary)", fontSize: 13, flexShrink: 0 }}>mins</span>
+                      </div>
+                      <div className="field-hint" style={{ marginTop: 6 }}>Only send survey if the interaction lasted at least this long.</div>
+                    </FieldRow>
+                  </div>
+
                 </div>{/* /setup-section-body */}
               </div>
 
@@ -7525,10 +7761,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
           {activeStep === 1 && (
             <div className="wz-step-content">
               <div className="wz-content-card">
-              <div className="wz-step-head">
-                <h2>Suppression Rules</h2>
-                <p>When not to send surveys, even if everything else qualifies.</p>
-              </div>
               <div className="sup-row">
                 <Toggle checked={c.suppressOptOut} onChange={v => set("suppressOptOut", v)}/>
                 <div className="meta">
@@ -7574,10 +7806,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
           {activeStep === 2 && (
             <div className="wz-step-content">
               <div className="wz-content-card">
-              <div className="wz-step-head">
-                <h2>Topic AI Model &amp; Survey Template</h2>
-                <p>Choose the AI model and survey design for this campaign.</p>
-              </div>
               <div className="intel-sub-section">
                 {(() => {
                   const activeModel = AI_MODELS.find(m => m.id === c.aiModelId);
@@ -7587,7 +7815,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                         <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg>
                       </span>
                       <div style={{ flex: 1 }}><h3>Topic AI Model</h3><div className="sub">Select an AI model to power your campaign intelligence</div></div>
-                      <button className="btn" onClick={() => setModelDrawerOpen(true)}>Choose Topic AI Model →</button>
+                      <button className="btn primary" onClick={() => setModelDrawerOpen(true)}>Choose Topic AI Model →</button>
                     </header>
                   );
                   return (
@@ -7676,21 +7904,16 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             );
             const missingRequired = !c.name || !c.queues?.length || !c.startDate || (!c.ongoing && !c.endDate);
             return (
-              <div className="wz-step-content">
-                <div style={{ marginBottom: "var(--space-5)" }}>
-                  <h2 className="setup-section-title">Summary &amp; Review</h2>
-                  <p className="setup-section-sub">Review every setting before activating. Click Edit on any section to go back.</p>
-                </div>
-
+              <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3) var(--space-4)", background: "#fff0f0", border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)", font: "var(--text-body-sm)", color: "var(--color-status-error)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-status-critical-subtle, #fff0f0)", border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-8)", font: "var(--text-body-sm)", color: "var(--color-status-error)" }}>
                     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                     Some required fields are incomplete. Return to the relevant steps to fill them in before activating.
                   </div>
                 )}
 
                 {selectedTemplate && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-2) var(--space-4)", background: "var(--color-bg-active-subtle)", border: "1px solid var(--lyra-brand-200)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)", font: "var(--text-body-sm)", color: "var(--lyra-brand-700)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-2) var(--space-4)", background: "var(--color-bg-active-subtle)", border: "1px solid var(--lyra-brand-200)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-8)", font: "var(--text-body-sm)", color: "var(--lyra-brand-700)" }}>
                     <svg viewBox="0 0 16 16" width="13" height="13" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
                     <span><strong>Template applied:</strong> {selectedTemplate.name}</span>
                   </div>
@@ -7725,13 +7948,16 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
           })()}
 
           </div>{/* /form-pane */}
+            </div>{/* /wz-body */}
+          </div>{/* /wz-scroll-area */}
+        </div>{/* /wz-content-left */}
 
-          {/* Right rail summary */}
-          <aside className="summary-pane">
-            <FloatingMetrics campaign={c}/>
-          </aside>
-        </div>{/* /wz-body */}
-      </div>{/* /wz-scroll-area */}
+        {/* Right: sticky campaign summary */}
+        <aside className="wz-summary-rail">
+          <FloatingMetrics campaign={c}/>
+        </aside>
+
+      </div>{/* /wz-content-area */}
 
       {/* ── Back / Next footer — outside scroll area, always visible ── */}
       <div className="wz-footer">
@@ -8278,7 +8504,7 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
   const [showChanges, setShowChanges] = React.useState(false);
   React.useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 2800);
+    const t = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -8301,7 +8527,7 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
       </div>
 
       {/* Page header — title only */}
-      <div className="pane-head" style={{ paddingTop: 6 }}>
+      <div className="pane-head">
         <h1 style={{ flex: 1, margin: 0 }}>{c.name}</h1>
       </div>
 
@@ -8437,8 +8663,13 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
 
       {toast ? (
         <div className="toast">
-          <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
-          {toast.msg}
+          <div className="toast-icon">
+            <svg viewBox="0 0 16 16"><polyline points="3 8.5 6.5 12 13 5"/></svg>
+          </div>
+          <span className="toast-msg">{toast.msg}</span>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Dismiss">
+            <svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
         </div>
       ) : null}
     </div>
@@ -8447,37 +8678,7 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
 
 /* Campaign Summary sidebar card */
 function CampaignSummaryCard({ campaign: c }) {
-  const isLive = c.status === "active";
-
-  /* ── Live metrics (active / paused campaigns) ── */
-  const metricRows = [
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="2 10 6 6 9 9 14 4"/></svg>,
-      label: "Response Rate", value: c.responseRate || "31%", highlight: true,
-    },
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="1.5" width="10" height="13" rx="1.5"/><line x1="6" y1="5" x2="10" y2="5"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="11" x2="8.5" y2="11"/></svg>,
-      label: "Total Surveys Sent", value: c.totalSurveys ? c.totalSurveys.toLocaleString() : "2,847",
-    },
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><polyline points="2 11 6 7 9 10 14 5"/><line x1="14" y1="5" x2="14" y2="9"/><line x1="14" y1="5" x2="10" y2="5"/></svg>,
-      label: "Completed Responses", value: c.completedResponses ? c.completedResponses.toLocaleString() : "882",
-    },
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>,
-      label: "Avg. Completion Time", value: c.avgCompletionTime || "1m 42s",
-    },
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M8 2l1.8 3.6L14 6.3l-3 2.9.7 4.1L8 11.2l-3.7 2.1.7-4.1-3-2.9 4.2-.7z"/></svg>,
-      label: "Avg. CSAT Score", value: c.avgCsat || "4.2 / 5",
-    },
-    {
-      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>,
-      label: "Last Survey Sent", value: c.lastSurveySent || "Today, 9:41 AM",
-    },
-  ];
-
-  /* ── Config info (draft / ended campaigns) ── */
+  /* ── Config info ── */
   const agentTeams = c.queues?.length ? c.queues.join(", ") : "Not set";
   const agentGroups = c.teams?.length ? c.teams.join(", ") : "All groups";
   const dateRange = c.startDate
@@ -8500,21 +8701,17 @@ function CampaignSummaryCard({ campaign: c }) {
   ];
 
   const rows = configRows;
-  const headLabel = "Campaign Summary";
 
   return (
-    <div className="detail-summary-card">
-      <div className="detail-summary-head">
-        <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
-        {headLabel}
-      </div>
-      <div className="detail-summary-rows">
+    <div className="summary-card">
+      <div className="summary-card-head">Campaign Summary</div>
+      <div className="summary-card-rows">
         {rows.map(r => (
-          <div key={r.label} className={`detail-summary-row${r.highlight ? " highlight" : ""}`}>
-            <div className="detail-summary-ico">{r.icon}</div>
-            <div className="detail-summary-body">
-              <div className="detail-summary-label">{r.label}</div>
-              <div className="detail-summary-value">{r.value}</div>
+          <div key={r.label} className="summary-card-row">
+            <div className="summary-card-icon">{r.icon}</div>
+            <div className="summary-card-row-body">
+              <div className="summary-card-label">{r.label}</div>
+              <div className="summary-card-value">{r.value}</div>
             </div>
           </div>
         ))}
@@ -9036,7 +9233,7 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
       </div>
 
       {/* Page header */}
-      <div className="pane-head" style={{ paddingTop: 6 }}>
+      <div className="pane-head">
         <h1 style={{ flex: 1, margin: 0 }}>{d.name}</h1>
       </div>
 
@@ -9072,7 +9269,7 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
                 </div>
 
                 {/* Welcome Message */}
-                <div style={{ borderTop: "1px solid var(--color-border-subtle)", paddingTop: "var(--space-5)", marginBottom: "var(--space-5)" }}>
+                <div style={{ marginTop: 36, marginBottom: "var(--space-5)" }}>
                   <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Welcome Message</div>
                   <DefRow label="Message Mode">{welcomeLabel[d.welcomeMode] || d.welcomeMode}</DefRow>
                   {d.welcomeMode !== "none" && d.welcomeMessage && (
@@ -9087,7 +9284,7 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
                 </div>
 
                 {/* Rating Format */}
-                <div style={{ borderTop: "1px solid var(--color-border-subtle)", paddingTop: "var(--space-5)", marginBottom: "var(--space-5)" }}>
+                <div style={{ marginTop: 36, marginBottom: "var(--space-5)" }}>
                   <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Rating Format</div>
                   <DefRow label="Display Style">{d.displayStyle}</DefRow>
                   {d.listPickerLabel && <DefRow label="List Picker Label">{d.listPickerLabel}</DefRow>}
@@ -9121,17 +9318,17 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
                     No campaigns are linked to this template.
                   </div>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden", marginTop: "var(--space-2)" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 140px", padding: "var(--space-2) var(--space-4)", background: "var(--lyra-slate-50)", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                  <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-lg)", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 140px", padding: "var(--space-2) var(--space-5)", background: "var(--lyra-slate-50)", borderBottom: "1px solid var(--color-border-subtle)" }}>
                       {["Campaign", "Status"].map(h => (
                         <span key={h} style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
                       ))}
                     </div>
                     {linkedCampaigns.map((c, i) => (
-                      <div key={c.id} style={{ display: "grid", gridTemplateColumns: "1fr 140px", alignItems: "center", padding: "var(--space-3) var(--space-4)", borderBottom: i < linkedCampaigns.length - 1 ? "1px solid var(--color-border-subtle)" : "none", background: "var(--lyra-white)" }}>
+                      <div key={c.id} style={{ display: "grid", gridTemplateColumns: "1fr 140px", alignItems: "center", padding: "var(--space-4) var(--space-5)", borderBottom: i < linkedCampaigns.length - 1 ? "1px solid var(--color-border-subtle)" : "none", background: "var(--lyra-white)" }}>
                         <div>
                           <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{c.name}</div>
-                          <div style={{ marginTop: 3 }}><window.CampaignStateInline status={c.status} hasWorkingCopy={c.hasWorkingCopy}/></div>
+                          <div style={{ marginTop: "var(--space-1)" }}><window.CampaignStateInline status={c.status} hasWorkingCopy={c.hasWorkingCopy}/></div>
                         </div>
                         <div><window.StatusPill s={c.status}/></div>
                       </div>
@@ -9203,6 +9400,11 @@ function SurveyDesignsGrid({ onCreate, onOpen, onEdit, newDesigns = [] }) {
     if (typeFilter && d.surveyType !== typeFilter) return false;
     return true;
   }).sort((a, b) => {
+    // Newly saved designs always float to top (isNew flag), then sort by updated date.
+    if (sortDir === "desc") {
+      if (a.isNew && !b.isNew) return -1;
+      if (!a.isNew && b.isNew) return 1;
+    }
     const av = a.updated ?? ""; const bv = b.updated ?? "";
     if (av < bv) return sortDir === "asc" ? -1 : 1;
     if (av > bv) return sortDir === "asc" ? 1 : -1;
@@ -9236,7 +9438,7 @@ function SurveyDesignsGrid({ onCreate, onOpen, onEdit, newDesigns = [] }) {
       </div>
 
       {/* Lyra filter bar — search on the left + Channel / Type / Owner filter chips */}
-      <div className="toolbar" style={{ paddingTop: 14 }}>
+      <div className="toolbar">
         <div className="search">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input placeholder="Search by name"
@@ -9362,10 +9564,10 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
   );
 
   const STEPS = [
-    { n: 0, label: "Identity",         done: !!d.name },
-    { n: 1, label: "Survey Content",   done: !!d.defaultScaleQuestion },
-    { n: 2, label: "Linked Campaigns", done: linkedIds.length > 0 },
-    { n: 3, label: "Summary & Review", done: false },
+    { n: 0, label: "Identity",         desc: "Name this template and set ownership so your team knows when to use it.", done: !!d.name },
+    { n: 1, label: "Survey Content",   desc: "Configure the questions, channel, display style, and delivery rules for this template.", done: !!d.defaultScaleQuestion },
+    { n: 2, label: "Linked Campaigns", desc: "Review campaigns that use this template. Changes here will affect all linked campaigns.", done: linkedIds.length > 0 },
+    { n: 3, label: "Summary & Review", desc: "Review all settings before publishing your survey template.", done: false },
   ];
 
   function stepState(s) {
@@ -9396,7 +9598,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
       </div>
 
       {/* Page header */}
-      <div className="pane-head" style={{ paddingTop: 6 }}>
+      <div className="pane-head">
         <h1>{isEdit ? d.name : "New Survey Template"}</h1>
       </div>
 
@@ -9423,8 +9625,15 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
         </div>
       </div>
 
-      {/* ── Wizard body ── */}
+      {/* ── Wizard body — section header + form both scroll together ── */}
       <div className="wz-scroll-area">
+        {(() => { const s = STEPS[activeStep]; return s ? (
+          <div className="wz-section-header">
+            <h2>{s.label}</h2>
+            <p>{s.desc}</p>
+          </div>
+        ) : null; })()}
+
         <div className="wz-body" style={{ gridTemplateColumns: "1fr" }}>
           <div className="form-pane sv-form">
 
@@ -9434,33 +9643,25 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
             const nameErr = showErr && !d.name;
             return <div className="wz-step-content">
               <div className="setup-section">
-                <div className="setup-section-head">
-                  <div>
-                    <h2 className="setup-section-title">Identity</h2>
-                    <p className="setup-section-sub">Name this template so your team knows when to use it.</p>
+                <div className="setup-section-body" style={{ display: "flex", flexDirection: "column", gap: "var(--space-8)" }}>
+                  <div className="field-cell" style={{ maxWidth: 400 }}>
+                    <label className="field-label">Template Name<span className="req">*</span><span className="char-counter">{(d.name || "").length}/50</span></label>
+                    <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="e.g. Post-Chat CSAT" maxLength={50}
+                      aria-invalid={nameErr || undefined}
+                      value={d.name} onChange={e => set("name", e.target.value)}/>
+                    {nameErr && <div className="field-control"><span className="error-msg">
+                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                      Template name is required
+                    </span></div>}
                   </div>
-                </div>
-                <div className="setup-section-body">
-                  <div className="field-grid-2">
-                    <div className="field-cell">
-                      <label className="field-label">Template Name<span className="req">*</span><span className="char-counter">{(d.name || "").length}/50</span></label>
-                      <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="e.g. Post-Chat CSAT" maxLength={50}
-                        aria-invalid={nameErr || undefined}
-                        value={d.name} onChange={e => set("name", e.target.value)}/>
-                      {nameErr && <div className="field-control"><span className="error-msg">
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        Template name is required
-                      </span></div>}
-                    </div>
-                    <div className="field-cell">
-                      <label className="field-label">
-                        Description
-                        <span className="char-counter">{(d.description || "").length}/200</span>
-                      </label>
-                      <textarea className="fi-input" rows={3} maxLength={200} placeholder="What this template is for and which campaigns should use it."
-                        value={d.description} onChange={e => set("description", e.target.value)}/>
-                      <div className="help">Help your team understand when to apply this template.</div>
-                    </div>
+                  <div className="field-cell" style={{ maxWidth: 600 }}>
+                    <label className="field-label">
+                      Description
+                      <span className="char-counter">{(d.description || "").length}/200</span>
+                    </label>
+                    <textarea className="fi-input" rows={3} maxLength={200} placeholder="What this template is for and which campaigns should use it."
+                      value={d.description} onChange={e => set("description", e.target.value)}/>
+                    <div className="help">Help your team understand when to apply this template.</div>
                   </div>
                 </div>
               </div>
@@ -9473,16 +9674,16 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
             const scaleErr = showErr && !d.defaultScaleQuestion;
             return <div className="wz-step-content">
 
-              {/* ── Card 1: Channel ── */}
-              <div className="setup-section" style={{ background: "var(--lyra-white)", borderColor: "rgba(0,0,0,0.08)" }}>
-                <div className="setup-section-head" style={{ background: "var(--lyra-white)" }}>
+              {/* ── Channel ── */}
+              <div className="setup-section">
+                <div className="setup-section-head">
                   <div>
                     <h2 className="setup-section-title">Channel</h2>
                     <p className="setup-section-sub">Choose how this survey is delivered to customers.</p>
                   </div>
                 </div>
                 <div className="setup-section-body">
-                  <div className="field-cell">
+                  <div className="field-cell" style={{ maxWidth: 400 }}>
                       <label className="field-label">Survey Channel<span className="req">*</span></label>
                       <Segmented options={["Digital", "IVR", "All"]}
                         disabled={["All"]}
@@ -9495,6 +9696,8 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                   </div>
                 </div>
               </div>
+
+              <hr style={{ border: "none", borderTop: "1px solid var(--color-border-subtle)", margin: "var(--space-8) 0" }}/>
 
               {/* ── Card 2: Welcome Message ── */}
               <div className="setup-section">
@@ -9531,45 +9734,45 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                       </div>
                     </div>
                     {d.welcomeMode !== "none" && (
-                      <div className="field-cell" style={{ marginTop: "var(--space-4)" }}>
-                        <label className="field-label">Invitation Text</label>
-                        <div style={{ borderRadius: "var(--radius-md)", background: "var(--lyra-slate-50)", border: "1px solid var(--color-border-subtle)", padding: "var(--space-4)" }}>
-                          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-2)" }}>
-                            <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.welcomeMessage || "").length > 220 ? "var(--fi-amber)" : "var(--lyra-slate-400)" }}>
-                              {(d.welcomeMessage || "").length}/240
-                            </span>
-                          </div>
-                          <textarea className="fi-input" rows={3} maxLength={240}
-                            style={{ resize: "vertical", minHeight: 72, background: "var(--lyra-white)" }}
-                            placeholder={`"{{First Name}}", we'd love to hear about your experience today. Just two minutes of your time.`}
-                            value={d.welcomeMessage}
-                            onChange={e => set("welcomeMessage", e.target.value)}/>
-                          {(d.channel === "Digital" || d.channel === "Both") && (
-                            <div style={{ display: "grid", gridTemplateColumns: d.welcomeMode === "with-optout" ? "1fr 1fr" : "1fr", gap: "var(--space-3)", marginTop: "var(--space-4)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-border-subtle)" }}>
-                              <div>
-                                <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Start survey button label</div>
-                                <input className="fi-input" disabled readOnly value={d.buttonToStart}
-                                  style={{ background: "var(--lyra-slate-200)", color: "var(--lyra-slate-600)", cursor: "not-allowed" }}/>
-                              </div>
-                              {d.welcomeMode === "with-optout" && (
-                                <div>
-                                  <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Opt-out button label</div>
-                                  <input className="fi-input" disabled readOnly value={d.buttonToOptOut}
-                                    style={{ background: "var(--lyra-slate-200)", color: "var(--lyra-slate-600)", cursor: "not-allowed" }}/>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          {d.channel === "IVR" && (
-                            <div className="help" style={{ marginTop: "var(--space-3)", padding: "var(--space-2) var(--space-3)", borderRadius: "var(--radius-sm)", background: "rgba(0,0,0,0.03)" }}>
-                              On phone surveys, this message is read aloud. The customer presses 1 to start or hangs up to skip.
-                            </div>
-                          )}
+                      <div className="field-cell" style={{ marginTop: "var(--space-6)" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
+                          <label className="field-label" style={{ margin: 0 }}>Invitation Text</label>
+                          <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.welcomeMessage || "").length > 220 ? "var(--fi-amber)" : "var(--color-fg-disabled)" }}>
+                            {(d.welcomeMessage || "").length}/240
+                          </span>
                         </div>
+                        <textarea className="fi-input" rows={4} maxLength={240}
+                          style={{ resize: "vertical", minHeight: 88 }}
+                          placeholder={`"{{First Name}}", we'd love to hear about your experience today. Just two minutes of your time.`}
+                          value={d.welcomeMessage}
+                          onChange={e => set("welcomeMessage", e.target.value)}/>
+                        {(d.channel === "Digital" || d.channel === "Both") && (
+                          <div style={{ display: "grid", gridTemplateColumns: d.welcomeMode === "with-optout" ? "1fr 1fr" : "1fr", gap: "var(--space-4)", marginTop: "var(--space-5)" }}>
+                            <div className="field-cell">
+                              <label className="field-label">Start survey button label</label>
+                              <input className="fi-input" disabled readOnly value={d.buttonToStart}
+                                style={{ background: "var(--lyra-slate-100)", color: "var(--color-fg-disabled)", cursor: "not-allowed" }}/>
+                            </div>
+                            {d.welcomeMode === "with-optout" && (
+                              <div className="field-cell">
+                                <label className="field-label">Opt-out button label</label>
+                                <input className="fi-input" disabled readOnly value={d.buttonToOptOut}
+                                  style={{ background: "var(--lyra-slate-100)", color: "var(--color-fg-disabled)", cursor: "not-allowed" }}/>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {d.channel === "IVR" && (
+                          <div className="help" style={{ marginTop: "var(--space-3)" }}>
+                            On phone surveys, this message is read aloud. The customer presses 1 to start or hangs up to skip.
+                          </div>
+                        )}
                       </div>
                     )}
                 </div>
               </div>
+
+              <hr style={{ border: "none", borderTop: "1px solid var(--color-border-subtle)", margin: "var(--space-8) 0" }}/>
 
               {/* ── Card 3: Rating Format ── */}
               <div className="setup-section">
@@ -9582,7 +9785,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                 <div className="setup-section-body">
                     {(d.channel === "Digital" || d.channel === "Both") && (
                       <>
-                        <div className="field-cell" style={{ marginBottom: d.displayStyle === "List Picker" ? "var(--space-5)" : 0 }}>
+                        <div className="field-cell" style={{ maxWidth: 400, marginBottom: d.displayStyle === "List Picker" ? "var(--space-5)" : 0 }}>
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
                             <label className="field-label" style={{ margin: 0 }}>Digital Display Style<span className="req">*</span></label>
                             <button className="clear-link" style={{ fontSize: 13, color: "var(--color-fg-action)", display: "flex", alignItems: "center", gap: 5 }}
@@ -9676,12 +9879,6 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
           {activeStep === 2 && (
             <div className="wz-step-content">
               <div className="setup-section">
-                <div className="setup-section-head">
-                  <div>
-                    <h2 className="setup-section-title">Linked Campaigns</h2>
-                    {isEdit && <p className="setup-section-sub">Campaigns currently using this template. To link or unlink campaigns, edit the individual campaign.</p>}
-                  </div>
-                </div>
                 <div className="setup-section-body">
                   {(!isEdit || d.isDefault) ? (
                     <div style={{
@@ -9738,14 +9935,9 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
               </div>
             );
             return (
-              <div className="wz-step-content">
-                <div style={{ marginBottom: "var(--space-5)" }}>
-                  <h2 className="setup-section-title">Summary &amp; Review</h2>
-                  <p className="setup-section-sub">Review every setting before saving. Click Edit on any section to go back.</p>
-                </div>
-
+              <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3) var(--space-4)", background: "#fff0f0", border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-4)", font: "var(--text-body-sm)", color: "var(--color-status-error)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-status-critical-subtle, #fff0f0)", border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-8)", font: "var(--text-body-sm)", color: "var(--color-status-error)" }}>
                     <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                     Some required fields are incomplete. Return to the relevant steps to fill them in.
                   </div>
@@ -9777,7 +9969,9 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                 </SRSection>
 
                 <SRSection title="Linked Campaigns" num={3} noEdit>
-                  <LinkedCampaignsTable linkedIds={linkedIds} currentDesignId={initial?.id} />
+                  <div style={{ margin: "0 calc(-1 * var(--space-4)) calc(-1 * var(--space-3))" }}>
+                    <LinkedCampaignsTable linkedIds={linkedIds} currentDesignId={initial?.id} />
+                  </div>
                 </SRSection>
               </div>
             );
@@ -9843,11 +10037,11 @@ function LinkedCampaignsTable({ linkedIds, currentDesignId }) {
           No campaigns are linked to this template yet.
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-lg)", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
           {/* Header */}
           <div style={{
             display: "grid", gridTemplateColumns: "1fr 140px",
-            padding: "var(--space-2) var(--space-4)",
+            padding: "var(--space-2) var(--space-5)",
             background: "var(--lyra-slate-50)",
             borderBottom: "1px solid var(--color-border-subtle)",
           }}>
@@ -9859,13 +10053,13 @@ function LinkedCampaignsTable({ linkedIds, currentDesignId }) {
             <div key={c.id} style={{
               display: "grid", gridTemplateColumns: "1fr 140px",
               alignItems: "center",
-              padding: "var(--space-3) var(--space-4)",
+              padding: "var(--space-4) var(--space-5)",
               borderBottom: i < rows.length - 1 ? "1px solid var(--color-border-subtle)" : "none",
               background: "var(--lyra-white)",
             }}>
               <div>
                 <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{c.name}</div>
-                <div style={{ marginTop: 3 }}>
+                <div style={{ marginTop: "var(--space-1)" }}>
                   <CampaignStateInline status={c.status} hasWorkingCopy={c.hasWorkingCopy}/>
                 </div>
               </div>
@@ -11338,7 +11532,7 @@ function App() {
 
   React.useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 2800);
+    const t = setTimeout(() => setToast(null), 3000);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -11379,7 +11573,7 @@ function App() {
             const newId = Date.now();
             const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
             setNewCampaigns(prev => [{ ...c, id: newId, created: today, updated: today, owner: "Maria Cohen", isNew: true }, ...prev]);
-            setToast({ icon: "check", msg: c.status === "active" ? `Campaign "${c.name}" is now live.` : `Campaign "${c.name}" saved as draft.` });
+            setToast({ msg: c.status === "active" ? `Campaign "${c.name}" created and activated successfully.` : `Campaign "${c.name}" saved as draft.` });
             setRoute({ ...route, view: "list", editCampaign: null });
           }}/>;
       } else if (route.view === "detail" && route.campaign) {
@@ -11403,7 +11597,7 @@ function App() {
           onSave={(d) => {
             const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
             setNewDesigns(prev => [{ ...d, id: `new-${Date.now()}`, updated: today, owner: "Maria Cohen", isNew: true }, ...prev]);
-            setToast({ msg: `Survey template "${d.name}" saved.` });
+            setToast({ msg: `Survey template "${d.name}" created successfully.` });
             setRoute({ ...route, view: "list", design: null });
           }}/>;
       } else if (route.view === "detail-design" && route.design) {
@@ -11469,8 +11663,13 @@ function App() {
 
       {toast ? (
         <div className="toast">
-          <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
-          {toast.msg}
+          <div className="toast-icon">
+            <svg viewBox="0 0 16 16"><polyline points="3 8.5 6.5 12 13 5"/></svg>
+          </div>
+          <span className="toast-msg">{toast.msg}</span>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Dismiss">
+            <svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
         </div>
       ) : null}
     </div>

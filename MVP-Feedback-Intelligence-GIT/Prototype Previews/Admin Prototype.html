@@ -25,10 +25,13 @@ button{border:none;background:none;padding:0;cursor:pointer}
   --lyra-slate-700:#3f5e69;
   --lyra-slate-900:#1d2630;
   --lyra-white:#ffffff;
+  --lyra-green-50:#ebfaed;
   --lyra-green-500:#278a33;
   --lyra-green-700:#1c5e25;
+  --lyra-orange-50:#fff7ed;
   --lyra-orange-500:#ec7000;
   --lyra-orange-600:#c45d00;
+  --lyra-orange-700:#a64f00;
 
   --canvas: rgb(243,245,246);
 
@@ -45,7 +48,15 @@ button{border:none;background:none;padding:0;cursor:pointer}
   --radius-sm:6px;
   --radius-md:8px;
   --radius-lg:12px;
+  --radius-full:9999px;
   --shadow-sm:0px 2px 6px 0px rgba(0,0,0,0.04);
+  --shadow-md:0px 4px 12px 0px rgba(0,0,0,0.06);
+
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  --font-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 
 /* ── App grid ────────────────────────────────────────────────── */
@@ -183,22 +194,23 @@ button{border:none;background:none;padding:0;cursor:pointer}
   background:var(--canvas);
   padding:8px 12px 12px 0;
   display:flex;flex-direction:column;
+  overflow:auto;
 }
+/* White pane card — header only */
 .pane{
   background:#fff;
   border:1px solid var(--color-border-subtle);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm);
-  flex:1;min-height:0;
   display:flex;flex-direction:column;
   overflow:hidden;
+  flex-shrink:0;
 }
 .pane-head{
   display:flex;align-items:center;
   min-height:72px;
   padding:16px 32px;
   gap:16px;
-  border-bottom:1px solid var(--color-border-subtle);
 }
 .pane-head h1{font-size:20px;font-weight:600;line-height:24px;letter-spacing:-0.01rem;margin:0;color:var(--color-fg-default);flex:1}
 .head-actions{display:flex;gap:8px;align-items:center}
@@ -209,8 +221,8 @@ button{border:none;background:none;padding:0;cursor:pointer}
 .btn.primary{background:var(--lyra-brand-600);color:#fff;border-color:var(--lyra-brand-600)}
 .btn.primary:hover{background:var(--lyra-brand-700);border-color:var(--lyra-brand-700)}
 
-/* Toolbar */
-.emp-toolbar{display:flex;align-items:center;gap:8px;padding:12px 24px;border-bottom:1px solid var(--color-border-subtle)}
+/* Toolbar — floating shell-bg card, same as FI survey campaign filter bar */
+.emp-toolbar{display:flex;align-items:center;gap:8px;margin:var(--space-6) 0 0;padding:var(--space-5);background:var(--canvas);border-radius:var(--radius-lg)}
 .emp-count{font-size:13px;color:var(--color-fg-secondary)}
 .emp-sep{width:1px;height:16px;background:var(--color-border-subtle)}
 .emp-selected{font-size:13px;color:var(--color-fg-secondary)}
@@ -225,11 +237,13 @@ button{border:none;background:none;padding:0;cursor:pointer}
 .all-chip{margin-left:auto;display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 10px;border:1px solid var(--color-border-soft);border-radius:var(--radius-md);background:#fff;font-size:13px;font-weight:500;color:var(--color-fg-default);cursor:pointer}
 .all-chip svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-/* Table */
-.table-wrap{flex:1;overflow:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{text-align:left;padding:10px 16px;background:#fff;border-bottom:1px solid var(--color-border-soft);font-size:11px;font-weight:500;color:var(--color-fg-secondary);letter-spacing:0.03em;text-transform:uppercase;white-space:nowrap;vertical-align:middle}
-tbody td{padding:8px 16px;border-bottom:1px solid var(--color-border-subtle);vertical-align:middle;color:var(--color-fg-default)}
+/* Table grid — white card, consistent with campaign/survey grids */
+.table-wrap{margin-top:var(--space-6);padding:0 0 var(--space-8)}
+.table-card{background:#fff;border:1px solid var(--color-border-subtle);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{text-align:left;padding:10px 16px;background:transparent;border-bottom:1px solid rgba(0,0,0,0.06);font-size:12px;font-weight:500;color:var(--color-fg-secondary);letter-spacing:0.01em;text-transform:uppercase;white-space:nowrap;vertical-align:middle}
+tbody td{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.05);vertical-align:middle;color:var(--color-fg-default)}
+tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:var(--color-state-bg-hover)}
 
 /* Checkbox */
@@ -240,13 +254,19 @@ tbody tr:hover td{background:var(--color-state-bg-hover)}
 .emp-avatar{width:28px;height:28px;border-radius:50%;background:var(--lyra-slate-200);color:var(--lyra-slate-700);font-size:10px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .emp-name{font-weight:500}
 
-/* Status */
-.status-pill{display:inline-flex;align-items:center;gap:5px;font-size:13px}
-.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.status-active .status-dot{background:var(--lyra-green-500)}
-.status-pending .status-dot{background:var(--lyra-orange-500)}
-.status-active{color:var(--lyra-green-700)}
-.status-pending{color:var(--lyra-orange-600)}
+/* Status pills — canonical fi-pill pattern (Lyra bodySm-medium) */
+.status-pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:2px 8px;
+  border-radius:var(--radius-full);
+  font-family:var(--font-sans);font-size:12px;font-weight:500;
+  line-height:16px;letter-spacing:0.01em;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.status-active{background:var(--lyra-green-50);color:var(--lyra-green-700);border-color:rgba(28,94,37,0.18)}
+.status-pending{background:var(--lyra-orange-50);color:var(--lyra-orange-700);border-color:rgba(166,79,0,0.18)}
 
 /* Kebab */
 .dot3{width:28px;height:28px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--lyra-slate-400)}
@@ -424,6 +444,7 @@ function App() {
       <Topbar/>
       <LeftNav active={active} onSelect={setActive}/>
       <main className="main">
+        {/* White pane — header only */}
         <div className="pane">
           <div className="pane-head">
             <h1>Employees</h1>
@@ -432,25 +453,29 @@ function App() {
               <button className="btn primary">Create Employee</button>
             </div>
           </div>
+        </div>
 
-          <div className="emp-toolbar">
-            <span className="emp-count">142 employees</span>
-            <div className="emp-sep"/>
-            <span className="emp-selected">0 Selected</span>
-            <div className="search-wrap">
-              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-              <input type="text" placeholder="Start typing to find user"/>
-            </div>
-            <button className="filter-btn">
-              <svg viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-            </button>
-            <div className="all-chip">
-              All
-              <svg viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </div>
+        {/* Floating toolbar on canvas */}
+        <div className="emp-toolbar">
+          <span className="emp-count">142 employees</span>
+          <div className="emp-sep"/>
+          <span className="emp-selected">0 Selected</span>
+          <div className="search-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Start typing to find user"/>
           </div>
+          <button className="filter-btn">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          </button>
+          <div className="all-chip">
+            All
+            <svg viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+        </div>
 
-          <div className="table-wrap">
+        {/* Table grid card */}
+        <div className="table-wrap">
+          <div className="table-card">
             <table>
               <thead>
                 <tr>

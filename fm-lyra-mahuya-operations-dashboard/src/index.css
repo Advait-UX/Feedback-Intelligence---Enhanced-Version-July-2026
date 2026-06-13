@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../design-system/css/theme.css";
+@import "../design-system/css/lyra.css";
 
 /* Conference Flow Animations */
 @keyframes fadeUp {

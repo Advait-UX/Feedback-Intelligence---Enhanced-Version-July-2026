@@ -106,20 +106,24 @@ function SurveyRow({ survey, onSelect }: { survey: Survey; onSelect: () => void 
 }
 
 /* ---------- Status pill ---------- */
-const SURVEY_STATUS_STYLES: Record<SurveyStatus, { bg: string; text: string; label: string }> = {
-  completed: { bg: '#dcfce7', text: '#15803d', label: 'Completed' },
-  partial:   { bg: '#fef3c7', text: '#b45309', label: 'Partial' },
-  abandoned: { bg: '#e2e8f0', text: '#475569', label: 'Abandoned' },
-  pending:   { bg: '#f1f5f9', text: '#64748b', label: 'Pending' },
+const SURVEY_STATUS_STYLES: Record<SurveyStatus, { bg: string; color: string; border: string; label: string }> = {
+  completed: { bg: 'var(--lyra-color-status-success-subtle)', color: 'var(--lyra-color-status-success-strong)', border: 'rgba(35,114,45,0.18)',  label: 'Completed' },
+  partial:   { bg: 'var(--lyra-color-status-warning-subtle)', color: 'var(--lyra-color-status-warning-strong)', border: 'rgba(142,104,0,0.18)', label: 'Partial'   },
+  abandoned: { bg: 'var(--lyra-slate-200)',                   color: 'var(--lyra-slate-500)',                   border: 'rgba(0,0,0,0.10)',      label: 'Abandoned' },
+  pending:   { bg: 'var(--lyra-slate-100)',                   color: 'var(--lyra-slate-600)',                   border: 'rgba(0,0,0,0.10)',      label: 'Pending'   },
 }
 
 export function SurveyStatusPill({ status }: { status: SurveyStatus }) {
   const s = SURVEY_STATUS_STYLES[status]
   return (
-    <span
-      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-      style={{ backgroundColor: s.bg, color: s.text }}
-    >
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 5,
+      borderRadius: 'var(--radius-full)', padding: '2px 8px',
+      fontSize: 12, fontWeight: 500, lineHeight: '16px', letterSpacing: '0.01em',
+      background: s.bg, color: s.color, border: `1px solid ${s.border}`,
+      whiteSpace: 'nowrap',
+    }}>
+      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', flexShrink: 0 }} />
       {s.label}
     </span>
   )
