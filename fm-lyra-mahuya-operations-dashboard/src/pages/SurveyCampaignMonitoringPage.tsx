@@ -386,8 +386,9 @@ function KpiShell({ accent, children }: { accent: string; children: React.ReactN
       border: '1px solid var(--lyra-color-border-subtle)',
       boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.05)',
       display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
     }}>
-      <div style={{ height: 3, background: accent, borderRadius: '14px 14px 0 0', flexShrink: 0 }} />
+      <div style={{ height: 3, background: accent, flexShrink: 0 }} />
       <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
         {children}
       </div>
