@@ -267,11 +267,10 @@ function Sparkline({ data, color: _accentColor, width = 160, height = 52, toolti
   const min = Math.min(...data)
   const max = Math.max(...data)
   const range = max - min || 1
-  const padY = 4
-  const padX = 8
+  const padY = 6
 
   const pts = data.map((v, i) => ({
-    x: padX + (i / (data.length - 1)) * (width - padX * 2),
+    x: (i / (data.length - 1)) * width,
     y: (height - padY * 2) - ((v - min) / range) * (height - padY * 2) + padY,
   }))
 
@@ -294,7 +293,8 @@ function Sparkline({ data, color: _accentColor, width = 160, height = 52, toolti
     <div style={{ position: 'relative', display: 'block', width: '100%' }}>
       <svg
         width="100%" height={height} viewBox={`0 0 ${width} ${height}`} fill="none"
-        style={{ overflow: 'visible', cursor: 'crosshair', display: 'block' }}
+        preserveAspectRatio="none"
+        style={{ overflow: 'hidden', cursor: 'crosshair', display: 'block' }}
         onMouseMove={e => {
           const rect = (e.currentTarget as SVGElement).getBoundingClientRect()
           const scaleX = width / rect.width
@@ -621,9 +621,8 @@ function KpiTile({ label, value, delta, tone = 'up', accent, sparkData, sparkToo
         <span style={{ ...BIG_NUM }}>{value}</span>
       </div>
 
-      {/* Sparkline — stretches edge-to-edge, negative margin cancels card padding */}
       {sparkData && (
-        <div style={{ width: 'calc(100% + 36px)', marginLeft: -18, marginBottom: 14 }}>
+        <div style={{ width: '100%', marginBottom: 14 }}>
           <Sparkline data={sparkData} color={accent} width={240} height={48} tooltipLabel={sparkTooltipLabel} />
         </div>
       )}
