@@ -419,7 +419,7 @@ export default function App() {
           onAppSwitch={handleAppSwitch}
         />
         <iframe
-          src="prototype.html?embed=topbar"
+          src="./prototype.html?embed=topbar"
           title="Feedback Intelligence prototype"
           style={{ flex: 1, width: '100%', border: 0, display: 'block' }}
         />
@@ -592,7 +592,7 @@ export default function App() {
       ) : (
         <iframe
           ref={protoIframeRef}
-          src="prototype.html?embed=full"
+          src="./prototype.html?embed=full"
           title={FI_TITLES[fiSection]}
           style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
           onLoad={() => {
