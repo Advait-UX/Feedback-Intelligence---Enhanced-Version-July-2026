@@ -10879,8 +10879,8 @@ function OntologyMetaStrip({ ontology, formatUpdatedAt }) {
 
       {divider}
 
-      {/* Col 3 — Last Updated (fixed narrow) */}
-      <div style={{ flex: "0 0 200px", display: "flex", flexDirection: "column", paddingLeft: "var(--space-6)" }}>
+      {/* Col 3 — Last Updated */}
+      <div style={{ flex: "0 0 260px", display: "flex", flexDirection: "column", paddingLeft: "var(--space-6)" }}>
         <span style={labelStyle}>Last Updated</span>
         <span style={valueStyle}>
           {formatUpdatedAt(ontology.updatedAt)}{ontology.updatedBy ? ` · by ${ontology.updatedBy}` : ""}
