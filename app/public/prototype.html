@@ -10789,6 +10789,50 @@ function OntologyRowActions({ onEdit, onRemove }) {
   );
 }
 
+function CampaignList({ campaigns, valueStyle }) {
+  const maxShow = 2;
+  const visible = campaigns.slice(0, maxShow);
+  const hidden = campaigns.slice(maxShow);
+  const [tipVisible, setTipVisible] = React.useState(false);
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", minWidth: 0 }}>
+      <span style={{ ...valueStyle, minWidth: 0 }}>{visible.join(", ")}</span>
+      {hidden.length > 0 && (
+        <span style={{ position: "relative", display: "inline-flex" }}>
+          <span
+            onMouseEnter={() => setTipVisible(true)}
+            onMouseLeave={() => setTipVisible(false)}
+            style={{
+              font: "500 12px/16px var(--font-sans)",
+              color: "var(--color-fg-link)",
+              cursor: "pointer",
+              textDecoration: "underline",
+              textDecorationStyle: "dotted",
+              whiteSpace: "nowrap",
+            }}
+          >+{hidden.length} more</span>
+          {tipVisible && (
+            <div style={{
+              position: "absolute", bottom: "calc(100% + 6px)", left: 0,
+              background: "var(--lyra-slate-900)",
+              color: "#fff",
+              font: "400 12px/18px var(--font-sans)",
+              borderRadius: "var(--radius-sm)",
+              padding: "6px 10px",
+              whiteSpace: "nowrap",
+              boxShadow: "0px 4px 12px rgba(0,0,0,0.18)",
+              zIndex: 999,
+              pointerEvents: "none",
+            }}>
+              {hidden.map((c, i) => <div key={i}>{c}</div>)}
+            </div>
+          )}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function OntologyMetaStrip({ ontology, formatUpdatedAt }) {
   const campaigns = ontology.mappedCampaigns || [];
   const labelStyle = {
@@ -10823,25 +10867,13 @@ function OntologyMetaStrip({ ontology, formatUpdatedAt }) {
 
       {divider}
 
-      {/* Col 2 — Mapped Campaigns (flex-grow, ellipsis + link-style overflow) */}
+      {/* Col 2 — Mapped Campaigns */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "0 var(--space-6)", minWidth: 0 }}>
         <span style={labelStyle}>Mapped Campaigns</span>
         {campaigns.length === 0 ? (
           <span style={{ ...valueStyle, color: "var(--color-fg-secondary)", fontStyle: "italic" }}>None</span>
         ) : (
-          <div style={{ display: "flex", alignItems: "baseline", gap: 6, minWidth: 0 }}>
-            <span style={{ ...valueStyle, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", minWidth: 0 }}>
-              {campaigns.join(", ")}
-            </span>
-          </div>
-        )}
-        {campaigns.length > 0 && campaigns.join(", ").length > 60 && (
-          <span
-            title={campaigns.join("\n")}
-            style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-link)", cursor: "default", marginTop: 2, textDecoration: "underline", textDecorationStyle: "dotted" }}
-          >
-            {campaigns.length} campaigns — hover to see all
-          </span>
+          <CampaignList campaigns={campaigns} valueStyle={valueStyle} />
         )}
       </div>
 
