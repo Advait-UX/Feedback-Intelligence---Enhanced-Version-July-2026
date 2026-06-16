@@ -7579,8 +7579,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
     return "default";
   }
 
+  const SPECIAL_CHARS_RE_STEP = /[\\\/!+<>?#&,%"]/;
   function stepValid(n) {
-    if (n === 0) return !!(c.name && c.startDate && (c.ongoing || c.endDate));
+    if (n === 0) return !!(c.name && !SPECIAL_CHARS_RE_STEP.test(c.name) && c.startDate && (c.ongoing || c.endDate) && c.queues?.length);
     if (n === 2) return !!(c.aiModelId && c.surveyDesignId);
     return true;
   }
@@ -7686,6 +7687,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const datesValid  = !!(c.startDate && (c.ongoing || c.endDate));
   const canDraft    = !!(c.name && datesValid);
   const canActivate = !!(c.name && c.queues?.length && datesValid);
+  const reviewMissingRequired = !c.name || !c.queues?.length || !c.startDate || (!c.ongoing && !c.endDate) || !c.aiModelId || !c.surveyDesignId;
 
   return (
     <div className="pane" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -7742,7 +7744,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     {st === "done" ? (
                       <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 6 5 9.5 10 2.5"/></svg>
                     ) : st === "error" ? (
-                      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="2.5" x2="6" y2="6.5"/><circle cx="6" cy="9" r=".7" fill="currentColor"/></svg>
+                      <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>
                     ) : s.n + 1}
                   </div>
                   <div className="wz-label">{s.label}</div>
@@ -7772,11 +7774,17 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
           {/* ── Step 0: Template, Identity &amp; Scope ── */}
           {activeStep === 0 && (()=>{
+            const SPECIAL_CHARS_RE = /[\\\/!+<>?#&,%"]/;
+            const nameVal      = c.name || "";
             const showErr      = triedSteps.has(0);
-            const nameErr      = showErr && !c.name;
+            const nameBlankErr = showErr && !nameVal;
+            const nameSpecialErr = nameVal.length > 0 && SPECIAL_CHARS_RE.test(nameVal);
+            const nameErr      = nameBlankErr || nameSpecialErr;
             const teamsErr     = showErr && !c.queues?.[0];
             const startDateErr = showErr && !c.startDate;
             const endDateErr   = showErr && !c.ongoing && !c.endDate;
+            const nameMsg = nameBlankErr ? "Required" : nameSpecialErr ? "Only alphanumeric characters are allowed" : "";
+            const nameCounterRed = nameVal.length >= 50;
             return <div className="wz-step-content">
 
               {/* ── Campaign Identity ── */}
@@ -7786,13 +7794,13 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   {/* Name + Description */}
                   <div className="field-grid-2">
                     <div className="field-cell">
-                      <label className="field-label">Campaign Name<span className="req">*</span><span className="char-counter">{(c.name || "").length}/50</span></label>
+                      <label className="field-label">Campaign Name<span className="req">*</span><span className="char-counter" style={{ color: nameCounterRed ? "var(--color-status-error)" : undefined }}>{nameVal.length}/50</span></label>
                       <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="Type" maxLength={50}
                         aria-invalid={nameErr || undefined}
                         value={c.name} onChange={e => set("name", e.target.value)}/>
                       {nameErr && <div className="field-control"><span className="error-msg">
                         <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        Campaign name is required
+                        {nameMsg}
                       </span></div>}
                     </div>
                     <div className="field-cell">
@@ -7959,14 +7967,14 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
           {activeStep === 2 && (
             <div className="wz-step-content">
               <div className="wz-content-card">
-              <div className="intel-sub-section">
+              <div className="intel-sub-section" style={step2Err && !c.aiModelId ? { border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-status-critical-subtle, #fff0f0)" } : undefined}>
                 {(() => {
                   const activeModel = AI_MODELS.find(m => m.id === c.aiModelId);
                   const modelErr = step2Err && !c.aiModelId;
                   if (!activeModel) return (
                     <header className="form-section-head no-border" style={{ cursor: "default", flexDirection: "column", alignItems: "flex-start", gap: "var(--space-2)" }}>
                       <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "var(--space-3)" }}>
-                        <span className="step-num" style={{ display: "flex", fontSize: 0, flexShrink: 0, border: modelErr ? "2px solid var(--color-status-error)" : undefined }}>
+                        <span className="step-num" style={{ display: "flex", fontSize: 0, flexShrink: 0 }}>
                           <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke={modelErr ? "var(--color-status-error)" : "currentColor"} strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg>
                         </span>
                         <div style={{ flex: 1 }}><h3 style={{ color: modelErr ? "var(--color-status-error)" : undefined }}>Topic AI Model</h3><div className="sub">Select an AI model to power your campaign intelligence</div></div>
@@ -8069,7 +8077,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                 <div className="sr-row-value">{children || <span style={{ color: "var(--color-fg-secondary)" }}>—</span>}</div>
               </div>
             );
-            const missingRequired = !c.name || !c.queues?.length || !c.startDate || (!c.ongoing && !c.endDate);
+            const missingRequired = !c.name || !c.queues?.length || !c.startDate || (!c.ongoing && !c.endDate) || !c.aiModelId || !c.surveyDesignId;
             return (
               <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
@@ -8107,8 +8115,8 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
 
                 <SRSection title="Topic AI Model &amp; Survey Template" num={3}>
-                  <SRRow label="Topic AI Model">{aiModel ? aiModel.name : <span style={{ color: "var(--color-fg-secondary)" }}>Not configured</span>}</SRRow>
-                  <SRRow label="Survey Template">{survey ? survey.name : <span style={{ color: "var(--color-fg-secondary)" }}>Not configured</span>}</SRRow>
+                  <SRRow label="Topic AI Model">{aiModel ? aiModel.name : <span style={{ color: "var(--color-status-error)" }}>Required — go to Step 3</span>}</SRRow>
+                  <SRRow label="Survey Template">{survey ? survey.name : <span style={{ color: "var(--color-status-error)" }}>Required — go to Step 3</span>}</SRRow>
                 </SRSection>
               </div>
             );
@@ -8137,7 +8145,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             {activeStep > 0 && (
               <button className="btn" onClick={goBack}>← Back</button>
             )}
-            <button className="btn primary" onClick={activeStep === 3 ? handleActivate : goNext}>
+            <button className="btn primary"
+              disabled={activeStep === 3 && reviewMissingRequired}
+              onClick={activeStep === 3 ? handleActivate : goNext}>
               {activeStep === 3 ? "✓ Activate Campaign" : activeStep === 2 ? "Review →" : "Next →"}
             </button>
           </>
@@ -9793,7 +9803,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                     {st === "done" ? (
                       <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 6 5 9.5 10 2.5"/></svg>
                     ) : st === "error" ? (
-                      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="2.5" x2="6" y2="6.5"/><circle cx="6" cy="9" r=".7" fill="currentColor"/></svg>
+                      <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>
                     ) : s.n + 1}
                   </div>
                   <div className="wz-label">{s.label}</div>
