@@ -7573,17 +7573,32 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
   function stepState(s) {
     if (s.n === activeStep) return "active";
-    if (visitedSteps.has(s.n)) return "done";
+    if (visitedSteps.has(s.n) && s.done) return "done";
+    if (visitedSteps.has(s.n) && !s.done) return "error";
     return "default";
   }
+
+  function stepValid(n) {
+    if (n === 0) return !!(c.name && c.startDate && (c.ongoing || c.endDate));
+    if (n === 2) return !!(c.aiModelId && c.surveyDesignId);
+    return true;
+  }
+
+  const [step2Err, setStep2Err] = React.useState(false);
 
   function goNext() {
     setTriedSteps(prev => new Set([...prev, activeStep]));
     setVisitedSteps(prev => new Set([...prev, activeStep]));
+    if (!stepValid(activeStep)) {
+      if (activeStep === 2) setStep2Err(true);
+      return;
+    }
+    setStep2Err(false);
     setActiveStep(prev => Math.min(prev + 1, 4));
   }
 
   function goBack() {
+    setStep2Err(false);
     setActiveStep(prev => Math.max(prev - 1, 0));
   }
 
@@ -7943,13 +7958,20 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               <div className="intel-sub-section">
                 {(() => {
                   const activeModel = AI_MODELS.find(m => m.id === c.aiModelId);
+                  const modelErr = step2Err && !c.aiModelId;
                   if (!activeModel) return (
-                    <header className="form-section-head no-border" style={{ cursor: "default" }}>
-                      <span className="step-num" style={{ display: "flex", fontSize: 0 }}>
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg>
-                      </span>
-                      <div style={{ flex: 1 }}><h3>Topic AI Model</h3><div className="sub">Select an AI model to power your campaign intelligence</div></div>
-                      <button className="btn primary" onClick={() => setModelDrawerOpen(true)}>Choose Topic AI Model →</button>
+                    <header className="form-section-head no-border" style={{ cursor: "default", flexDirection: "column", alignItems: "flex-start", gap: "var(--space-2)" }}>
+                      <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "var(--space-3)" }}>
+                        <span className="step-num" style={{ display: "flex", fontSize: 0, flexShrink: 0, border: modelErr ? "2px solid var(--color-status-error)" : undefined }}>
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke={modelErr ? "var(--color-status-error)" : "currentColor"} strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.42 1.42M11.53 11.53l1.42 1.42M3.05 12.95l1.42-1.42M11.53 4.47l1.42-1.42"/></svg>
+                        </span>
+                        <div style={{ flex: 1 }}><h3 style={{ color: modelErr ? "var(--color-status-error)" : undefined }}>Topic AI Model</h3><div className="sub">Select an AI model to power your campaign intelligence</div></div>
+                        <button className="btn primary" onClick={() => { setModelDrawerOpen(true); setStep2Err(false); }}>Choose Topic AI Model →</button>
+                      </div>
+                      {modelErr && <div className="field-control" style={{ paddingLeft: "var(--space-10)" }}><span className="error-msg">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                        Select a Topic AI Model to continue
+                      </span></div>}
                     </header>
                   );
                   return (
@@ -7977,13 +7999,20 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               <div className="intel-sub-section">
                 {(() => {
                   const activeSurvey = SURVEY_DESIGNS.find(s => s.id === c.surveyDesignId);
+                  const surveyErr = step2Err && !c.surveyDesignId;
                   if (!activeSurvey) return (
-                    <header className="form-section-head no-border" style={{ cursor: "default" }}>
-                      <span className="step-num" style={{ display: "flex", fontSize: 0 }}>
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
-                      </span>
-                      <div style={{ flex: 1 }}><h3>Survey Template</h3><div className="sub">Pick the survey design that will be sent to customers</div></div>
-                      <button className="btn" onClick={() => setSurveyDrawerOpen(true)}>Choose Survey Template →</button>
+                    <header className="form-section-head no-border" style={{ cursor: "default", flexDirection: "column", alignItems: "flex-start", gap: "var(--space-2)" }}>
+                      <div style={{ display: "flex", alignItems: "center", width: "100%", gap: "var(--space-3)" }}>
+                        <span className="step-num" style={{ display: "flex", fontSize: 0, flexShrink: 0, border: surveyErr ? "2px solid var(--color-status-error)" : undefined }}>
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke={surveyErr ? "var(--color-status-error)" : "currentColor"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="1" width="12" height="14" rx="1.5"/><line x1="5" y1="5" x2="11" y2="5"/><line x1="5" y1="8" x2="11" y2="8"/><line x1="5" y1="11" x2="9" y2="11"/></svg>
+                        </span>
+                        <div style={{ flex: 1 }}><h3 style={{ color: surveyErr ? "var(--color-status-error)" : undefined }}>Survey Template</h3><div className="sub">Pick the survey design that will be sent to customers</div></div>
+                        <button className="btn" onClick={() => { setSurveyDrawerOpen(true); setStep2Err(false); }}>Choose Survey Template →</button>
+                      </div>
+                      {surveyErr && <div className="field-control" style={{ paddingLeft: "var(--space-10)" }}><span className="error-msg">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                        Select a Survey Template to continue
+                      </span></div>}
                     </header>
                   );
                   return (
@@ -9679,6 +9708,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
   const isEdit = !!initial;
   const [activeStep, setActiveStep] = React.useState(0);
   const [visitedSteps, setVisitedSteps] = React.useState(new Set());
+  const [triedSteps, setTriedSteps] = React.useState(new Set());
   const [saving, setSaving] = React.useState(false);
   const [showPreview, setShowPreview] = React.useState(false);
 
@@ -9704,6 +9734,12 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
     { n: 3, label: "Summary & Review", desc: "Review all settings before publishing your survey template.", done: false },
   ];
 
+  function svStepValid(n) {
+    if (n === 0) return !!d.name;
+    if (n === 1) return !!d.defaultScaleQuestion;
+    return true;
+  }
+
   function stepState(s) {
     if (s.n === activeStep) return "active";
     if (visitedSteps.has(s.n) && s.done) return "done";
@@ -9712,7 +9748,9 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
   }
 
   function goNext() {
+    setTriedSteps(prev => new Set([...prev, activeStep]));
     setVisitedSteps(prev => new Set([...prev, activeStep]));
+    if (!svStepValid(activeStep)) return;
     setActiveStep(prev => Math.min(prev + 1, 4));
   }
 
@@ -9720,7 +9758,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
     setActiveStep(prev => Math.max(prev - 1, 0));
   }
 
-  const canSave = !!d.name;
+  const canSave = !!(d.name && d.defaultScaleQuestion);
 
   return (
     <div className="pane" style={{ overflow: "hidden" }}>
@@ -9773,7 +9811,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
 
           {/* ── Step 0: Identity ── */}
           {activeStep === 0 && (()=>{
-            const showErr = visitedSteps.has(0);
+            const showErr = triedSteps.has(0);
             const nameErr = showErr && !d.name;
             return <div className="wz-step-content">
               <div className="setup-section">
@@ -9804,7 +9842,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
 
           {/* ── Step 1: Survey Content ── */}
           {activeStep === 1 && (()=>{
-            const showErr = visitedSteps.has(1);
+            const showErr = triedSteps.has(1);
             const scaleErr = showErr && !d.defaultScaleQuestion;
             return <div className="wz-step-content">
 
@@ -9950,6 +9988,44 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                         )}
                       </>
                     )}
+
+                    {/* ── Rating Question (required) ── */}
+                    <div className="field-cell" style={{ maxWidth: 600, marginTop: "var(--space-5)" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
+                        <label className="field-label" style={{ margin: 0 }}>Rating Question<span className="req">*</span></label>
+                        <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.defaultScaleQuestion || "").length > 100 ? "var(--fi-amber)" : "var(--color-fg-disabled)" }}>
+                          {(d.defaultScaleQuestion || "").length}/120
+                        </span>
+                      </div>
+                      <textarea className={`fi-input${scaleErr ? " error" : ""}`} rows={2} maxLength={120}
+                        aria-invalid={scaleErr || undefined}
+                        style={{ resize: "vertical", minHeight: 64 }}
+                        placeholder="On a scale of 1 to 5, how would you rate your experience today?"
+                        value={d.defaultScaleQuestion}
+                        onChange={e => set("defaultScaleQuestion", e.target.value)}/>
+                      {scaleErr && <div className="field-control"><span className="error-msg">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                        Rating question is required
+                      </span></div>}
+                      <div className="help">This is the primary question customers will answer.</div>
+                    </div>
+
+                    {/* ── Follow-up Question (optional) ── */}
+                    <div className="field-cell" style={{ maxWidth: 600, marginTop: "var(--space-4)" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
+                        <label className="field-label" style={{ margin: 0 }}>Follow-up Question <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)" }}>(optional)</span></label>
+                        <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-disabled)" }}>
+                          {(d.defaultCommentQuestion || "").length}/120
+                        </span>
+                      </div>
+                      <textarea className="fi-input" rows={2} maxLength={120}
+                        style={{ resize: "vertical", minHeight: 64 }}
+                        placeholder="What could we have done better?"
+                        value={d.defaultCommentQuestion}
+                        onChange={e => set("defaultCommentQuestion", e.target.value)}/>
+                      <div className="help">An open-text follow-up shown after the rating response.</div>
+                    </div>
+
                     {showPreview && ReactDOM.createPortal(
                       <div style={{ position: "fixed", inset: 0, zIndex: 900, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.40)" }}
                         onClick={() => setShowPreview(false)}>
@@ -10045,7 +10121,7 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
 
           {/* ── Step 3: Summary & Review ── */}
           {activeStep === 3 && (() => {
-            const missingRequired = !d.name;
+            const missingRequired = !d.name || !d.defaultScaleQuestion;
             const SRSection = ({ title, num, children, noEdit }) => (
               <div className="sr-section">
                 <div className="sr-section-head">
