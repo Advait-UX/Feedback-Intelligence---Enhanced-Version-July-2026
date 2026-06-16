@@ -6606,7 +6606,7 @@ function RowActions({ campaign, statusOf, onActivate, onDeactivate, onDelete, on
   );
 }
 
-function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
+function SurveyCampaignsGrid({ onCreate, onOpen, onEdit, newCampaigns = [] }) {
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState(null);   // null = no filter (show all)
   const [order, setOrder] = React.useState(() => CAMPAIGNS.map(c => c.id));
@@ -6881,7 +6881,7 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
                       onActivate={rowActivate}
                       onDeactivate={rowDeactivate}
                       onDelete={rowDelete}
-                      onEdit={onOpen}
+                      onEdit={onEdit || onOpen}
                     />
                   </td>
                 </tr>
@@ -11602,6 +11602,7 @@ function App() {
         content = <SurveyCampaignsGrid
           onCreate={() => setRoute({ ...route, view: "create" })}
           onOpen={(c) => setRoute({ ...route, view: "detail", campaign: c })}
+          onEdit={(c) => setRoute({ ...route, view: "create", editCampaign: c })}
           newCampaigns={newCampaigns}/>;
       }
     } else if (route.section === "ontology") {
