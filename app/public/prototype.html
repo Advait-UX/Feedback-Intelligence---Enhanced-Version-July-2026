@@ -10419,14 +10419,10 @@ const SEED_CATEGORIES = [
 //   - Adds "Proactive Outreach" and "Trust & Transparency" (newly created)
 // Other categories remain unchanged.
 const REFRESHED_CATEGORIES = [
-  { id: 1,  name: "Resolution",            weight: 5, active: true },
-  { id: 2,  name: "Agent Empathy",         weight: 5, active: true },
-  { id: 3,  name: "Customer Effort",       weight: 5, active: true },
-  { id: 4,  name: "Wait Time",             weight: 5, active: true },
-  { id: 7,  name: "Channel Handoff",       weight: 5, active: true },
-  { id: 8,  name: "Communication Clarity", weight: 5, active: true },
-  { id: 9,  name: "Proactive Outreach",    weight: 5, active: true, isNew: true },
-  { id: 10, name: "Trust & Transparency",  weight: 5, active: true, isNew: true },
+  { id: 201, name: "Sentiment Shift Detection", weight: 5, active: true, isNew: true },
+  { id: 202, name: "Escalation Propensity",     weight: 5, active: true, isNew: true },
+  { id: 203, name: "Compliance Risk Flag",       weight: 5, active: true, isNew: true },
+  ...SEED_CATEGORIES,
 ];
 
 // Default category set for each Topic AI Model. When the user selects a
@@ -10872,6 +10868,12 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
   const [dirty, setDirty] = React.useState(false);
   const [refreshState, setRefreshState] = React.useState("idle");
   const [newlyAddedIds, setNewlyAddedIds] = React.useState([]);
+  const [toast, setToast] = React.useState(null);
+  React.useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const handleModelChange = (newId) => {
     setSelectedModel(newId);
@@ -10891,14 +10893,18 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
     setRefreshState("refreshing");
     setTimeout(() => {
       if (selectedModel === "cx-quality") {
-        setCategories(REFRESHED_CATEGORIES.map(c => ({ ...c })));
-        setNewlyAddedIds(REFRESHED_CATEGORIES.filter(c => c.isNew).map(c => c.id));
+        const newCats = REFRESHED_CATEGORIES.filter(c => c.isNew);
+        const existingCats = REFRESHED_CATEGORIES.filter(c => !c.isNew);
+        setCategories([...newCats, ...existingCats].map(c => ({ ...c })));
+        const newIds = newCats.map(c => c.id);
+        setNewlyAddedIds(newIds);
         setDirty(true);
+        setToast({ msg: `Model refreshed — ${newCats.length} new categories added.` });
       }
       setRefreshState("done");
     }, 1400);
     setTimeout(() => setRefreshState("idle"), 4400);
-    setTimeout(() => setNewlyAddedIds([]), 9400);
+    setTimeout(() => setNewlyAddedIds([]), 10000);
   };
 
   const canPublish = !!selectedModel && categories.length > 0 && (isEdit ? dirty : true);
@@ -11245,6 +11251,19 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
           Publish changes
         </button>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="toast">
+          <div className="toast-icon">
+            <svg viewBox="0 0 16 16"><polyline points="3 8.5 6.5 12 13 5"/></svg>
+          </div>
+          <span className="toast-msg">{toast.msg}</span>
+          <button className="toast-close" onClick={() => setToast(null)} aria-label="Dismiss">
+            <svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
