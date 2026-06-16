@@ -10867,6 +10867,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
   );
   const [dirty, setDirty] = React.useState(false);
   const [refreshState, setRefreshState] = React.useState("idle");
+  const [refreshDone, setRefreshDone] = React.useState(false);
   const [newlyAddedIds, setNewlyAddedIds] = React.useState([]);
   const [toast, setToast] = React.useState(null);
   React.useEffect(() => {
@@ -10889,7 +10890,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
   };
 
   const handleRefreshModel = () => {
-    if (refreshState !== "idle" || !selectedModel) return;
+    if (refreshState !== "idle" || refreshDone || !selectedModel) return;
     setRefreshState("refreshing");
     setTimeout(() => {
       if (selectedModel === "cx-quality") {
@@ -10902,9 +10903,8 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
         setToast({ msg: `Model refreshed — ${newCats.length} new categories added.` });
       }
       setRefreshState("done");
+      setRefreshDone(true);
     }, 1400);
-    setTimeout(() => setRefreshState("idle"), 4400);
-    setTimeout(() => setNewlyAddedIds([]), 10000);
   };
 
   const canPublish = !!selectedModel && categories.length > 0 && (isEdit ? dirty : true);
@@ -10929,21 +10929,21 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
         </div>
         <button
           onClick={handleRefreshModel}
-          disabled={refreshState !== "idle" || !selectedModel}
-          title="Pull the latest categories from Topic AI"
+          disabled={refreshState !== "idle" || refreshDone || !selectedModel}
+          title={refreshDone ? "Model already refreshed" : "Pull the latest categories from Topic AI"}
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
-            background: refreshState === "done" ? "var(--lyra-color-status-success-medium, #64B96F)" : "var(--color-bg-primary)",
-            border: "none",
-            color: "var(--color-fg-on-primary)",
+            background: refreshDone ? "var(--lyra-slate-100)" : "var(--color-bg-primary)",
+            border: refreshDone ? "1px solid var(--lyra-slate-200)" : "none",
+            color: refreshDone ? "var(--color-fg-secondary)" : "var(--color-fg-on-primary)",
             font: "500 13px/20px var(--font-sans)",
             padding: "6px 14px",
             borderRadius: "var(--radius-md)",
-            cursor: refreshState === "idle" && selectedModel ? "pointer" : "default",
-            opacity: !selectedModel ? 0.55 : 1,
+            cursor: (!refreshDone && refreshState === "idle" && selectedModel) ? "pointer" : "default",
+            opacity: (!selectedModel || refreshState === "refreshing") ? 0.55 : 1,
           }}
         >
-          {refreshState === "done" ? (
+          {refreshDone ? (
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="4 13 10 19 20 5"/>
             </svg>
@@ -10955,7 +10955,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
               <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>
             </svg>
           )}
-          {refreshState === "refreshing" ? "Refreshing…" : refreshState === "done" ? "Model refreshed" : "Refresh Model"}
+          {refreshState === "refreshing" ? "Refreshing…" : refreshDone ? "Model refreshed" : "Refresh Model"}
         </button>
       </div>
 
@@ -11252,7 +11252,6 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
         </button>
       </div>
 
-      {/* Toast */}
       {toast && (
         <div className="toast">
           <div className="toast-icon">
