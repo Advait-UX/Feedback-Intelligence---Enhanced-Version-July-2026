@@ -10610,7 +10610,12 @@ function VUScoreModel({ onRefreshed }) {
       configuredModelIds={ontologies.map(o => o.modelId)}
       onCancel={handleCancel}
       onPublish={handlePublish}
-      onRefreshed={onRefreshed}
+      onRefreshed={() => {
+        if (editingId) {
+          setOntologies(prev => prev.map(o => o.id === editingId ? { ...o, hasUpstreamChanges: false } : o));
+        }
+        if (onRefreshed) onRefreshed();
+      }}
     />
   );
 }
