@@ -10527,7 +10527,7 @@ const SEED_SENTIMENT = [
 
 const CATEGORIES = ["Outcome", "Experience", "Channel", "Loyalty"];
 
-function VUScoreModel() {
+function VUScoreModel({ onRefreshed }) {
   const [ontologies, setOntologies] = React.useState(loadOntologies);
   // 'list' | 'edit' | 'new'
   const [view, setView] = React.useState("list");
@@ -10610,6 +10610,7 @@ function VUScoreModel() {
       configuredModelIds={ontologies.map(o => o.modelId)}
       onCancel={handleCancel}
       onPublish={handlePublish}
+      onRefreshed={onRefreshed}
     />
   );
 }
@@ -10891,7 +10892,7 @@ function OntologyMetaStrip({ ontology, formatUpdatedAt }) {
   );
 }
 
-function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublish }) {
+function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublish, onRefreshed }) {
   const isEdit = mode === "edit";
   const [selectedModel, setSelectedModel] = React.useState(ontology ? ontology.modelId : "");
   const [categories, setCategories] = React.useState(
@@ -10936,6 +10937,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
       }
       setRefreshState("done");
       setRefreshDone(true);
+      if (onRefreshed) onRefreshed();
     }, 1400);
   };
 
@@ -12093,6 +12095,7 @@ function App() {
   const [toast, setToast] = React.useState(null);
   const [newCampaigns, setNewCampaigns] = React.useState([]);
   const [newDesigns, setNewDesigns] = React.useState([]);
+  const [ontologyHasUpdates, setOntologyHasUpdates] = React.useState(true);
 
   React.useEffect(() => {
     if (!toast) return;
@@ -12124,7 +12127,7 @@ function App() {
         const anyActive = children.some(c => c.active);
         return { ...n, children, expanded: anyActive || n.expanded };
       }
-      const extra = n.key === "ontology" ? { hasUpdates: true } : {};
+      const extra = n.key === "ontology" ? { hasUpdates: ontologyHasUpdates } : {};
       return { ...n, active: n.key === route.section, ...extra };
     });
     if (route.section === "dashboard") {
@@ -12164,7 +12167,7 @@ function App() {
           newCampaigns={newCampaigns}/>;
       }
     } else if (route.section === "ontology") {
-      content = <VUScoreModel/>;
+      content = <VUScoreModel onRefreshed={() => setOntologyHasUpdates(false)}/>;
     } else if (route.section === "designs") {
       if (route.view === "create" || route.view === "edit") {
         content = <CreateSurveyDesign
