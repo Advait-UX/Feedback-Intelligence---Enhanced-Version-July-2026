@@ -10995,8 +10995,8 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
       <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-6) var(--space-8) var(--space-8)" }}>
         <div>
 
-          {/* Upstream changes notice — only in edit mode when Topic AI has new updates */}
-          {isEdit && ontology && ontology.hasUpstreamChanges ? (
+          {/* Upstream changes notice — hidden once refreshed */}
+          {isEdit && ontology && ontology.hasUpstreamChanges && !refreshDone ? (
             <div style={{
               background: "var(--lyra-yellow-50)",
               border: "1px solid var(--lyra-yellow-500)",
