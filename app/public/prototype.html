@@ -3277,13 +3277,6 @@ button,input,select,textarea,table,th,td{font-family:inherit;font-size:inherit;f
   border-color: var(--color-bg-primary-hover);
 }
 
-.btn.destructive{
-  background: var(--color-bg-destructive);
-  color: var(--color-fg-on-destructive);
-  border-color: var(--color-bg-destructive);
-}
-.btn.destructive:hover{ background: var(--lyra-red-700, #b91c1c); border-color: var(--lyra-red-700, #b91c1c); }
-
 .btn.ghost{
   background: transparent;
   border-color: transparent;
@@ -10311,33 +10304,6 @@ const SEED_ONTOLOGIES = [
       "Post-Chat CSAT — Tier 1 Billing",
       "Cognigy AI Session — Bot Handoff Audit",
       "NPS Quarterly — Enterprise Clients",
-      "General Inquiry Pulse",
-      "Mobile App Feedback",
-      "Cancellation Recovery",
-      "Complaint Resolution Follow-Up",
-      "Product Feedback — Beta Testers",
-      "Negative Sentiment Catcher — All Digital",
-      "Social Media Response Quality",
-      "VIP Escalation Follow-Up",
-      "FCR Check — Tier 2 Support",
-      "Proactive Outreach Feedback",
-      "Digital Onboarding CSAT",
-      "Billing Dispute Resolution",
-      "IVR Drop-Off Analysis",
-      "Agent Empathy Tracker",
-      "First Contact Resolution Monitor",
-      "Chat Deflection Quality",
-      "Email Response Sentiment",
-      "Escalation Trend Pulse",
-      "Retention Campaign CSAT",
-      "Self-Service Completion Rate",
-      "Support Follow-Up Survey",
-      "Premium Tier Experience",
-      "Renewal Intent Survey",
-      "Technical Support Quality",
-      "Account Management Pulse",
-      "Onboarding Completion Survey",
-      "Post-Resolution Satisfaction",
     ],
     // Topic AI has published updates to this model after the ontology was
     // last saved. Drives the "Updates available" badge on the grid and the
@@ -10401,7 +10367,6 @@ function VUScoreModel() {
   // 'list' | 'edit' | 'new'
   const [view, setView] = React.useState("list");
   const [editingId, setEditingId] = React.useState(null);
-  const [confirmRemoveId, setConfirmRemoveId] = React.useState(null);
 
   const editing = editingId ? ontologies.find(o => o.id === editingId) : null;
 
@@ -10411,10 +10376,9 @@ function VUScoreModel() {
   };
   const handleEdit = (id) => { setEditingId(id); setView("edit"); };
   const handleNew  = () => { setEditingId(null); setView("new"); };
-  const handleRemove = (id) => { setConfirmRemoveId(id); };
-  const handleConfirmRemove = () => {
-    persist(ontologies.filter(o => o.id !== confirmRemoveId));
-    setConfirmRemoveId(null);
+  const handleRemove = (id) => {
+    if (!window.confirm("Remove this ontology configuration?")) return;
+    persist(ontologies.filter(o => o.id !== id));
   };
   const handleCancel = () => { setView("list"); setEditingId(null); };
   const handlePublish = (modelId, categories) => {
@@ -10454,23 +10418,8 @@ function VUScoreModel() {
     setEditingId(null);
   };
 
-  const confirmTarget = confirmRemoveId ? ontologies.find(o => o.id === confirmRemoveId) : null;
-
   if (view === "list") {
-    return (
-      <React.Fragment>
-        <OntologyList ontologies={ontologies} onEdit={handleEdit} onRemove={handleRemove} onNew={handleNew}/>
-        {confirmRemoveId && (
-          <ConfirmModal
-            title="Remove ontology configuration"
-            body={confirmTarget ? `"${confirmTarget.modelName}" will be permanently removed. This cannot be undone.` : "This configuration will be permanently removed. This cannot be undone."}
-            confirmLabel="Remove"
-            onConfirm={handleConfirmRemove}
-            onCancel={() => setConfirmRemoveId(null)}
-          />
-        )}
-      </React.Fragment>
-    );
+    return <OntologyList ontologies={ontologies} onEdit={handleEdit} onRemove={handleRemove} onNew={handleNew}/>;
   }
   return (
     <OntologyEditor
@@ -10480,114 +10429,6 @@ function VUScoreModel() {
       onCancel={handleCancel}
       onPublish={handlePublish}
     />
-  );
-}
-
-function ConfirmModal({ title, body, confirmLabel, onConfirm, onCancel }) {
-  return (
-    <div className="ly-modal-backdrop" onClick={onCancel}>
-      <div className="ly-modal" style={{ width: 400 }} onClick={e => e.stopPropagation()}
-        role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
-        <div className="ly-modal-head">
-          <span className="ly-modal-title" id="confirm-modal-title">{title}</span>
-          <button className="ly-modal-close" aria-label="Close" onClick={onCancel}>
-            <LucideX/>
-          </button>
-        </div>
-        <div style={{ padding: "var(--space-5) var(--space-6)", font: "400 14px/24px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
-          {body}
-        </div>
-        <div className="ly-modal-foot">
-          <button className="btn" onClick={onCancel}>Cancel</button>
-          <button className="btn destructive" onClick={onConfirm}>{confirmLabel}</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MappedCampaignsCell({ campaigns }) {
-  const MAX_VISIBLE = 10;
-  const [popoverOpen, setPopoverOpen] = React.useState(false);
-  const ref = React.useRef(null);
-  const visible = campaigns.slice(0, MAX_VISIBLE);
-  const overflow = campaigns.slice(MAX_VISIBLE);
-
-  React.useEffect(() => {
-    if (!popoverOpen) return;
-    function onDocClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) setPopoverOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [popoverOpen]);
-
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-      {visible.map((name, i) => (
-        <span key={i} style={{
-          display: "inline-flex", alignItems: "center",
-          padding: "2px 8px",
-          borderRadius: "var(--radius-round)",
-          background: "var(--lyra-slate-100)",
-          color: "var(--lyra-slate-700)",
-          font: "400 12px/18px var(--font-sans)",
-          whiteSpace: "nowrap",
-          border: "1px solid var(--lyra-slate-200)",
-        }}>{name}</span>
-      ))}
-      {overflow.length > 0 && (
-        <div ref={ref} style={{ position: "relative" }}>
-          <button
-            onClick={() => setPopoverOpen(v => !v)}
-            style={{
-              display: "inline-flex", alignItems: "center",
-              padding: "2px 8px",
-              borderRadius: "var(--radius-round)",
-              background: "var(--lyra-brand-50)",
-              color: "var(--lyra-brand-700)",
-              font: "500 12px/18px var(--font-sans)",
-              border: "1px solid var(--lyra-brand-200)",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >+{overflow.length} more</button>
-          {popoverOpen && (
-            <div style={{
-              position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 100,
-              background: "var(--lyra-color-bg-surface-overlay)",
-              border: "1px solid var(--lyra-color-border-soft)",
-              borderRadius: "var(--radius-lg)",
-              boxShadow: "var(--sol-effect-shadowlg)",
-              padding: "8px 0",
-              minWidth: 260,
-              maxWidth: 360,
-              maxHeight: 320,
-              overflowY: "auto",
-            }}>
-              <div style={{
-                padding: "4px 12px 8px",
-                font: "500 11px/16px var(--font-sans)",
-                color: "var(--color-fg-secondary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                borderBottom: "1px solid var(--lyra-color-border-subtle)",
-                marginBottom: 4,
-              }}>
-                {overflow.length} more campaign{overflow.length !== 1 ? "s" : ""}
-              </div>
-              {overflow.map((name, i) => (
-                <div key={i} style={{
-                  padding: "6px 12px",
-                  font: "400 13px/18px var(--font-sans)",
-                  color: "var(--color-fg-default)",
-                }}>{name}</div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -10626,6 +10467,7 @@ function OntologyList({ ontologies, onEdit, onRemove, onNew }) {
             <tr>
               <th>Topic AI Model</th>
               <th>Mapped campaigns</th>
+              <th>Last updated</th>
               <th style={{ width: 52 }}>Actions</th>
             </tr>
           </thead>
@@ -10671,12 +10513,30 @@ function OntologyList({ ontologies, onEdit, onRemove, onNew }) {
                       {o.categories.length} categories
                     </div>
                   </td>
-                  <td>
+                  <td style={{ maxWidth: 320 }}>
                     {mapped.length === 0 ? (
                       <span style={{ color: "var(--color-fg-secondary)", fontStyle: "italic" }}>None</span>
                     ) : (
-                      <MappedCampaignsCell campaigns={mapped} />
+                      <React.Fragment>
+                        <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
+                          {mapped.length} {mapped.length === 1 ? "campaign" : "campaigns"}
+                        </div>
+                        <div style={{
+                          font: "400 12px/16px var(--font-sans)",
+                          color: "var(--color-fg-secondary)",
+                          marginTop: 4, whiteSpace: "normal",
+                        }}>
+                          {mapped.slice(0, 2).join(", ")}
+                          {mapped.length > 2 ? ", +" + (mapped.length - 2) + " more" : ""}
+                        </div>
+                      </React.Fragment>
                     )}
+                  </td>
+                  <td>
+                    <div>{formatUpdatedAt(o.updatedAt)}</div>
+                    <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginTop: 4 }}>
+                      by {o.updatedBy}
+                    </div>
                   </td>
                   <td style={{ textAlign: "center" }}>
                     <OntologyRowActions
@@ -10829,29 +10689,29 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
       </div>
 
       {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-6) var(--space-8) var(--space-6)" }}>
-        <div style={{ maxWidth: 1200 }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px 24px" }}>
+        <div style={{ width: "80%" }}>
 
           {/* Upstream changes notice — only in edit mode when Topic AI has new updates */}
           {isEdit && ontology && ontology.hasUpstreamChanges ? (
             <div style={{
-              background: "var(--color-status-warning-subtle)",
-              border: "1px solid rgba(250,203,51,0.4)",
+              background: "#fffbeb",
+              border: "1px solid #fde68a",
               borderRadius: "var(--radius-md)",
-              padding: "var(--space-3) var(--space-4)",
-              marginBottom: "var(--space-6)",
-              display: "flex", alignItems: "flex-start", gap: "var(--space-3)",
+              padding: "12px 16px",
+              marginBottom: 24,
+              display: "flex", alignItems: "flex-start", gap: 12,
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-status-warning-strong)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
               <div>
-                <div style={{ font: "600 13px/18px var(--font-sans)", color: "var(--color-status-warning-strong)", marginBottom: 2 }}>
+                <div style={{ font: "600 13px/18px var(--font-sans)", color: "#92400e", marginBottom: 2 }}>
                   Topic AI has new updates for this model
                 </div>
-                <div style={{ font: "400 13px/18px var(--font-sans)", color: "var(--color-status-warning-strong)" }}>
+                <div style={{ font: "400 13px/18px var(--font-sans)", color: "#78350f" }}>
                   Click <strong>Refresh Model</strong> at the top right to pull the latest categories before publishing.
                 </div>
               </div>
@@ -10888,7 +10748,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
                   </select>
                   <p style={{ margin: "8px 0 0", font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
                     {isEdit
-                      ? null
+                      ? "The model is locked while editing this ontology."
                       : nothingLeft
                       ? "Every Topic AI Model already has an ontology. Edit an existing row to update its weights."
                       : "Only models without an ontology yet are shown. Choose one to load its categories with default weight = 5."}
@@ -10900,163 +10760,86 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
 
           {selectedModel && categories.length > 0 ? (
             <React.Fragment>
-              {/* Section header row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-4)" }}>
-                <div>
-                  <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
-                    Category Weights
-                  </div>
-                  <div style={{ font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
-                    {categories.filter(c => c.active).length} of {categories.length} active · adjust weight 1–10 per category
-                  </div>
-                </div>
-                <div style={{
-                  display: "inline-flex", alignItems: "center", gap: "var(--space-2)",
-                  background: "var(--color-bg-active-subtle)",
-                  border: "1px solid var(--color-border-active)",
-                  borderRadius: "var(--radius-full)",
-                  padding: "4px 12px",
-                  font: "500 12px/16px var(--font-sans)",
-                  color: "var(--color-fg-active-strong)",
-                }}>
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                  {categories.reduce((s, c) => s + (c.active ? c.weight : 0), 0)} total weight
-                </div>
+              {/* Section label */}
+              <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16 }}>
+                Define Category Weights
               </div>
 
-              {/* Categories card grid — 3 cols */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-4)" }}>
-                {categories.map((c, idx) => {
-                  const accentColors = [
-                    "var(--lyra-brand-600)",
-                    "#7c3aed",
-                    "var(--color-status-success-strong)",
-                    "var(--color-status-warning-strong)",
-                    "#0891b2",
-                    "var(--color-status-critical-strong)",
-                    "#0d9488",
-                    "#db2777",
-                    "var(--lyra-brand-800)",
-                    "#65a30d",
-                  ];
-                  const accent = accentColors[idx % accentColors.length];
-                  const isNew = newlyAddedIds.indexOf(c.id) !== -1;
-                  return (
-                    <div key={c.id} style={{
-                      position: "relative",
-                      background: "var(--lyra-white)",
-                      border: "1px solid var(--color-border-subtle)",
-                      borderRadius: "var(--radius-lg)",
-                      overflow: "hidden",
-                      opacity: c.active ? 1 : 0.5,
-                      transition: "box-shadow 0.15s, border-color 0.15s, opacity 0.15s",
-                      display: "flex", flexDirection: "column",
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.14)"; e.currentTarget.style.boxShadow = "0px 4px 12px 0px rgba(0,0,0,0.06)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--color-border-subtle)"; e.currentTarget.style.boxShadow = "none"; }}
-                    >
-                      {/* Accent top bar */}
-                      <div style={{ height: 3, background: accent, flexShrink: 0 }}/>
+              {/* Categories card grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                {categories.map(c => (
+                  <div key={c.id} className={`ont-cat-card${c.active ? "" : " ont-cat-card--inactive"}`}>
 
-                      <div style={{ padding: "var(--space-4) var(--space-4) var(--space-5)" }}>
-                        {/* Name row + badges */}
-                        <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
-                          <input
-                            className="ont-input"
-                            value={c.name}
-                            onChange={e => setCategory(c.id, { name: e.target.value })}
-                            style={{
-                              font: "500 14px/20px var(--font-sans)",
-                              color: "var(--color-fg-default)",
-                              padding: "2px 0",
-                              border: "none",
-                              borderBottom: "1px solid transparent",
-                              borderRadius: 0,
-                              background: "transparent",
-                              flex: 1,
-                              minWidth: 0,
-                              outline: "none",
-                            }}
-                            onFocus={e => { e.target.style.borderBottomColor = "var(--color-border-active)"; }}
-                            onBlur={e => { e.target.style.borderBottomColor = "transparent"; }}
-                          />
-                          {isNew && (
-                            <span style={{
-                              display: "inline-flex", alignItems: "center",
-                              font: "600 9px/1 var(--font-sans)",
-                              color: "var(--color-status-success-strong)",
-                              background: "var(--color-status-success-subtle)",
-                              border: "1px solid rgba(100,185,111,0.35)",
-                              padding: "3px 7px",
-                              borderRadius: "var(--radius-full)",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.06em",
-                              flexShrink: 0,
-                              marginTop: 2,
-                            }}>New</span>
+                    {/* Name + actions row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+                      <input className="ont-input" value={c.name}
+                        onChange={e => setCategory(c.id, { name: e.target.value })}
+                        style={{ font: "500 15px/20px var(--font-sans)", color: "var(--color-fg-default)", padding: "2px 4px", flex: 1 }}/>
+                      {newlyAddedIds.indexOf(c.id) !== -1 ? (
+                        <span style={{
+                          display: "inline-flex", alignItems: "center",
+                          font: "700 9px/1 var(--font-sans)",
+                          color: "#15803d",
+                          background: "#dcfce7",
+                          border: "1px solid #bbf7d0",
+                          padding: "3px 6px",
+                          borderRadius: "999px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          flexShrink: 0,
+                        }}>New</span>
+                      ) : null}
+                    </div>
+
+                    {/* Weight label + badge */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                      <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                        Weight
+                      </span>
+                      <span style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 34, height: 28,
+                        font: "700 15px/1 var(--font-sans)",
+                        color: "var(--color-fg-action)",
+                        background: "var(--color-bg-active-moderate)",
+                        borderRadius: "var(--radius-sm)",
+                      }}>{c.weight}</span>
+                    </div>
+
+                    {/* Slider */}
+                    <input type="range" min="1" max="10" value={c.weight}
+                      disabled={!c.active}
+                      onChange={e => setCategory(c.id, { weight: parseInt(e.target.value) })}
+                      style={{ width: "100%", accentColor: "var(--color-border-active)", display: "block" }}/>
+
+                    {/* Tick marks + labels */}
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5, padding: "0 7px" }}>
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                        <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                          <div style={{
+                            width: 1.5,
+                            height: (n === 1 || n === 5 || n === 10) ? 8 : 5,
+                            background: n === c.weight ? "var(--color-border-active)" : "rgba(0,0,0,0.16)",
+                            borderRadius: 1,
+                          }}/>
+                          {(n === 1 || n === 5 || n === 10) && (
+                            <span style={{ font: "400 10px/12px var(--font-sans)", color: n === c.weight ? "var(--color-fg-action)" : "var(--color-fg-secondary)" }}>
+                              {n}
+                            </span>
                           )}
                         </div>
-
-                        {/* Weight row */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
-                          <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                            Weight
-                          </span>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            minWidth: 32, height: 24,
-                            font: "600 14px/1 var(--font-sans)",
-                            color: accent,
-                            background: "transparent",
-                            borderRadius: "var(--radius-xs)",
-                          }}>{c.weight}</span>
-                        </div>
-
-                        {/* Slider */}
-                        <input type="range" min="1" max="10" value={c.weight}
-                          disabled={!c.active}
-                          onChange={e => setCategory(c.id, { weight: parseInt(e.target.value) })}
-                          style={{ width: "100%", accentColor: accent, display: "block", cursor: c.active ? "pointer" : "not-allowed" }}/>
-
-                        {/* Tick marks */}
-                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, padding: "0 6px" }}>
-                          {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                            <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                              <div style={{
-                                width: 1.5,
-                                height: (n === 1 || n === 5 || n === 10) ? 7 : 4,
-                                background: n === c.weight ? accent : "rgba(0,0,0,0.14)",
-                                borderRadius: 1,
-                              }}/>
-                              {(n === 1 || n === 5 || n === 10) && (
-                                <span style={{ font: "400 10px/12px var(--font-sans)", color: n === c.weight ? accent : "var(--color-fg-secondary)" }}>
-                                  {n}
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Active toggle row */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "var(--space-4)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-border-subtle)" }}>
-                          <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
-                            {c.active ? "Active" : "Inactive"}
-                          </span>
-                          <SmallToggle checked={c.active} onChange={v => setCategory(c.id, { active: v })}/>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  );
-                })}
+
+                  </div>
+                ))}
               </div>
             </React.Fragment>
           ) : (
             <div style={{
-              border: "1.5px dashed var(--color-border-soft)",
-              borderRadius: "var(--radius-lg)",
-              padding: "48px 24px",
+              border: "1px dashed var(--color-border-soft)",
+              borderRadius: "var(--radius-md)",
+              padding: "32px 24px",
               textAlign: "center",
               color: "var(--color-fg-secondary)",
               font: "400 14px/20px var(--font-sans)",
