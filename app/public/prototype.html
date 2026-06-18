@@ -9,24 +9,30 @@
 <style>
 /* Feedback Intelligence — additions over shell.css */
 
-/* ─── Global scrollbar — Lyra slate palette, thin & subtle ──────────── */
+/* ─── Global scrollbar — hidden until hover, 3px thin, light grey ──────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--lyra-slate-300, #d2d8db) transparent;
+  scrollbar-color: transparent transparent;
 }
 *::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--lyra-slate-300, #d2d8db);
+  background: transparent;
   border-radius: 9999px;
 }
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--lyra-slate-400, #a8b3bb);
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.22);
+}
+*:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
 }
 
 /* ─── Lyra Info banner — used for inline help text above tables ──────────────
@@ -88,7 +94,7 @@
   display: flex; flex-direction: column;
   gap: var(--space-4);                                  /* 16px between rows (per request) */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
+  scrollbar-color: transparent transparent;
 }
 .app-menu-gap {
   height: var(--space-2);                               /* Figma: 8px tall divider container */
@@ -1036,12 +1042,13 @@ select.fi-input {
   overflow-y: auto;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: var(--lyra-slate-300, #d2d8db) transparent;
+  scrollbar-color: transparent transparent;
 }
 .wz-scroll-area::-webkit-scrollbar { width: 4px; }
 .wz-scroll-area::-webkit-scrollbar-track { background: transparent; }
-.wz-scroll-area::-webkit-scrollbar-thumb { background: var(--lyra-slate-300, #d2d8db); border-radius: 9999px; }
-.wz-scroll-area::-webkit-scrollbar-thumb:hover { background: var(--lyra-slate-400, #a8b3bb); }
+.wz-scroll-area::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; }
+.wz-scroll-area:hover::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
+.wz-scroll-area::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.22); }
 /* Two-column outer layout: form left, summary right — sits below wizard bar */
 .wz-content-area {
   display: flex;
@@ -2331,7 +2338,7 @@ select.fi-input {
   padding: 0 var(--space-6) var(--space-4);
   display: flex; flex-direction: column; gap: var(--space-2);
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
+  scrollbar-color: transparent transparent;
 }
 
 .model-picker-row {
@@ -3270,6 +3277,13 @@ button,input,select,textarea,table,th,td{font-family:inherit;font-size:inherit;f
   border-color: var(--color-bg-primary-hover);
 }
 
+.btn.destructive{
+  background: var(--color-bg-destructive);
+  color: var(--color-fg-on-destructive);
+  border-color: var(--color-bg-destructive);
+}
+.btn.destructive:hover{ background: var(--lyra-red-700, #b91c1c); border-color: var(--lyra-red-700, #b91c1c); }
+
 .btn.ghost{
   background: transparent;
   border-color: transparent;
@@ -3755,7 +3769,7 @@ tbody tr.selected td:first-child::before{
   display: flex; flex-direction: column;
   gap: var(--space-4);                                  /* 16px between rows (per request) */
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
+  scrollbar-color: transparent transparent;
 }
 .app-menu-gap {
   height: var(--space-2);                               /* Figma: 8px tall divider container */
@@ -5533,7 +5547,7 @@ select.fi-input {
   padding: 0 var(--space-6) var(--space-4);
   display: flex; flex-direction: column; gap: var(--space-2);
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-medium) transparent;
+  scrollbar-color: transparent transparent;
 }
 
 .model-picker-row {
@@ -6195,124 +6209,203 @@ Object.assign(window, { Topbar, LeftNav, AppSwitcher, FIProductIcon, Chev, SMILE
 const CAMPAIGNS = [
   { id: 1, name: "Post-Chat CSAT — Tier 1 Billing",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "vu-score",
+    queues: ["Tier 1 Billing"], startDate: "Mar 14, 2026", ongoing: true,
+    description: "Captures customer satisfaction immediately after each billing interaction.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     hasWorkingCopy: true, workingCopyVersion: 4, publishedVersion: 3, publishedAt: "May 04, 2026", workingCopyEditedBy: "Maria Cohen", workingCopyEditedAt: "May 10, 2026",
     sampling: 50, sent: 12480, completion: 31.2, vu: 76,
     owner: "Maria Cohen", created: "Mar 14, 2026", updated: "May 02, 2026", endDate: null },
   { id: 2, name: "Negative Sentiment Catcher — All Digital",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
+    queues: ["Digital Support", "Chat Team"], startDate: "Jan 22, 2026", ongoing: true,
+    description: "Targets interactions flagged with negative sentiment indicators for follow-up.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 14,
     sampling: 100, sent: 4220, completion: 28.6, vu: 41,
     owner: "Dev Patel", created: "Jan 22, 2026", updated: "May 08, 2026", endDate: null },
   { id: 3, name: "Email Support — Resolution Quality",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "vu-score",
+    queues: ["Email Support"], startDate: "Feb 04, 2026", ongoing: false,
+    description: "Measures resolution quality for email-based support tickets.",
+    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 25, sent: 8910, completion: 22.4, vu: 68,
     owner: "Maria Cohen", created: "Feb 04, 2026", updated: "Apr 28, 2026", endDate: "Jun 30, 2026" },
   { id: 4, name: "Cognigy AI Session — Bot Handoff Audit",
     status: "active", channels: ["voice"], surveyDesignId: "bot-simple", aiModelId: "vu-score",
+    queues: ["AI Bot Team", "Handoff Queue"], startDate: "Mar 30, 2026", ongoing: true,
+    description: "Audits the handoff quality from Cognigy bot sessions to live agents.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 80, sent: 6122, completion: 19.7, vu: 54,
     owner: "Tomás Reyes", created: "Mar 30, 2026", updated: "May 09, 2026", endDate: null },
   { id: 5, name: "Social DM — Brand Health Pulse",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
+    queues: ["Social Media Team"], startDate: "Dec 01, 2025", ongoing: false,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 1840, completion: 14.1, vu: 62,
     owner: "Aisha Khan", created: "Dec 01, 2025", updated: "Apr 12, 2026", endDate: "May 31, 2026" },
   { id: 6, name: "VIP Escalation Follow-Up",
     status: "inactive", channels: ["voice"], surveyDesignId: "vip-followup",
+    queues: ["VIP Support"], startDate: "May 06, 2026", ongoing: true,
+    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 60,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Maria Cohen", created: "May 06, 2026", updated: "May 06, 2026", endDate: null },
   { id: 7, name: "Holiday Returns — Email",
     status: "expired", channels: ["voice"], surveyDesignId: "csat-quick",
+    queues: ["Returns Team"], startDate: "Nov 12, 2025", ongoing: false,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 21450, completion: 26.8, vu: 71,
     owner: "Dev Patel", created: "Nov 12, 2025", updated: "Jan 15, 2026", endDate: "Dec 31, 2025" },
   { id: 8, name: "NPS Quarterly — Enterprise Clients",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-nps", aiModelId: "csat-predictor",
+    queues: ["Enterprise Support"], startDate: "Feb 10, 2026", ongoing: true,
+    description: "Quarterly NPS measurement targeting enterprise-tier client interactions.",
+    interactionLength: 10, suppressOptOut: true, suppressRecent: true, recentDays: 90,
     sampling: 60, sent: 3410, completion: 34.2, vu: 82,
     owner: "Dev Patel", created: "Feb 10, 2026", updated: "May 07, 2026", endDate: null },
   { id: 9, name: "FCR Check — Tier 2 Support",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "vu-score",
+    queues: ["Tier 2 Support"], startDate: "Jan 05, 2026", ongoing: true,
+    description: "First-contact resolution check for Tier 2 escalated support cases.",
+    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 75, sent: 5880, completion: 27.1, vu: 69,
     owner: "Tomás Reyes", created: "Jan 05, 2026", updated: "May 05, 2026", endDate: null },
   { id: 10, name: "Agent Empathy — Voice Quality",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
+    queues: ["Voice Quality Team"], startDate: "Mar 01, 2026", ongoing: true,
+    description: "Measures perceived agent empathy across voice interactions.",
+    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 40, sent: 2760, completion: 29.4, vu: 74,
     owner: "Aisha Khan", created: "Mar 01, 2026", updated: "May 03, 2026", endDate: null },
   { id: 11, name: "Onboarding Feedback — New Users",
-    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching",
+    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching", aiModelId: "csat-predictor",
+    queues: ["Onboarding Team"], startDate: "Apr 02, 2026", ongoing: false,
+    description: "Collects first-impression feedback from newly onboarded customers.",
+    interactionLength: 2, suppressOptOut: false, suppressRecent: true, recentDays: 60,
     sampling: 100, sent: 1920, completion: 42.6, vu: 88,
     owner: "Maria Cohen", created: "Apr 02, 2026", updated: "Apr 30, 2026", endDate: "Jun 30, 2026" },
   { id: 12, name: "Escalation Recovery Survey",
     status: "inactive", channels: ["voice"], surveyDesignId: "vip-followup",
+    queues: ["Escalations"], startDate: "Nov 20, 2025", ongoing: true,
+    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 90, sent: 4100, completion: 18.9, vu: 55,
     owner: "Dev Patel", created: "Nov 20, 2025", updated: "Apr 25, 2026", endDate: null },
   { id: 13, name: "Chatbot Deflection — Self Service",
-    status: "active", channels: ["voice"], surveyDesignId: "bot-simple",
+    status: "active", channels: ["voice"], surveyDesignId: "bot-simple", aiModelId: "vu-score",
+    queues: ["Self Service", "Bot Deflection"], startDate: "Feb 18, 2026", ongoing: true,
+    description: "Evaluates effectiveness of chatbot deflection before agent handoff.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 50, sent: 9340, completion: 22.3, vu: 61,
     owner: "Tomás Reyes", created: "Feb 18, 2026", updated: "Apr 22, 2026", endDate: null },
   { id: 14, name: "Product Feedback — Beta Testers",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
+    queues: ["Beta Program"], startDate: "May 10, 2026", ongoing: false,
+    interactionLength: 2, suppressOptOut: false, suppressRecent: false, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Aisha Khan", created: "May 10, 2026", updated: "May 10, 2026", endDate: "Aug 31, 2026" },
   { id: 15, name: "Complaint Resolution Follow-Up",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "vu-score",
+    queues: ["Complaints Team"], startDate: "Mar 12, 2026", ongoing: true,
+    description: "Follows up on resolved complaints to measure satisfaction recovery.",
+    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 45,
     hasWorkingCopy: true, workingCopyVersion: 2, publishedVersion: 1, publishedAt: "Mar 15, 2026", workingCopyEditedBy: "Maria Cohen", workingCopyEditedAt: "May 12, 2026",
     sampling: 85, sent: 6720, completion: 31.8, vu: 72,
     owner: "Maria Cohen", created: "Mar 12, 2026", updated: "May 12, 2026", endDate: null },
   { id: 16, name: "Seasonal Campaign — Q1 2026",
     status: "expired", channels: ["voice"], surveyDesignId: "csat-quick",
+    queues: ["Seasonal Team"], startDate: "Jan 01, 2026", ongoing: false,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 18900, completion: 24.5, vu: 65,
     owner: "Dev Patel", created: "Jan 01, 2026", updated: "Mar 31, 2026", endDate: "Mar 31, 2026" },
   { id: 17, name: "IVR Experience Survey",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "sentiment-pulse",
+    queues: ["IVR Team"], startDate: "Dec 10, 2025", ongoing: true,
+    description: "Measures satisfaction with IVR self-service experience before agent connection.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 30, sent: 7450, completion: 19.2, vu: 58,
     owner: "Tomás Reyes", created: "Dec 10, 2025", updated: "Apr 18, 2026", endDate: null },
   { id: 18, name: "Technical Support CSAT",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-quick",
+    status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "vu-score",
+    queues: ["Technical Support"], startDate: "Jan 28, 2026", ongoing: true,
+    description: "Post-resolution satisfaction measurement for technical support interactions.",
+    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 65, sent: 11200, completion: 26.7, vu: 70,
     owner: "Aisha Khan", created: "Jan 28, 2026", updated: "Apr 15, 2026", endDate: null },
   { id: 19, name: "Renewal Intent — Premium Tier",
     status: "inactive", channels: ["voice"], surveyDesignId: "ivr-nps",
+    queues: ["Premium Tier"], startDate: "Oct 15, 2025", ongoing: true,
+    interactionLength: 10, suppressOptOut: true, suppressRecent: true, recentDays: 90,
     sampling: 100, sent: 2340, completion: 38.1, vu: 79,
     owner: "Maria Cohen", created: "Oct 15, 2025", updated: "Apr 10, 2026", endDate: null },
   { id: 20, name: "Post-Installation Survey",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall",
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "csat-predictor",
+    queues: ["Installation Team"], startDate: "Mar 05, 2026", ongoing: false,
+    description: "Gauges satisfaction immediately following product or service installation.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 70, sent: 4560, completion: 28.9, vu: 67,
     owner: "Dev Patel", created: "Mar 05, 2026", updated: "Apr 08, 2026", endDate: "Sep 30, 2026" },
   { id: 21, name: "Social Media Response Quality",
     status: "inactive", channels: ["voice"], surveyDesignId: "voice-coaching",
+    queues: ["Social Media Team"], startDate: "May 08, 2026", ongoing: true,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Tomás Reyes", created: "May 08, 2026", updated: "May 08, 2026", endDate: null },
   { id: 22, name: "Long-Term Relationship NPS",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-nps",
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-nps", aiModelId: "csat-predictor",
+    queues: ["Retention Team"], startDate: "Nov 05, 2025", ongoing: true,
+    description: "Long-form NPS survey targeting customers with 12+ months tenure.",
+    interactionLength: 15, suppressOptOut: true, suppressRecent: true, recentDays: 90,
     sampling: 45, sent: 8900, completion: 32.4, vu: 84,
     owner: "Aisha Khan", created: "Nov 05, 2025", updated: "Apr 05, 2026", endDate: null },
   { id: 23, name: "Callback Experience — Voice",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-quick",
+    status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
+    queues: ["Callback Team"], startDate: "Feb 25, 2026", ongoing: true,
+    description: "Measures satisfaction with the callback scheduling and delivery experience.",
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 55, sent: 3280, completion: 21.6, vu: 63,
     owner: "Maria Cohen", created: "Feb 25, 2026", updated: "Apr 02, 2026", endDate: null },
   { id: 24, name: "Knowledge Base Effectiveness",
     status: "expired", channels: ["voice"], surveyDesignId: "ivr-postcall",
+    queues: ["Knowledge Team"], startDate: "Sep 01, 2025", ongoing: false,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 14600, completion: 22.8, vu: 60,
     owner: "Dev Patel", created: "Sep 01, 2025", updated: "Mar 28, 2026", endDate: "Mar 28, 2026" },
   { id: 25, name: "Agent Soft Skills Feedback",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "vu-score",
+    queues: ["Voice Team A", "Voice Team B"], startDate: "Jan 15, 2026", ongoing: true,
+    description: "Evaluates perceived agent soft skills including empathy and communication clarity.",
+    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 35, sent: 6140, completion: 24.3, vu: 71,
     owner: "Tomás Reyes", created: "Jan 15, 2026", updated: "Mar 25, 2026", endDate: null },
   { id: 26, name: "Digital Onboarding — Web",
-    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching",
+    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching", aiModelId: "csat-predictor",
+    queues: ["Web Onboarding"], startDate: "Feb 05, 2026", ongoing: false,
+    description: "Tracks satisfaction across the digital onboarding journey for web users.",
+    interactionLength: 2, suppressOptOut: false, suppressRecent: true, recentDays: 60,
     sampling: 80, sent: 5020, completion: 36.8, vu: 85,
     owner: "Maria Cohen", created: "Feb 05, 2026", updated: "Mar 20, 2026", endDate: "Jul 31, 2026" },
   { id: 27, name: "After-Hours Support Survey",
     status: "inactive", channels: ["voice"], surveyDesignId: "csat-quick",
+    queues: ["After Hours"], startDate: "Dec 20, 2025", ongoing: true,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 1680, completion: 16.4, vu: 52,
     owner: "Aisha Khan", created: "Dec 20, 2025", updated: "Mar 15, 2026", endDate: null },
   { id: 28, name: "Proactive Outreach Feedback",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
+    queues: ["Outreach Team"], startDate: "May 05, 2026", ongoing: true,
+    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Dev Patel", created: "May 05, 2026", updated: "May 05, 2026", endDate: null },
   { id: 29, name: "SLA Compliance Feedback",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall",
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "sentiment-pulse",
+    queues: ["SLA Team"], startDate: "Jan 10, 2026", ongoing: true,
+    description: "Verifies customer perception of SLA adherence across service interactions.",
+    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 60, sent: 7830, completion: 29.6, vu: 73,
     owner: "Maria Cohen", created: "Jan 10, 2026", updated: "Mar 10, 2026", endDate: null },
   { id: 30, name: "Brand Perception — Loyalty",
-    status: "active", channels: ["voice"], surveyDesignId: "brand-pulse",
+    status: "active", channels: ["voice"], surveyDesignId: "brand-pulse", aiModelId: "vu-score",
+    queues: ["Loyalty Program"], startDate: "Dec 05, 2025", ongoing: true,
+    description: "Measures brand loyalty sentiment among high-value repeat customers.",
+    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 45,
     sampling: 90, sent: 4450, completion: 27.8, vu: 77,
     owner: "Tomás Reyes", created: "Dec 05, 2025", updated: "Mar 05, 2026", endDate: null },
 ];
@@ -6599,7 +6692,7 @@ function RowActions({ campaign, statusOf, onActivate, onDeactivate, onDelete, on
   );
 }
 
-function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
+function SurveyCampaignsGrid({ onCreate, onOpen, onEdit, newCampaigns = [] }) {
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState(null);   // null = no filter (show all)
   const [order, setOrder] = React.useState(() => CAMPAIGNS.map(c => c.id));
@@ -6874,7 +6967,7 @@ function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
                       onActivate={rowActivate}
                       onDeactivate={rowDeactivate}
                       onDelete={rowDelete}
-                      onEdit={onOpen}
+                      onEdit={onEdit || onOpen}
                     />
                   </td>
                 </tr>
@@ -7037,6 +7130,51 @@ const SURVEY_DESIGNS = [
     intents: [
       { group: "Primary",   tags: ["Response clarity", "Helpfulness"] },
       { group: "Secondary", tags: ["Tone quality", "Resolution satisfaction"] },
+    ],
+  },
+  {
+    id: "ivr-postcall", name: "IVR Post-Call Survey", category: "Voice Channel",
+    why: "Triggers immediately after an IVR-assisted call ends. Captures in-the-moment effort and resolution signals before the customer disengages.",
+    channels: "Voice",
+    intents: [
+      { group: "Primary",   tags: ["Call resolution", "IVR ease of use"] },
+      { group: "Secondary", tags: ["Hold time satisfaction", "Agent handoff quality"] },
+    ],
+  },
+  {
+    id: "ivr-nps", name: "IVR NPS Survey", category: "Net Promoter",
+    why: "Short NPS delivered post-call via IVR keypad input. High completion rates due to low friction — single question, single keypress.",
+    channels: "Voice",
+    intents: [
+      { group: "Primary",   tags: ["Recommend likelihood", "Loyalty signal"] },
+      { group: "Secondary", tags: ["Detractor flag", "Promoter identification"] },
+    ],
+  },
+  {
+    id: "csat-list", name: "CSAT Ranked List", category: "Customer Satisfaction",
+    why: "Multi-question CSAT covering resolution, effort, and agent behaviour. Best for complex interactions where a single score misses detail.",
+    channels: "Digital · Voice",
+    intents: [
+      { group: "Primary",   tags: ["Overall satisfaction", "Issue resolution"] },
+      { group: "Secondary", tags: ["Agent effectiveness", "Process friction"] },
+    ],
+  },
+  {
+    id: "brand-pulse", name: "Brand Perception Pulse", category: "Brand Health",
+    why: "Measures brand perception beyond the single interaction. Use for loyalty programs, retention campaigns, and long-term relationship tracking.",
+    channels: "Digital · Voice",
+    intents: [
+      { group: "Primary",   tags: ["Brand trust", "Loyalty intent"] },
+      { group: "Secondary", tags: ["Perception shift", "Competitor sensitivity"] },
+    ],
+  },
+  {
+    id: "voice-coaching", name: "Voice Coaching Survey", category: "Quality Assurance",
+    why: "Purpose-built for QA and coaching workflows. Captures specific agent behaviour signals that map directly to coaching rubrics.",
+    channels: "Voice",
+    intents: [
+      { group: "Primary",   tags: ["Agent clarity", "Empathy score"] },
+      { group: "Secondary", tags: ["Script adherence", "Resolution ownership"] },
     ],
   },
 ];
@@ -7326,10 +7464,13 @@ function MultiSelectField({ options, value = [], onChange, placeholder = "Select
       {value.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginTop: "var(--space-2)" }}>
           {value.map(v => (
-            <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px var(--space-2)", borderRadius: "var(--radius-round)", background: "var(--color-bg-active-moderate)", color: "var(--color-fg-active-strong)", font: "500 12px/16px var(--font-sans)" }}>
+            <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-1)", height: 24, padding: "0 6px 0 10px", borderRadius: "var(--radius-full)", background: "var(--lyra-slate-100)", color: "var(--lyra-slate-800)", border: "1px solid var(--lyra-slate-300)", font: "500 12px/20px var(--font-sans)", letterSpacing: "0.01em" }}>
               {v}
-              <button type="button" onClick={() => toggle(v)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1, color: "inherit", display: "flex", alignItems: "center" }}>
-                <svg viewBox="0 0 12 12" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="1.8" strokeLinecap="round"><line x1="9" y1="3" x2="3" y2="9"/><line x1="3" y1="3" x2="9" y2="9"/></svg>
+              <button type="button" onClick={() => toggle(v)}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", lineHeight: 1, color: "var(--lyra-slate-500)", display: "flex", alignItems: "center", borderRadius: "var(--radius-full)" }}
+                onMouseEnter={e => e.currentTarget.style.background = "var(--lyra-slate-200)"}
+                onMouseLeave={e => e.currentTarget.style.background = "none"}>
+                <svg viewBox="0 0 12 12" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><line x1="9" y1="3" x2="3" y2="9"/><line x1="3" y1="3" x2="9" y2="9"/></svg>
               </button>
             </span>
           ))}
@@ -10170,6 +10311,33 @@ const SEED_ONTOLOGIES = [
       "Post-Chat CSAT — Tier 1 Billing",
       "Cognigy AI Session — Bot Handoff Audit",
       "NPS Quarterly — Enterprise Clients",
+      "General Inquiry Pulse",
+      "Mobile App Feedback",
+      "Cancellation Recovery",
+      "Complaint Resolution Follow-Up",
+      "Product Feedback — Beta Testers",
+      "Negative Sentiment Catcher — All Digital",
+      "Social Media Response Quality",
+      "VIP Escalation Follow-Up",
+      "FCR Check — Tier 2 Support",
+      "Proactive Outreach Feedback",
+      "Digital Onboarding CSAT",
+      "Billing Dispute Resolution",
+      "IVR Drop-Off Analysis",
+      "Agent Empathy Tracker",
+      "First Contact Resolution Monitor",
+      "Chat Deflection Quality",
+      "Email Response Sentiment",
+      "Escalation Trend Pulse",
+      "Retention Campaign CSAT",
+      "Self-Service Completion Rate",
+      "Support Follow-Up Survey",
+      "Premium Tier Experience",
+      "Renewal Intent Survey",
+      "Technical Support Quality",
+      "Account Management Pulse",
+      "Onboarding Completion Survey",
+      "Post-Resolution Satisfaction",
     ],
     // Topic AI has published updates to this model after the ontology was
     // last saved. Drives the "Updates available" badge on the grid and the
@@ -10233,6 +10401,7 @@ function VUScoreModel() {
   // 'list' | 'edit' | 'new'
   const [view, setView] = React.useState("list");
   const [editingId, setEditingId] = React.useState(null);
+  const [confirmRemoveId, setConfirmRemoveId] = React.useState(null);
 
   const editing = editingId ? ontologies.find(o => o.id === editingId) : null;
 
@@ -10242,9 +10411,10 @@ function VUScoreModel() {
   };
   const handleEdit = (id) => { setEditingId(id); setView("edit"); };
   const handleNew  = () => { setEditingId(null); setView("new"); };
-  const handleRemove = (id) => {
-    if (!window.confirm("Remove this ontology configuration?")) return;
-    persist(ontologies.filter(o => o.id !== id));
+  const handleRemove = (id) => { setConfirmRemoveId(id); };
+  const handleConfirmRemove = () => {
+    persist(ontologies.filter(o => o.id !== confirmRemoveId));
+    setConfirmRemoveId(null);
   };
   const handleCancel = () => { setView("list"); setEditingId(null); };
   const handlePublish = (modelId, categories) => {
@@ -10284,8 +10454,23 @@ function VUScoreModel() {
     setEditingId(null);
   };
 
+  const confirmTarget = confirmRemoveId ? ontologies.find(o => o.id === confirmRemoveId) : null;
+
   if (view === "list") {
-    return <OntologyList ontologies={ontologies} onEdit={handleEdit} onRemove={handleRemove} onNew={handleNew}/>;
+    return (
+      <React.Fragment>
+        <OntologyList ontologies={ontologies} onEdit={handleEdit} onRemove={handleRemove} onNew={handleNew}/>
+        {confirmRemoveId && (
+          <ConfirmModal
+            title="Remove ontology configuration"
+            body={confirmTarget ? `"${confirmTarget.modelName}" will be permanently removed. This cannot be undone.` : "This configuration will be permanently removed. This cannot be undone."}
+            confirmLabel="Remove"
+            onConfirm={handleConfirmRemove}
+            onCancel={() => setConfirmRemoveId(null)}
+          />
+        )}
+      </React.Fragment>
+    );
   }
   return (
     <OntologyEditor
@@ -10295,6 +10480,114 @@ function VUScoreModel() {
       onCancel={handleCancel}
       onPublish={handlePublish}
     />
+  );
+}
+
+function ConfirmModal({ title, body, confirmLabel, onConfirm, onCancel }) {
+  return (
+    <div className="ly-modal-backdrop" onClick={onCancel}>
+      <div className="ly-modal" style={{ width: 400 }} onClick={e => e.stopPropagation()}
+        role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+        <div className="ly-modal-head">
+          <span className="ly-modal-title" id="confirm-modal-title">{title}</span>
+          <button className="ly-modal-close" aria-label="Close" onClick={onCancel}>
+            <LucideX/>
+          </button>
+        </div>
+        <div style={{ padding: "var(--space-5) var(--space-6)", font: "400 14px/24px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+          {body}
+        </div>
+        <div className="ly-modal-foot">
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className="btn destructive" onClick={onConfirm}>{confirmLabel}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MappedCampaignsCell({ campaigns }) {
+  const MAX_VISIBLE = 10;
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
+  const ref = React.useRef(null);
+  const visible = campaigns.slice(0, MAX_VISIBLE);
+  const overflow = campaigns.slice(MAX_VISIBLE);
+
+  React.useEffect(() => {
+    if (!popoverOpen) return;
+    function onDocClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setPopoverOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [popoverOpen]);
+
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+      {visible.map((name, i) => (
+        <span key={i} style={{
+          display: "inline-flex", alignItems: "center",
+          padding: "2px 8px",
+          borderRadius: "var(--radius-round)",
+          background: "var(--lyra-slate-100)",
+          color: "var(--lyra-slate-700)",
+          font: "400 12px/18px var(--font-sans)",
+          whiteSpace: "nowrap",
+          border: "1px solid var(--lyra-slate-200)",
+        }}>{name}</span>
+      ))}
+      {overflow.length > 0 && (
+        <div ref={ref} style={{ position: "relative" }}>
+          <button
+            onClick={() => setPopoverOpen(v => !v)}
+            style={{
+              display: "inline-flex", alignItems: "center",
+              padding: "2px 8px",
+              borderRadius: "var(--radius-round)",
+              background: "var(--lyra-brand-50)",
+              color: "var(--lyra-brand-700)",
+              font: "500 12px/18px var(--font-sans)",
+              border: "1px solid var(--lyra-brand-200)",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >+{overflow.length} more</button>
+          {popoverOpen && (
+            <div style={{
+              position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 100,
+              background: "var(--lyra-color-bg-surface-overlay)",
+              border: "1px solid var(--lyra-color-border-soft)",
+              borderRadius: "var(--radius-lg)",
+              boxShadow: "var(--sol-effect-shadowlg)",
+              padding: "8px 0",
+              minWidth: 260,
+              maxWidth: 360,
+              maxHeight: 320,
+              overflowY: "auto",
+            }}>
+              <div style={{
+                padding: "4px 12px 8px",
+                font: "500 11px/16px var(--font-sans)",
+                color: "var(--color-fg-secondary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                borderBottom: "1px solid var(--lyra-color-border-subtle)",
+                marginBottom: 4,
+              }}>
+                {overflow.length} more campaign{overflow.length !== 1 ? "s" : ""}
+              </div>
+              {overflow.map((name, i) => (
+                <div key={i} style={{
+                  padding: "6px 12px",
+                  font: "400 13px/18px var(--font-sans)",
+                  color: "var(--color-fg-default)",
+                }}>{name}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -10333,7 +10626,6 @@ function OntologyList({ ontologies, onEdit, onRemove, onNew }) {
             <tr>
               <th>Topic AI Model</th>
               <th>Mapped campaigns</th>
-              <th>Last updated</th>
               <th style={{ width: 52 }}>Actions</th>
             </tr>
           </thead>
@@ -10379,30 +10671,12 @@ function OntologyList({ ontologies, onEdit, onRemove, onNew }) {
                       {o.categories.length} categories
                     </div>
                   </td>
-                  <td style={{ maxWidth: 320 }}>
+                  <td>
                     {mapped.length === 0 ? (
                       <span style={{ color: "var(--color-fg-secondary)", fontStyle: "italic" }}>None</span>
                     ) : (
-                      <React.Fragment>
-                        <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                          {mapped.length} {mapped.length === 1 ? "campaign" : "campaigns"}
-                        </div>
-                        <div style={{
-                          font: "400 12px/16px var(--font-sans)",
-                          color: "var(--color-fg-secondary)",
-                          marginTop: 4, whiteSpace: "normal",
-                        }}>
-                          {mapped.slice(0, 2).join(", ")}
-                          {mapped.length > 2 ? ", +" + (mapped.length - 2) + " more" : ""}
-                        </div>
-                      </React.Fragment>
+                      <MappedCampaignsCell campaigns={mapped} />
                     )}
-                  </td>
-                  <td>
-                    <div>{formatUpdatedAt(o.updatedAt)}</div>
-                    <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginTop: 4 }}>
-                      by {o.updatedBy}
-                    </div>
                   </td>
                   <td style={{ textAlign: "center" }}>
                     <OntologyRowActions
@@ -10555,29 +10829,29 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
       </div>
 
       {/* Scrollable body */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "36px 40px 24px" }}>
-        <div style={{ width: "80%" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "var(--space-6) var(--space-8) var(--space-6)" }}>
+        <div style={{ maxWidth: 1200 }}>
 
           {/* Upstream changes notice — only in edit mode when Topic AI has new updates */}
           {isEdit && ontology && ontology.hasUpstreamChanges ? (
             <div style={{
-              background: "#fffbeb",
-              border: "1px solid #fde68a",
+              background: "var(--color-status-warning-subtle)",
+              border: "1px solid rgba(250,203,51,0.4)",
               borderRadius: "var(--radius-md)",
-              padding: "12px 16px",
-              marginBottom: 24,
-              display: "flex", alignItems: "flex-start", gap: 12,
+              padding: "var(--space-3) var(--space-4)",
+              marginBottom: "var(--space-6)",
+              display: "flex", alignItems: "flex-start", gap: "var(--space-3)",
             }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-status-warning-strong)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
                 <circle cx="12" cy="12" r="10"/>
                 <line x1="12" y1="8" x2="12" y2="12"/>
                 <line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
               <div>
-                <div style={{ font: "600 13px/18px var(--font-sans)", color: "#92400e", marginBottom: 2 }}>
+                <div style={{ font: "600 13px/18px var(--font-sans)", color: "var(--color-status-warning-strong)", marginBottom: 2 }}>
                   Topic AI has new updates for this model
                 </div>
-                <div style={{ font: "400 13px/18px var(--font-sans)", color: "#78350f" }}>
+                <div style={{ font: "400 13px/18px var(--font-sans)", color: "var(--color-status-warning-strong)" }}>
                   Click <strong>Refresh Model</strong> at the top right to pull the latest categories before publishing.
                 </div>
               </div>
@@ -10614,7 +10888,7 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
                   </select>
                   <p style={{ margin: "8px 0 0", font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
                     {isEdit
-                      ? "The model is locked while editing this ontology."
+                      ? null
                       : nothingLeft
                       ? "Every Topic AI Model already has an ontology. Edit an existing row to update its weights."
                       : "Only models without an ontology yet are shown. Choose one to load its categories with default weight = 5."}
@@ -10626,86 +10900,163 @@ function OntologyEditor({ mode, ontology, configuredModelIds, onCancel, onPublis
 
           {selectedModel && categories.length > 0 ? (
             <React.Fragment>
-              {/* Section label */}
-              <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 16 }}>
-                Define Category Weights
+              {/* Section header row */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-4)" }}>
+                <div>
+                  <div style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>
+                    Category Weights
+                  </div>
+                  <div style={{ font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+                    {categories.filter(c => c.active).length} of {categories.length} active · adjust weight 1–10 per category
+                  </div>
+                </div>
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: "var(--space-2)",
+                  background: "var(--color-bg-active-subtle)",
+                  border: "1px solid var(--color-border-active)",
+                  borderRadius: "var(--radius-full)",
+                  padding: "4px 12px",
+                  font: "500 12px/16px var(--font-sans)",
+                  color: "var(--color-fg-active-strong)",
+                }}>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  {categories.reduce((s, c) => s + (c.active ? c.weight : 0), 0)} total weight
+                </div>
               </div>
 
-              {/* Categories card grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                {categories.map(c => (
-                  <div key={c.id} className={`ont-cat-card${c.active ? "" : " ont-cat-card--inactive"}`}>
+              {/* Categories card grid — 3 cols */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "var(--space-4)" }}>
+                {categories.map((c, idx) => {
+                  const accentColors = [
+                    "var(--lyra-brand-600)",
+                    "#7c3aed",
+                    "var(--color-status-success-strong)",
+                    "var(--color-status-warning-strong)",
+                    "#0891b2",
+                    "var(--color-status-critical-strong)",
+                    "#0d9488",
+                    "#db2777",
+                    "var(--lyra-brand-800)",
+                    "#65a30d",
+                  ];
+                  const accent = accentColors[idx % accentColors.length];
+                  const isNew = newlyAddedIds.indexOf(c.id) !== -1;
+                  return (
+                    <div key={c.id} style={{
+                      position: "relative",
+                      background: "var(--lyra-white)",
+                      border: "1px solid var(--color-border-subtle)",
+                      borderRadius: "var(--radius-lg)",
+                      overflow: "hidden",
+                      opacity: c.active ? 1 : 0.5,
+                      transition: "box-shadow 0.15s, border-color 0.15s, opacity 0.15s",
+                      display: "flex", flexDirection: "column",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(0,0,0,0.14)"; e.currentTarget.style.boxShadow = "0px 4px 12px 0px rgba(0,0,0,0.06)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--color-border-subtle)"; e.currentTarget.style.boxShadow = "none"; }}
+                    >
+                      {/* Accent top bar */}
+                      <div style={{ height: 3, background: accent, flexShrink: 0 }}/>
 
-                    {/* Name + actions row */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                      <input className="ont-input" value={c.name}
-                        onChange={e => setCategory(c.id, { name: e.target.value })}
-                        style={{ font: "500 15px/20px var(--font-sans)", color: "var(--color-fg-default)", padding: "2px 4px", flex: 1 }}/>
-                      {newlyAddedIds.indexOf(c.id) !== -1 ? (
-                        <span style={{
-                          display: "inline-flex", alignItems: "center",
-                          font: "700 9px/1 var(--font-sans)",
-                          color: "#15803d",
-                          background: "#dcfce7",
-                          border: "1px solid #bbf7d0",
-                          padding: "3px 6px",
-                          borderRadius: "999px",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.06em",
-                          flexShrink: 0,
-                        }}>New</span>
-                      ) : null}
-                    </div>
-
-                    {/* Weight label + badge */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                      <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                        Weight
-                      </span>
-                      <span style={{
-                        display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        width: 34, height: 28,
-                        font: "700 15px/1 var(--font-sans)",
-                        color: "var(--color-fg-action)",
-                        background: "var(--color-bg-active-moderate)",
-                        borderRadius: "var(--radius-sm)",
-                      }}>{c.weight}</span>
-                    </div>
-
-                    {/* Slider */}
-                    <input type="range" min="1" max="10" value={c.weight}
-                      disabled={!c.active}
-                      onChange={e => setCategory(c.id, { weight: parseInt(e.target.value) })}
-                      style={{ width: "100%", accentColor: "var(--color-border-active)", display: "block" }}/>
-
-                    {/* Tick marks + labels */}
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5, padding: "0 7px" }}>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                        <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                          <div style={{
-                            width: 1.5,
-                            height: (n === 1 || n === 5 || n === 10) ? 8 : 5,
-                            background: n === c.weight ? "var(--color-border-active)" : "rgba(0,0,0,0.16)",
-                            borderRadius: 1,
-                          }}/>
-                          {(n === 1 || n === 5 || n === 10) && (
-                            <span style={{ font: "400 10px/12px var(--font-sans)", color: n === c.weight ? "var(--color-fg-action)" : "var(--color-fg-secondary)" }}>
-                              {n}
-                            </span>
+                      <div style={{ padding: "var(--space-4) var(--space-4) var(--space-5)" }}>
+                        {/* Name row + badges */}
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
+                          <input
+                            className="ont-input"
+                            value={c.name}
+                            onChange={e => setCategory(c.id, { name: e.target.value })}
+                            style={{
+                              font: "500 14px/20px var(--font-sans)",
+                              color: "var(--color-fg-default)",
+                              padding: "2px 0",
+                              border: "none",
+                              borderBottom: "1px solid transparent",
+                              borderRadius: 0,
+                              background: "transparent",
+                              flex: 1,
+                              minWidth: 0,
+                              outline: "none",
+                            }}
+                            onFocus={e => { e.target.style.borderBottomColor = "var(--color-border-active)"; }}
+                            onBlur={e => { e.target.style.borderBottomColor = "transparent"; }}
+                          />
+                          {isNew && (
+                            <span style={{
+                              display: "inline-flex", alignItems: "center",
+                              font: "600 9px/1 var(--font-sans)",
+                              color: "var(--color-status-success-strong)",
+                              background: "var(--color-status-success-subtle)",
+                              border: "1px solid rgba(100,185,111,0.35)",
+                              padding: "3px 7px",
+                              borderRadius: "var(--radius-full)",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.06em",
+                              flexShrink: 0,
+                              marginTop: 2,
+                            }}>New</span>
                           )}
                         </div>
-                      ))}
-                    </div>
 
-                  </div>
-                ))}
+                        {/* Weight row */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
+                          <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                            Weight
+                          </span>
+                          <span style={{
+                            display: "inline-flex", alignItems: "center", justifyContent: "center",
+                            minWidth: 32, height: 24,
+                            font: "600 14px/1 var(--font-sans)",
+                            color: accent,
+                            background: "transparent",
+                            borderRadius: "var(--radius-xs)",
+                          }}>{c.weight}</span>
+                        </div>
+
+                        {/* Slider */}
+                        <input type="range" min="1" max="10" value={c.weight}
+                          disabled={!c.active}
+                          onChange={e => setCategory(c.id, { weight: parseInt(e.target.value) })}
+                          style={{ width: "100%", accentColor: accent, display: "block", cursor: c.active ? "pointer" : "not-allowed" }}/>
+
+                        {/* Tick marks */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, padding: "0 6px" }}>
+                          {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                            <div key={n} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                              <div style={{
+                                width: 1.5,
+                                height: (n === 1 || n === 5 || n === 10) ? 7 : 4,
+                                background: n === c.weight ? accent : "rgba(0,0,0,0.14)",
+                                borderRadius: 1,
+                              }}/>
+                              {(n === 1 || n === 5 || n === 10) && (
+                                <span style={{ font: "400 10px/12px var(--font-sans)", color: n === c.weight ? accent : "var(--color-fg-secondary)" }}>
+                                  {n}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Active toggle row */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "var(--space-4)", paddingTop: "var(--space-3)", borderTop: "1px solid var(--color-border-subtle)" }}>
+                          <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+                            {c.active ? "Active" : "Inactive"}
+                          </span>
+                          <SmallToggle checked={c.active} onChange={v => setCategory(c.id, { active: v })}/>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </React.Fragment>
           ) : (
             <div style={{
-              border: "1px dashed var(--color-border-soft)",
-              borderRadius: "var(--radius-md)",
-              padding: "32px 24px",
+              border: "1.5px dashed var(--color-border-soft)",
+              borderRadius: "var(--radius-lg)",
+              padding: "48px 24px",
               textAlign: "center",
               color: "var(--color-fg-secondary)",
               font: "400 14px/20px var(--font-sans)",
@@ -11595,6 +11946,7 @@ function App() {
         content = <SurveyCampaignsGrid
           onCreate={() => setRoute({ ...route, view: "create" })}
           onOpen={(c) => setRoute({ ...route, view: "detail", campaign: c })}
+          onEdit={(c) => setRoute({ ...route, view: "create", editCampaign: c })}
           newCampaigns={newCampaigns}/>;
       }
     } else if (route.section === "ontology") {
