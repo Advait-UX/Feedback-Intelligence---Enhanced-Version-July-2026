@@ -9,30 +9,24 @@
 <style>
 /* Feedback Intelligence — additions over shell.css */
 
-/* ─── Global scrollbar — hidden until hover, 3px thin, light grey ──────── */
+/* ─── Global scrollbar — Lyra slate palette, thin & subtle ──────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--lyra-slate-300, #d2d8db) transparent;
 }
 *::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: var(--lyra-slate-300, #d2d8db);
   border-radius: 9999px;
 }
-*:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-}
-*:hover::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.22);
-}
-*:hover {
-  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--lyra-slate-400, #a8b3bb);
 }
 
 /* ─── Lyra Info banner — used for inline help text above tables ──────────────
@@ -94,7 +88,7 @@
   display: flex; flex-direction: column;
   gap: var(--space-4);                                  /* 16px between rows (per request) */
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--color-border-medium) transparent;
 }
 .app-menu-gap {
   height: var(--space-2);                               /* Figma: 8px tall divider container */
@@ -1042,13 +1036,12 @@ select.fi-input {
   overflow-y: auto;
   min-height: 0;
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--lyra-slate-300, #d2d8db) transparent;
 }
 .wz-scroll-area::-webkit-scrollbar { width: 4px; }
 .wz-scroll-area::-webkit-scrollbar-track { background: transparent; }
-.wz-scroll-area::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; }
-.wz-scroll-area:hover::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.12); }
-.wz-scroll-area::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.22); }
+.wz-scroll-area::-webkit-scrollbar-thumb { background: var(--lyra-slate-300, #d2d8db); border-radius: 9999px; }
+.wz-scroll-area::-webkit-scrollbar-thumb:hover { background: var(--lyra-slate-400, #a8b3bb); }
 /* Two-column outer layout: form left, summary right — sits below wizard bar */
 .wz-content-area {
   display: flex;
@@ -2338,7 +2331,7 @@ select.fi-input {
   padding: 0 var(--space-6) var(--space-4);
   display: flex; flex-direction: column; gap: var(--space-2);
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--color-border-medium) transparent;
 }
 
 .model-picker-row {
@@ -3762,7 +3755,7 @@ tbody tr.selected td:first-child::before{
   display: flex; flex-direction: column;
   gap: var(--space-4);                                  /* 16px between rows (per request) */
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--color-border-medium) transparent;
 }
 .app-menu-gap {
   height: var(--space-2);                               /* Figma: 8px tall divider container */
@@ -5540,7 +5533,7 @@ select.fi-input {
   padding: 0 var(--space-6) var(--space-4);
   display: flex; flex-direction: column; gap: var(--space-2);
   scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
+  scrollbar-color: var(--color-border-medium) transparent;
 }
 
 .model-picker-row {
@@ -6202,203 +6195,124 @@ Object.assign(window, { Topbar, LeftNav, AppSwitcher, FIProductIcon, Chev, SMILE
 const CAMPAIGNS = [
   { id: 1, name: "Post-Chat CSAT — Tier 1 Billing",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "vu-score",
-    queues: ["Tier 1 Billing"], startDate: "Mar 14, 2026", ongoing: true,
-    description: "Captures customer satisfaction immediately after each billing interaction.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     hasWorkingCopy: true, workingCopyVersion: 4, publishedVersion: 3, publishedAt: "May 04, 2026", workingCopyEditedBy: "Maria Cohen", workingCopyEditedAt: "May 10, 2026",
     sampling: 50, sent: 12480, completion: 31.2, vu: 76,
     owner: "Maria Cohen", created: "Mar 14, 2026", updated: "May 02, 2026", endDate: null },
   { id: 2, name: "Negative Sentiment Catcher — All Digital",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
-    queues: ["Digital Support", "Chat Team"], startDate: "Jan 22, 2026", ongoing: true,
-    description: "Targets interactions flagged with negative sentiment indicators for follow-up.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 14,
     sampling: 100, sent: 4220, completion: 28.6, vu: 41,
     owner: "Dev Patel", created: "Jan 22, 2026", updated: "May 08, 2026", endDate: null },
   { id: 3, name: "Email Support — Resolution Quality",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "vu-score",
-    queues: ["Email Support"], startDate: "Feb 04, 2026", ongoing: false,
-    description: "Measures resolution quality for email-based support tickets.",
-    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
     sampling: 25, sent: 8910, completion: 22.4, vu: 68,
     owner: "Maria Cohen", created: "Feb 04, 2026", updated: "Apr 28, 2026", endDate: "Jun 30, 2026" },
   { id: 4, name: "Cognigy AI Session — Bot Handoff Audit",
     status: "active", channels: ["voice"], surveyDesignId: "bot-simple", aiModelId: "vu-score",
-    queues: ["AI Bot Team", "Handoff Queue"], startDate: "Mar 30, 2026", ongoing: true,
-    description: "Audits the handoff quality from Cognigy bot sessions to live agents.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 80, sent: 6122, completion: 19.7, vu: 54,
     owner: "Tomás Reyes", created: "Mar 30, 2026", updated: "May 09, 2026", endDate: null },
   { id: 5, name: "Social DM — Brand Health Pulse",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
-    queues: ["Social Media Team"], startDate: "Dec 01, 2025", ongoing: false,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 1840, completion: 14.1, vu: 62,
     owner: "Aisha Khan", created: "Dec 01, 2025", updated: "Apr 12, 2026", endDate: "May 31, 2026" },
   { id: 6, name: "VIP Escalation Follow-Up",
     status: "inactive", channels: ["voice"], surveyDesignId: "vip-followup",
-    queues: ["VIP Support"], startDate: "May 06, 2026", ongoing: true,
-    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 60,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Maria Cohen", created: "May 06, 2026", updated: "May 06, 2026", endDate: null },
   { id: 7, name: "Holiday Returns — Email",
     status: "expired", channels: ["voice"], surveyDesignId: "csat-quick",
-    queues: ["Returns Team"], startDate: "Nov 12, 2025", ongoing: false,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 21450, completion: 26.8, vu: 71,
     owner: "Dev Patel", created: "Nov 12, 2025", updated: "Jan 15, 2026", endDate: "Dec 31, 2025" },
   { id: 8, name: "NPS Quarterly — Enterprise Clients",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-nps", aiModelId: "csat-predictor",
-    queues: ["Enterprise Support"], startDate: "Feb 10, 2026", ongoing: true,
-    description: "Quarterly NPS measurement targeting enterprise-tier client interactions.",
-    interactionLength: 10, suppressOptOut: true, suppressRecent: true, recentDays: 90,
     sampling: 60, sent: 3410, completion: 34.2, vu: 82,
     owner: "Dev Patel", created: "Feb 10, 2026", updated: "May 07, 2026", endDate: null },
   { id: 9, name: "FCR Check — Tier 2 Support",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "vu-score",
-    queues: ["Tier 2 Support"], startDate: "Jan 05, 2026", ongoing: true,
-    description: "First-contact resolution check for Tier 2 escalated support cases.",
-    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 75, sent: 5880, completion: 27.1, vu: 69,
     owner: "Tomás Reyes", created: "Jan 05, 2026", updated: "May 05, 2026", endDate: null },
   { id: 10, name: "Agent Empathy — Voice Quality",
     status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
-    queues: ["Voice Quality Team"], startDate: "Mar 01, 2026", ongoing: true,
-    description: "Measures perceived agent empathy across voice interactions.",
-    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 40, sent: 2760, completion: 29.4, vu: 74,
     owner: "Aisha Khan", created: "Mar 01, 2026", updated: "May 03, 2026", endDate: null },
   { id: 11, name: "Onboarding Feedback — New Users",
-    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching", aiModelId: "csat-predictor",
-    queues: ["Onboarding Team"], startDate: "Apr 02, 2026", ongoing: false,
-    description: "Collects first-impression feedback from newly onboarded customers.",
-    interactionLength: 2, suppressOptOut: false, suppressRecent: true, recentDays: 60,
+    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching",
     sampling: 100, sent: 1920, completion: 42.6, vu: 88,
     owner: "Maria Cohen", created: "Apr 02, 2026", updated: "Apr 30, 2026", endDate: "Jun 30, 2026" },
   { id: 12, name: "Escalation Recovery Survey",
     status: "inactive", channels: ["voice"], surveyDesignId: "vip-followup",
-    queues: ["Escalations"], startDate: "Nov 20, 2025", ongoing: true,
-    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 90, sent: 4100, completion: 18.9, vu: 55,
     owner: "Dev Patel", created: "Nov 20, 2025", updated: "Apr 25, 2026", endDate: null },
   { id: 13, name: "Chatbot Deflection — Self Service",
-    status: "active", channels: ["voice"], surveyDesignId: "bot-simple", aiModelId: "vu-score",
-    queues: ["Self Service", "Bot Deflection"], startDate: "Feb 18, 2026", ongoing: true,
-    description: "Evaluates effectiveness of chatbot deflection before agent handoff.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "bot-simple",
     sampling: 50, sent: 9340, completion: 22.3, vu: 61,
     owner: "Tomás Reyes", created: "Feb 18, 2026", updated: "Apr 22, 2026", endDate: null },
   { id: 14, name: "Product Feedback — Beta Testers",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
-    queues: ["Beta Program"], startDate: "May 10, 2026", ongoing: false,
-    interactionLength: 2, suppressOptOut: false, suppressRecent: false, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Aisha Khan", created: "May 10, 2026", updated: "May 10, 2026", endDate: "Aug 31, 2026" },
   { id: 15, name: "Complaint Resolution Follow-Up",
     status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "vu-score",
-    queues: ["Complaints Team"], startDate: "Mar 12, 2026", ongoing: true,
-    description: "Follows up on resolved complaints to measure satisfaction recovery.",
-    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 45,
     hasWorkingCopy: true, workingCopyVersion: 2, publishedVersion: 1, publishedAt: "Mar 15, 2026", workingCopyEditedBy: "Maria Cohen", workingCopyEditedAt: "May 12, 2026",
     sampling: 85, sent: 6720, completion: 31.8, vu: 72,
     owner: "Maria Cohen", created: "Mar 12, 2026", updated: "May 12, 2026", endDate: null },
   { id: 16, name: "Seasonal Campaign — Q1 2026",
     status: "expired", channels: ["voice"], surveyDesignId: "csat-quick",
-    queues: ["Seasonal Team"], startDate: "Jan 01, 2026", ongoing: false,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 18900, completion: 24.5, vu: 65,
     owner: "Dev Patel", created: "Jan 01, 2026", updated: "Mar 31, 2026", endDate: "Mar 31, 2026" },
   { id: 17, name: "IVR Experience Survey",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "sentiment-pulse",
-    queues: ["IVR Team"], startDate: "Dec 10, 2025", ongoing: true,
-    description: "Measures satisfaction with IVR self-service experience before agent connection.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
     sampling: 30, sent: 7450, completion: 19.2, vu: 58,
     owner: "Tomás Reyes", created: "Dec 10, 2025", updated: "Apr 18, 2026", endDate: null },
   { id: 18, name: "Technical Support CSAT",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "vu-score",
-    queues: ["Technical Support"], startDate: "Jan 28, 2026", ongoing: true,
-    description: "Post-resolution satisfaction measurement for technical support interactions.",
-    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "csat-quick",
     sampling: 65, sent: 11200, completion: 26.7, vu: 70,
     owner: "Aisha Khan", created: "Jan 28, 2026", updated: "Apr 15, 2026", endDate: null },
   { id: 19, name: "Renewal Intent — Premium Tier",
     status: "inactive", channels: ["voice"], surveyDesignId: "ivr-nps",
-    queues: ["Premium Tier"], startDate: "Oct 15, 2025", ongoing: true,
-    interactionLength: 10, suppressOptOut: true, suppressRecent: true, recentDays: 90,
     sampling: 100, sent: 2340, completion: 38.1, vu: 79,
     owner: "Maria Cohen", created: "Oct 15, 2025", updated: "Apr 10, 2026", endDate: null },
   { id: 20, name: "Post-Installation Survey",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "csat-predictor",
-    queues: ["Installation Team"], startDate: "Mar 05, 2026", ongoing: false,
-    description: "Gauges satisfaction immediately following product or service installation.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall",
     sampling: 70, sent: 4560, completion: 28.9, vu: 67,
     owner: "Dev Patel", created: "Mar 05, 2026", updated: "Apr 08, 2026", endDate: "Sep 30, 2026" },
   { id: 21, name: "Social Media Response Quality",
     status: "inactive", channels: ["voice"], surveyDesignId: "voice-coaching",
-    queues: ["Social Media Team"], startDate: "May 08, 2026", ongoing: true,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Tomás Reyes", created: "May 08, 2026", updated: "May 08, 2026", endDate: null },
   { id: 22, name: "Long-Term Relationship NPS",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-nps", aiModelId: "csat-predictor",
-    queues: ["Retention Team"], startDate: "Nov 05, 2025", ongoing: true,
-    description: "Long-form NPS survey targeting customers with 12+ months tenure.",
-    interactionLength: 15, suppressOptOut: true, suppressRecent: true, recentDays: 90,
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-nps",
     sampling: 45, sent: 8900, completion: 32.4, vu: 84,
     owner: "Aisha Khan", created: "Nov 05, 2025", updated: "Apr 05, 2026", endDate: null },
   { id: 23, name: "Callback Experience — Voice",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-quick", aiModelId: "sentiment-pulse",
-    queues: ["Callback Team"], startDate: "Feb 25, 2026", ongoing: true,
-    description: "Measures satisfaction with the callback scheduling and delivery experience.",
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "csat-quick",
     sampling: 55, sent: 3280, completion: 21.6, vu: 63,
     owner: "Maria Cohen", created: "Feb 25, 2026", updated: "Apr 02, 2026", endDate: null },
   { id: 24, name: "Knowledge Base Effectiveness",
     status: "expired", channels: ["voice"], surveyDesignId: "ivr-postcall",
-    queues: ["Knowledge Team"], startDate: "Sep 01, 2025", ongoing: false,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 14600, completion: 22.8, vu: 60,
     owner: "Dev Patel", created: "Sep 01, 2025", updated: "Mar 28, 2026", endDate: "Mar 28, 2026" },
   { id: 25, name: "Agent Soft Skills Feedback",
-    status: "active", channels: ["voice"], surveyDesignId: "csat-list", aiModelId: "vu-score",
-    queues: ["Voice Team A", "Voice Team B"], startDate: "Jan 15, 2026", ongoing: true,
-    description: "Evaluates perceived agent soft skills including empathy and communication clarity.",
-    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "csat-list",
     sampling: 35, sent: 6140, completion: 24.3, vu: 71,
     owner: "Tomás Reyes", created: "Jan 15, 2026", updated: "Mar 25, 2026", endDate: null },
   { id: 26, name: "Digital Onboarding — Web",
-    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching", aiModelId: "csat-predictor",
-    queues: ["Web Onboarding"], startDate: "Feb 05, 2026", ongoing: false,
-    description: "Tracks satisfaction across the digital onboarding journey for web users.",
-    interactionLength: 2, suppressOptOut: false, suppressRecent: true, recentDays: 60,
+    status: "active", channels: ["voice"], surveyDesignId: "voice-coaching",
     sampling: 80, sent: 5020, completion: 36.8, vu: 85,
     owner: "Maria Cohen", created: "Feb 05, 2026", updated: "Mar 20, 2026", endDate: "Jul 31, 2026" },
   { id: 27, name: "After-Hours Support Survey",
     status: "inactive", channels: ["voice"], surveyDesignId: "csat-quick",
-    queues: ["After Hours"], startDate: "Dec 20, 2025", ongoing: true,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: true, recentDays: 30,
     sampling: 100, sent: 1680, completion: 16.4, vu: 52,
     owner: "Aisha Khan", created: "Dec 20, 2025", updated: "Mar 15, 2026", endDate: null },
   { id: 28, name: "Proactive Outreach Feedback",
     status: "inactive", channels: ["voice"], surveyDesignId: "brand-pulse",
-    queues: ["Outreach Team"], startDate: "May 05, 2026", ongoing: true,
-    interactionLength: 2, suppressOptOut: true, suppressRecent: false, recentDays: 30,
     sampling: 100, sent: 0, completion: 0, vu: null,
     owner: "Dev Patel", created: "May 05, 2026", updated: "May 05, 2026", endDate: null },
   { id: 29, name: "SLA Compliance Feedback",
-    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall", aiModelId: "sentiment-pulse",
-    queues: ["SLA Team"], startDate: "Jan 10, 2026", ongoing: true,
-    description: "Verifies customer perception of SLA adherence across service interactions.",
-    interactionLength: 3, suppressOptOut: true, suppressRecent: true, recentDays: 30,
+    status: "active", channels: ["voice"], surveyDesignId: "ivr-postcall",
     sampling: 60, sent: 7830, completion: 29.6, vu: 73,
     owner: "Maria Cohen", created: "Jan 10, 2026", updated: "Mar 10, 2026", endDate: null },
   { id: 30, name: "Brand Perception — Loyalty",
-    status: "active", channels: ["voice"], surveyDesignId: "brand-pulse", aiModelId: "vu-score",
-    queues: ["Loyalty Program"], startDate: "Dec 05, 2025", ongoing: true,
-    description: "Measures brand loyalty sentiment among high-value repeat customers.",
-    interactionLength: 5, suppressOptOut: true, suppressRecent: true, recentDays: 45,
+    status: "active", channels: ["voice"], surveyDesignId: "brand-pulse",
     sampling: 90, sent: 4450, completion: 27.8, vu: 77,
     owner: "Tomás Reyes", created: "Dec 05, 2025", updated: "Mar 05, 2026", endDate: null },
 ];
@@ -6685,7 +6599,7 @@ function RowActions({ campaign, statusOf, onActivate, onDeactivate, onDelete, on
   );
 }
 
-function SurveyCampaignsGrid({ onCreate, onOpen, onEdit, newCampaigns = [] }) {
+function SurveyCampaignsGrid({ onCreate, onOpen, newCampaigns = [] }) {
   const [search, setSearch] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState(null);   // null = no filter (show all)
   const [order, setOrder] = React.useState(() => CAMPAIGNS.map(c => c.id));
@@ -6960,7 +6874,7 @@ function SurveyCampaignsGrid({ onCreate, onOpen, onEdit, newCampaigns = [] }) {
                       onActivate={rowActivate}
                       onDeactivate={rowDeactivate}
                       onDelete={rowDelete}
-                      onEdit={onEdit || onOpen}
+                      onEdit={onOpen}
                     />
                   </td>
                 </tr>
@@ -7123,51 +7037,6 @@ const SURVEY_DESIGNS = [
     intents: [
       { group: "Primary",   tags: ["Response clarity", "Helpfulness"] },
       { group: "Secondary", tags: ["Tone quality", "Resolution satisfaction"] },
-    ],
-  },
-  {
-    id: "ivr-postcall", name: "IVR Post-Call Survey", category: "Voice Channel",
-    why: "Triggers immediately after an IVR-assisted call ends. Captures in-the-moment effort and resolution signals before the customer disengages.",
-    channels: "Voice",
-    intents: [
-      { group: "Primary",   tags: ["Call resolution", "IVR ease of use"] },
-      { group: "Secondary", tags: ["Hold time satisfaction", "Agent handoff quality"] },
-    ],
-  },
-  {
-    id: "ivr-nps", name: "IVR NPS Survey", category: "Net Promoter",
-    why: "Short NPS delivered post-call via IVR keypad input. High completion rates due to low friction — single question, single keypress.",
-    channels: "Voice",
-    intents: [
-      { group: "Primary",   tags: ["Recommend likelihood", "Loyalty signal"] },
-      { group: "Secondary", tags: ["Detractor flag", "Promoter identification"] },
-    ],
-  },
-  {
-    id: "csat-list", name: "CSAT Ranked List", category: "Customer Satisfaction",
-    why: "Multi-question CSAT covering resolution, effort, and agent behaviour. Best for complex interactions where a single score misses detail.",
-    channels: "Digital · Voice",
-    intents: [
-      { group: "Primary",   tags: ["Overall satisfaction", "Issue resolution"] },
-      { group: "Secondary", tags: ["Agent effectiveness", "Process friction"] },
-    ],
-  },
-  {
-    id: "brand-pulse", name: "Brand Perception Pulse", category: "Brand Health",
-    why: "Measures brand perception beyond the single interaction. Use for loyalty programs, retention campaigns, and long-term relationship tracking.",
-    channels: "Digital · Voice",
-    intents: [
-      { group: "Primary",   tags: ["Brand trust", "Loyalty intent"] },
-      { group: "Secondary", tags: ["Perception shift", "Competitor sensitivity"] },
-    ],
-  },
-  {
-    id: "voice-coaching", name: "Voice Coaching Survey", category: "Quality Assurance",
-    why: "Purpose-built for QA and coaching workflows. Captures specific agent behaviour signals that map directly to coaching rubrics.",
-    channels: "Voice",
-    intents: [
-      { group: "Primary",   tags: ["Agent clarity", "Empathy score"] },
-      { group: "Secondary", tags: ["Script adherence", "Resolution ownership"] },
     ],
   },
 ];
@@ -7457,13 +7326,10 @@ function MultiSelectField({ options, value = [], onChange, placeholder = "Select
       {value.length > 0 && (
         <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-1)", marginTop: "var(--space-2)" }}>
           {value.map(v => (
-            <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-1)", height: 24, padding: "0 6px 0 10px", borderRadius: "var(--radius-full)", background: "var(--lyra-slate-100)", color: "var(--lyra-slate-800)", border: "1px solid var(--lyra-slate-300)", font: "500 12px/20px var(--font-sans)", letterSpacing: "0.01em" }}>
+            <span key={v} style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "2px var(--space-2)", borderRadius: "var(--radius-round)", background: "var(--color-bg-active-moderate)", color: "var(--color-fg-active-strong)", font: "500 12px/16px var(--font-sans)" }}>
               {v}
-              <button type="button" onClick={() => toggle(v)}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "2px", lineHeight: 1, color: "var(--lyra-slate-500)", display: "flex", alignItems: "center", borderRadius: "var(--radius-full)" }}
-                onMouseEnter={e => e.currentTarget.style.background = "var(--lyra-slate-200)"}
-                onMouseLeave={e => e.currentTarget.style.background = "none"}>
-                <svg viewBox="0 0 12 12" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round"><line x1="9" y1="3" x2="3" y2="9"/><line x1="3" y1="3" x2="9" y2="9"/></svg>
+              <button type="button" onClick={() => toggle(v)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, lineHeight: 1, color: "inherit", display: "flex", alignItems: "center" }}>
+                <svg viewBox="0 0 12 12" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="1.8" strokeLinecap="round"><line x1="9" y1="3" x2="3" y2="9"/><line x1="3" y1="3" x2="9" y2="9"/></svg>
               </button>
             </span>
           ))}
@@ -11729,7 +11595,6 @@ function App() {
         content = <SurveyCampaignsGrid
           onCreate={() => setRoute({ ...route, view: "create" })}
           onOpen={(c) => setRoute({ ...route, view: "detail", campaign: c })}
-          onEdit={(c) => setRoute({ ...route, view: "create", editCampaign: c })}
           newCampaigns={newCampaigns}/>;
       }
     } else if (route.section === "ontology") {
