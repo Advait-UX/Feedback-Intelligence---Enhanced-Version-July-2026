@@ -1,4 +1,4 @@
-import { Fragment, useState, useRef } from 'react'
+import { Fragment, useState, useRef, useEffect } from 'react'
 import { AppShell } from './components/layout/AppShell'
 import { TopBar } from './components/layout/TopBar'
 import { TrendingUp, Minus, ChevronRight, Sparkles, AlertTriangle, Activity, Megaphone, FileText, Network } from 'lucide-react'
@@ -375,10 +375,10 @@ function RecommendationsSection() {
 
 /* -------------------- App -------------------- */
 export default function App() {
-  const [flow, setFlow] = useState<'admin' | 'landing' | 'feedback' | 'agent' | 'prototype'>('admin')
+  const [flow, setFlow] = useState<'admin' | 'landing' | 'feedback' | 'agent' | 'prototype'>('feedback')
   const [page, setPage] = useState<'campaign-portfolio' | 'dashboard' | 'analysis' | 'cohort' | 'interaction' | 'campaign-monitor' | 'survey-detail' | 'campaign-insight'>('campaign-portfolio')
   // Active section within the Feedback Intelligence shell (drives the sidebar)
-  const [fiSection, setFiSection] = useState<'dashboard' | 'campaigns' | 'designs' | 'ontology'>('dashboard')
+  const [fiSection, setFiSection] = useState<'dashboard' | 'campaigns' | 'designs' | 'ontology'>('campaigns')
   const protoIframeRef = useRef<HTMLIFrameElement>(null)
   // Selected campaign drives Level 2 and Level 3 scoping. Defaults to the
   // demo star performer so the campaign-context strip always has a value.
@@ -387,6 +387,17 @@ export default function App() {
   // Selected survey drives the Survey Detail Level 3 page.
   const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null)
   const selectedSurvey = selectedSurveyId ? getSurveyById(selectedSurveyId) : undefined
+  const [ontologyHasUpdates, setOntologyHasUpdates] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'fi-ontology-status') {
+        setOntologyHasUpdates(!!e.data.hasUpdates)
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [])
 
   // App-switcher routing (nice_world TopBar dropdown).
   const handleAppSwitch = (appLabel: string) => {
@@ -471,7 +482,7 @@ export default function App() {
     { id: 'dashboard', label: 'Operations',         icon: Activity },
     { id: 'campaigns', label: 'Survey Campaigns',   icon: Megaphone },
     { id: 'designs',   label: 'Survey Templates',   icon: FileText },
-    { id: 'ontology',  label: 'Ontology Studio',    icon: Network },
+    { id: 'ontology',  label: 'Ontology Studio',    icon: Network, ...(ontologyHasUpdates ? { badge: 'Update' } : {}) },
   ]
   const FI_TITLES: Record<typeof fiSection, string> = {
     dashboard:

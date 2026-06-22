@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import { LayoutGrid, Megaphone } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type SidebarNavItem = { id: string; label: string; icon: LucideIcon }
+export type SidebarNavItem = { id: string; label: string; icon: LucideIcon; badge?: string }
 
 const DEFAULT_NAV_ITEMS: SidebarNavItem[] = [
   { id: 'dashboard', label: 'Dashboard',        icon: LayoutGrid },
@@ -186,19 +186,32 @@ function NavItem({
         }}
       />
       {open && (
-        <span
-          className="flex-1 text-left truncate"
-          style={{
-            fontSize: 13,
-            lineHeight: '16px',
-            fontWeight: isSelected ? 500 : 400,
-            color: isSelected
-              ? '#185ba4'               // color-fg-active-strong
-              : 'rgba(0,0,0,0.80)',     // color-fg-default
-          }}
-        >
-          {item.label}
-        </span>
+        <>
+          <span
+            className="flex-1 text-left truncate"
+            style={{
+              fontSize: 13,
+              lineHeight: '16px',
+              fontWeight: isSelected ? 500 : 400,
+              color: isSelected
+                ? '#185ba4'               // color-fg-active-strong
+                : 'rgba(0,0,0,0.80)',     // color-fg-default
+            }}
+          >
+            {item.label}
+          </span>
+          {item.badge && (
+            <span style={{
+              flexShrink: 0,
+              font: '500 11px/14px Inter, sans-serif',
+              color: '#8e6800',
+              background: '#fff8d4',
+              borderRadius: 999,
+              padding: '1px 7px',
+              whiteSpace: 'nowrap',
+            }}>{item.badge}</span>
+          )}
+        </>
       )}
     </button>
   )
