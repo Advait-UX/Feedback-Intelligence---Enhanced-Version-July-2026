@@ -11524,9 +11524,10 @@ function ConfirmModal({ title, body, confirmLabel, onConfirm, onCancel }) {
 
 function OntSortIcon({ active, dir }) {
   return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ flexShrink: 0, opacity: active ? 1 : 0.35 }}>
-      <path d="M5 1L8 4H2L5 1Z" fill={active && dir === "asc" ? "currentColor" : "currentColor"} fillOpacity={active && dir === "asc" ? 1 : 0.4}/>
-      <path d="M5 9L2 6H8L5 9Z" fill={active && dir === "desc" ? "currentColor" : "currentColor"} fillOpacity={active && dir === "desc" ? 1 : 0.4}/>
+    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+      style={{ marginLeft: 4, verticalAlign: "-1px", opacity: active ? 1 : 0.3, color: active ? "var(--color-fg-action)" : "currentColor", flexShrink: 0 }}>
+      {(!active || dir === "asc")  && <polyline points="4 10 8 6 12 10" style={{ opacity: active && dir === "asc" ? 1 : 0.4 }}/>}
+      {(!active || dir === "desc") && <polyline points="4 6 8 10 12 6"  style={{ opacity: active && dir === "desc" ? 1 : 0.4 }}/>}
     </svg>
   );
 }
