@@ -32,6 +32,7 @@ export function Step0Identity({ c, set, showErr }: Props) {
   const startDateErr   = showErr && !c.startDate
   const endDateErr     = showErr && !c.ongoing && !c.endDate
   const startTimeErr   = showErr && !c.startTime
+  const endTimeErr     = showErr && !c.endTime
   const surveyDaysErr  = showErr && !c.surveyDays.length
   const teamsErr       = showErr && c.agentMode === 'teams' && !c.queues.length
   const skillsErr      = showErr && c.agentMode === 'skills' && !c.skills.length
@@ -122,7 +123,11 @@ export function Step0Identity({ c, set, showErr }: Props) {
             <FiTimePicker value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
             {startTimeErr && <ErrorMsg>Start time is required</ErrorMsg>}
           </div>
-          <div />
+          <div>
+            <FieldLabel required>End Time</FieldLabel>
+            <FiTimePicker value={c.endTime} onChange={v => set('endTime', v)} error={endTimeErr} />
+            {endTimeErr && <ErrorMsg>End time is required</ErrorMsg>}
+          </div>
         </div>
 
         <div style={{ marginTop: 18 }}>
