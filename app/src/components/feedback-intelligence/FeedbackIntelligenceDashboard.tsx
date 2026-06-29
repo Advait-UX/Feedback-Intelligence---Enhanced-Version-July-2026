@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, createContext, useContext } from 'react'
+import React, { useState, useMemo, useEffect, useRef, createContext, useContext } from 'react'
 import { Sparkles, Check, X, Pencil, ChevronDown, ArrowLeft } from 'lucide-react'
 import type { Campaign, CampaignStatus } from '@/lib/campaigns'
 import type { Topic } from '@/lib/topics'
@@ -109,6 +109,13 @@ export function FeedbackIntelligenceDashboard({
           <FilterRow />
         </div>
 
+        {/* Campaign scheduling info strip */}
+        {campaign && (campaign.startTime || campaign.endTime || campaign.surveyDays?.length) && (
+          <div style={enter(50)}>
+            <CampaignScheduleStrip campaign={campaign} />
+          </div>
+        )}
+
         {/* Aggregated KPI tiles — sourced from campaign + topic data */}
         <div style={enter(100)}>
           <CampaignKpiTiles campaign={campaign} />
@@ -135,6 +142,58 @@ function BottomInsightsRow() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, alignItems: 'stretch' }}>
       <ByCustomerTypePanel expanded={openIndex === 0} onToggle={toggle(0)} />
       <ByChannelPanel      expanded={openIndex === 1} onToggle={toggle(1)} />
+    </div>
+  )
+}
+
+/* ---------- Campaign scheduling info strip ---------- */
+function CampaignScheduleStrip({ campaign }: { campaign: Campaign }) {
+  const items: { icon: React.ReactNode; label: string; value: string }[] = []
+
+  if (campaign.startTime || campaign.endTime) {
+    const timeValue = campaign.startTime && campaign.endTime
+      ? `${campaign.startTime} – ${campaign.endTime}`
+      : campaign.startTime || campaign.endTime || '—'
+    items.push({
+      icon: (
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2.5 1.5"/>
+        </svg>
+      ),
+      label: 'Survey Hours',
+      value: timeValue,
+    })
+  }
+
+  if (campaign.surveyDays?.length) {
+    items.push({
+      icon: (
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+          <rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/>
+        </svg>
+      ),
+      label: 'Surveying Days',
+      value: campaign.surveyDays.join(', '),
+    })
+  }
+
+  if (!items.length) return null
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
+      padding: '12px 16px',
+      background: BG_BASE,
+      border: `1px solid ${BD_SOFT}`,
+      borderRadius: R_MD,
+    }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ color: FG_SEC, display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
+          <span style={{ font: `400 12px/16px var(--font-sans)`, color: FG_SEC, marginRight: 4 }}>{item.label}</span>
+          <span style={{ font: `500 13px/20px var(--font-sans)`, color: FG }}>{item.value}</span>
+        </div>
+      ))}
     </div>
   )
 }

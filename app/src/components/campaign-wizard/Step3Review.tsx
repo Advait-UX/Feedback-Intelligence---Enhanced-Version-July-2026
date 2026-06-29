@@ -49,7 +49,7 @@ function fmt(iso: string) {
 
 export function Step3Review({ c, isEditing, onGoToStep }: Props) {
   const agentValid = c.agentMode === 'skills' ? !!c.skills.length : !!c.queues.length
-  const missingRequired = !isEditing && (!c.name || !agentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !c.surveyDays.length || !c.surveyDesignId)
+  const missingRequired = !isEditing && (!c.name || !agentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !c.endTime || !c.surveyDays.length || !c.surveyDesignId)
   const survey = SURVEY_DESIGNS.find(s => s.id === c.surveyDesignId)
 
   const dateRange = c.startDate
@@ -70,6 +70,7 @@ export function Step3Review({ c, isEditing, onGoToStep }: Props) {
         {c.description && <SRRow label="Description">{c.description}</SRRow>}
         <SRRow label="Active Date Range">{dateRange}</SRRow>
         <SRRow label="Start Time">{c.startTime || <Req />}</SRRow>
+        <SRRow label="End Time">{c.endTime || <Req />}</SRRow>
         <SRRow label="Surveying Days">{c.surveyDays.length ? c.surveyDays.join(', ') : <Req />}</SRRow>
         <SRRow label="Agent Selection">{c.agentMode === 'skills' ? 'By skills' : 'By teams / groups'}</SRRow>
         {c.agentMode === 'teams' && <>

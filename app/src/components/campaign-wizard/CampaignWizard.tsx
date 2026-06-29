@@ -40,7 +40,7 @@ export function CampaignWizard({ editCampaign, onCancel, onSave }: Props) {
 
   // Validation
   const agentValid = c.agentMode === 'skills' ? !!c.skills.length : !!c.queues.length
-  const step0Valid = isEditing || !!(c.name && c.startDate && (c.ongoing || c.endDate) && agentValid && c.startTime && c.surveyDays.length)
+  const step0Valid = isEditing || !!(c.name && c.startDate && (c.ongoing || c.endDate) && agentValid && c.startTime && c.endTime && c.surveyDays.length)
   const step2Valid = isEditing || !!c.surveyDesignId
 
   function stepState(n: number): 'active' | 'done' | 'error' | 'idle' {
@@ -134,8 +134,12 @@ export function CampaignWizard({ editCampaign, onCancel, onSave }: Props) {
             <div className="wz-summary-row">
               <div className="wz-summary-icon"><Clock size={14} /></div>
               <div>
-                <div className="wz-summary-row-label">Start Time</div>
-                <div className="wz-summary-row-value">{c.startTime || 'Not set'}</div>
+                <div className="wz-summary-row-label">Survey Hours</div>
+                <div className="wz-summary-row-value">
+                  {c.startTime && c.endTime
+                    ? `${c.startTime} – ${c.endTime}`
+                    : c.startTime || c.endTime || 'Not set'}
+                </div>
               </div>
             </div>
             <div className="wz-summary-row">
