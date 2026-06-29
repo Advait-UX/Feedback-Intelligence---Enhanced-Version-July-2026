@@ -1,5 +1,6 @@
 import React from 'react'
-import { WizardCampaign, SURVEY_DESIGNS } from '../../lib/campaignWizard'
+import type { WizardCampaign } from '../../lib/campaignWizard'
+import { SURVEY_DESIGNS } from '../../lib/campaignWizard'
 import { Edit2 } from 'lucide-react'
 
 interface Props {

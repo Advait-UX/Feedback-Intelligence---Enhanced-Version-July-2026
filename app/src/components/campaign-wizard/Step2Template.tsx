@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { WizardCampaign, SURVEY_DESIGNS } from '../../lib/campaignWizard'
+import type { WizardCampaign } from '../../lib/campaignWizard'
+import { SURVEY_DESIGNS } from '../../lib/campaignWizard'
 import { SurveyPickerDrawer } from './WizardPrimitives'
 import { FileText, X } from 'lucide-react'
 

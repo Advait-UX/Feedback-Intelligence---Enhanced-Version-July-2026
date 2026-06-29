@@ -1,5 +1,5 @@
 import React from 'react'
-import { WizardCampaign } from '../../lib/campaignWizard'
+import type { WizardCampaign } from '../../lib/campaignWizard'
 import { Toggle } from './WizardPrimitives'
 
 interface Props {

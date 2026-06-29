@@ -1,5 +1,6 @@
 import React from 'react'
-import { WizardCampaign, ALL_TEAMS, ALL_SKILLS, DIGITAL_CHANNELS } from '../../lib/campaignWizard'
+import type { WizardCampaign } from '../../lib/campaignWizard'
+import { ALL_TEAMS, ALL_SKILLS, DIGITAL_CHANNELS } from '../../lib/campaignWizard'
 import { Toggle, FiDatePicker, FiTimePicker, SurveyingDays, MultiSelectField, ErrorMsg, FieldLabel } from './WizardPrimitives'
 import { ChevronDown } from 'lucide-react'
 
@@ -107,7 +108,9 @@ export function Step0Identity({ c, set, showErr }: Props) {
             {startDateErr && <ErrorMsg>Start date is required</ErrorMsg>}
           </div>
           <div>
-            <FieldLabel required={!c.ongoing} style={{ color: c.ongoing ? 'var(--lyra-color-fg-disabled)' : undefined }}>End Date</FieldLabel>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 4, font: '500 14px/20px var(--font-sans)', color: c.ongoing ? 'var(--lyra-color-fg-disabled)' : 'var(--lyra-color-fg-default)', marginBottom: 6 }}>
+              End Date{!c.ongoing && <span style={{ color: 'var(--lyra-color-status-critical-strong)', marginLeft: 2 }}>*</span>}
+            </label>
             <FiDatePicker value={c.endDate} onChange={v => set('endDate', v)} disabled={c.ongoing} placeholder={c.ongoing ? 'Ongoing' : 'Oct 30, 2025'} error={endDateErr} />
             {endDateErr && <ErrorMsg>End date is required</ErrorMsg>}
           </div>
