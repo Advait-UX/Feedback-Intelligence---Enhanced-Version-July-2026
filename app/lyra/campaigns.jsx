@@ -772,6 +772,9 @@ const DEFAULT_CAMPAIGN = {
   recentDays: 30,
   suppressInternal: true,
 
+  startTime: "",
+  endTime: "",
+
   triggerEvent: "Post-digital interaction",
   delay: "Immediate",
   delayValue: 0,
@@ -918,6 +921,35 @@ function FiDatePicker({ value, onChange, disabled, placeholder = "Select date" }
   );
 }
 
+function FiTimePicker({ value, onChange }) {
+  const slots = [];
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const ampm = h < 12 ? "AM" : "PM";
+      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      slots.push(`${h12}:${String(m).padStart(2,"0")} ${ampm}`);
+    }
+  }
+  return (
+    <div style={{ position: "relative" }}>
+      <select
+        className="fi-input"
+        value={value || ""}
+        onChange={e => onChange(e.target.value)}
+        style={{ paddingRight: 36, appearance: "none", WebkitAppearance: "none", cursor: "pointer", color: value ? "var(--lyra-color-fg-default, var(--color-fg-default))" : "var(--lyra-color-fg-disabled, var(--color-fg-disabled))" }}
+      >
+        <option value="" disabled>HH:MM AM/PM</option>
+        {slots.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <svg viewBox="0 0 24 24" width="14" height="14"
+        style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "var(--lyra-slate-500)", pointerEvents: "none" }}
+        stroke="currentColor" fill="none" strokeWidth="1.7" strokeLinecap="round">
+        <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
+      </svg>
+    </div>
+  );
+}
+
 function CreateCampaign({ template: initialTemplate, onCancel, onSave }) {
   const [selectedTemplate, setSelectedTemplate] = React.useState(initialTemplate || null);
   const [samplingAutofilled, setSamplingAutofilled] = React.useState(!!initialTemplate);
@@ -1026,6 +1058,8 @@ function CreateCampaign({ template: initialTemplate, onCancel, onSave }) {
               <SRow label="Description" value={c.description || null}/>
               <SRow label="Start Date" value={c.startDate}/>
               <SRow label="End Date" value={c.ongoing ? "Ongoing" : (c.endDate || null)}/>
+              <SRow label="Start Time" value={c.startTime || null}/>
+              <SRow label="End Time" value={c.endTime || null}/>
               <SRow label="Channels" value={c.channels.join(", ")}/>
               <SRow label="Agent Teams" value={(c.queues || []).join(", ")}/>
               <SRow label="Agent Group" value={(c.teams || []).join(", ")}/>
@@ -1195,6 +1229,16 @@ function CreateCampaign({ template: initialTemplate, onCancel, onSave }) {
                     <div className="field-cell">
                       <label className="field-label" style={{ fontWeight: 400, color: c.ongoing ? "var(--color-fg-disabled)" : undefined }}>End Date</label>
                       <FiDatePicker value={c.endDate} onChange={v => set("endDate", v)} disabled={c.ongoing} placeholder={c.ongoing ? "Ongoing" : "Oct 30, 2025"}/>
+                    </div>
+                  </div>
+                  <div className="field-grid-2" style={{ padding: 0, borderTop: 0, marginTop: 18 }}>
+                    <div className="field-cell">
+                      <label className="field-label">Start Time<span className="req">*</span></label>
+                      <FiTimePicker value={c.startTime} onChange={v => set("startTime", v)}/>
+                    </div>
+                    <div className="field-cell">
+                      <label className="field-label">End Time<span className="req">*</span></label>
+                      <FiTimePicker value={c.endTime} onChange={v => set("endTime", v)}/>
                     </div>
                   </div>
                 </div>
@@ -1973,8 +2017,11 @@ function FloatingMetrics({ campaign: c }) {
     ? `${c.samplingPct}% of interactions`
     : "Not configured";
 
+  const surveyHours = c.startTime && c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime || c.endTime || "Not set";
+
   const rows = [
     { icon: "calendar", label: "Active date range",      value: dateRange },
+    { icon: "clock",    label: "Survey Hours",           value: surveyHours },
     { icon: "channel",  label: "Channel",                value: channels },
     { icon: "agents",   label: "Agent teams",            value: teams },
     { icon: "survey",   label: "Interactions surveyed",  value: interactions },
@@ -1988,6 +2035,7 @@ function FloatingMetrics({ campaign: c }) {
           <div key={r.label} className="summary-card-row">
             <div className="summary-card-icon">
               {r.icon === "calendar" && <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/></svg>}
+              {r.icon === "clock"    && <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10.5 10"/></svg>}
               {r.icon === "channel"  && <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2 11.5C2 9.5 3.5 8 5.5 8h5C12.5 8 14 9.5 14 11.5"/><circle cx="8" cy="4.5" r="2.5"/></svg>}
               {r.icon === "agents"   && <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="5" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h2"/><circle cx="11.5" cy="6" r="2"/><path d="M8 13.5c0-1.9 1.6-3.5 3.5-3.5s3.5 1.6 3.5 3.5"/></svg>}
               {r.icon === "survey"   && <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="1.5" width="10" height="13" rx="1.5"/><line x1="6" y1="5" x2="10" y2="5"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="11" x2="8.5" y2="11"/></svg>}
