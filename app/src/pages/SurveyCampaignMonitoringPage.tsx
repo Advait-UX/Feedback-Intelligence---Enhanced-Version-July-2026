@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { CAMPAIGNS, portfolioSummary, type Campaign, type CampaignStatus } from '@/lib/campaigns'
 
 const FONT = 'var(--lyra-font-sans)'
@@ -11,9 +11,11 @@ const CARD_BORDER = '1px solid var(--lyra-color-border-subtle)'
  * ============================================================ */
 export function SurveyCampaignMonitoringPage({
   onSelectCampaign,
+  onCreateCampaign,
 }: {
   onSelectCampaign: (campaignId: string) => void
   onBackToAdmin: () => void
+  onCreateCampaign?: () => void
 }) {
   const summary = portfolioSummary()
 
@@ -56,10 +58,27 @@ export function SurveyCampaignMonitoringPage({
 
           {/* Table section */}
           <section>
-            <SectionHeader
-              title="Campaigns"
-              badge={CAMPAIGNS.filter(c => c.status === 'active').length}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <SectionHeader
+                title="Campaigns"
+                badge={CAMPAIGNS.filter(c => c.status === 'active').length}
+              />
+              {onCreateCampaign && (
+                <button
+                  onClick={onCreateCampaign}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    padding: '7px 16px', borderRadius: 'var(--radius-md)',
+                    border: 'none', background: 'var(--lyra-color-bg-primary)',
+                    font: '500 14px/20px var(--font-sans)', color: 'var(--lyra-color-fg-on-primary)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus size={14} />
+                  Create Campaign
+                </button>
+              )}
+            </div>
             <CampaignTable onSelectCampaign={onSelectCampaign} />
           </section>
 

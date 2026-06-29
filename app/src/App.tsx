@@ -15,6 +15,7 @@ import { CampaignInsightDashboard } from './components/feedback-intelligence/Cam
 import { FeedbackIntelligenceDashboard } from './components/feedback-intelligence/FeedbackIntelligenceDashboard'
 import { getCampaignById, CAMPAIGNS } from './lib/campaigns'
 import { getSurveyById } from './lib/surveys'
+import { CampaignWizard } from './components/campaign-wizard/CampaignWizard'
 
 /* -------------------- Stat card -------------------- */
 function StatCard({ title, value, subtitle, borderColor = '#208337', alert }: {
@@ -388,6 +389,7 @@ export default function App() {
   const [selectedSurveyId, setSelectedSurveyId] = useState<string | null>(null)
   const selectedSurvey = selectedSurveyId ? getSurveyById(selectedSurveyId) : undefined
   const [ontologyHasUpdates, setOntologyHasUpdates] = useState(false)
+  const [showWizard, setShowWizard] = useState(false)
 
   useEffect(() => {
     const handler = (e: MessageEvent) => {
@@ -513,13 +515,19 @@ export default function App() {
       }}
     >
       {fiSection === 'dashboard' ? (
-        page === 'campaign-portfolio' ? (
+        showWizard ? (
+          <CampaignWizard
+            onCancel={() => setShowWizard(false)}
+            onSave={() => setShowWizard(false)}
+          />
+        ) : page === 'campaign-portfolio' ? (
           <SurveyCampaignMonitoringPage
             onSelectCampaign={(id) => {
               setSelectedCampaignId(id)
               setPage('dashboard')
             }}
             onBackToAdmin={() => setFlow('admin')}
+            onCreateCampaign={() => setShowWizard(true)}
           />
         ) : page === 'campaign-insight' ? (
           <div className="p-6 lg:px-8 bg-[#F8FAFC] flex-1">
