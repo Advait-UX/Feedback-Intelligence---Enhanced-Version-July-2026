@@ -117,7 +117,7 @@ export function Step0Identity({ c, set, showErr }: Props) {
           </div>
         </div>
 
-        <div style={{ ...GRID2, marginTop: 18, borderTop: 'none' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 18 }}>
           <div>
             <FieldLabel required>Start Time</FieldLabel>
             <FiTimePicker value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
