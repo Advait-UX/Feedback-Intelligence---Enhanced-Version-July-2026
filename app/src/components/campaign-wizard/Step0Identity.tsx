@@ -10,6 +10,36 @@ interface Props {
   showErr: boolean
 }
 
+function TimeSelect({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: boolean }) {
+  const slots: string[] = []
+  for (let h = 0; h < 24; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const p = h < 12 ? 'AM' : 'PM'
+      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
+      slots.push(`${String(h12).padStart(2,'0')}:${m === 0 ? '00' : '30'} ${p}`)
+    }
+  }
+  return (
+    <div style={{ position: 'relative' }}>
+      <select
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          width: '100%', boxSizing: 'border-box', padding: '6px 32px 6px 12px',
+          font: '400 14px/24px var(--font-sans)', color: value ? 'var(--lyra-color-fg-default)' : 'var(--lyra-color-fg-disabled)',
+          background: 'var(--lyra-color-bg-field)', border: `1px solid ${error ? 'var(--lyra-color-status-critical-strong)' : 'var(--lyra-color-border-soft)'}`,
+          borderRadius: 'var(--radius-sm)', outline: 'none', cursor: 'pointer',
+          appearance: 'none', WebkitAppearance: 'none',
+        }}
+      >
+        <option value="" disabled>HH:MM AM/PM</option>
+        {slots.map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--lyra-slate-500)', pointerEvents: 'none' }} />
+    </div>
+  )
+}
+
 const SECTION_STYLE: React.CSSProperties = {
   padding: '24px 0',
   borderBottom: '1px solid var(--lyra-color-border-subtle)',
@@ -123,9 +153,9 @@ export function Step0Identity({ c, set, showErr }: Props) {
             <FiTimePicker value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
             {startTimeErr && <ErrorMsg>Start time is required</ErrorMsg>}
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <FieldLabel required>End Time</FieldLabel>
-            <FiTimePicker value={c.endTime} onChange={v => set('endTime', v)} error={endTimeErr} />
+            <TimeSelect value={c.endTime} onChange={v => set('endTime', v)} error={endTimeErr} />
             {endTimeErr && <ErrorMsg>End time is required</ErrorMsg>}
           </div>
         </div>
