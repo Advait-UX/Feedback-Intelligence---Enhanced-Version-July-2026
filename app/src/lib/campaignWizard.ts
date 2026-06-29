@@ -33,7 +33,6 @@ export interface WizardCampaign {
   startDate: string
   endDate: string
   startTime: string
-  endTime: string
   surveyDays: string[]
   agentMode: 'teams' | 'skills'
   queues: string[]
@@ -57,7 +56,6 @@ export const DEFAULT_WIZARD_CAMPAIGN: WizardCampaign = {
   startDate: '',
   endDate: '',
   startTime: '',
-  endTime: '',
   surveyDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
   agentMode: 'teams',
   queues: [],

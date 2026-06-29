@@ -32,10 +32,6 @@ export type Campaign = {
   category: string
   // 14-day CSAT history for the campaign-level CSAT KPI tile
   csatSeries: number[]
-  // Scheduling fields (set via wizard)
-  startTime?: string
-  endTime?: string
-  surveyDays?: string[]
   // On-theme topics surfaced inside this campaign's surveys.
   // Drives the Top Topics table on the per-campaign drill-down.
   topics: Topic[]
@@ -62,9 +58,6 @@ export const CAMPAIGNS: Campaign[] = [
     csat: 84,
     csatSeries: [80, 80, 81, 81, 82, 82, 82, 83, 83, 84, 84, 84, 84, 84],
     category: 'Service Disruption',
-    startTime: '9:00 AM',
-    endTime: '6:00 PM',
-    surveyDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
     // Per-topic surveys-sent + responses sum to the campaign totals (sent 1,810 · responses ~1,213).
     topics: [
       {
@@ -149,9 +142,6 @@ export const CAMPAIGNS: Campaign[] = [
     csat: 78,
     csatSeries: [72, 73, 73, 74, 75, 75, 76, 76, 77, 77, 78, 78, 78, 78],
     category: 'Service Disruption',
-    startTime: '8:00 AM',
-    endTime: '5:00 PM',
-    surveyDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
     // Per-topic surveys-sent + responses sum to the campaign totals (sent 980 · responses ~598).
     topics: [
       {
@@ -236,9 +226,6 @@ export const CAMPAIGNS: Campaign[] = [
     csat: 74,
     csatSeries: [73, 74, 74, 73, 74, 74, 75, 74, 73, 74, 74, 73, 74, 74],
     category: 'Loyalty & Membership',
-    startTime: '10:00 AM',
-    endTime: '7:00 PM',
-    surveyDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
     // Per-topic surveys-sent + responses sum to the campaign totals (sent 2,240 · responses ~1,210).
     topics: [
       {
