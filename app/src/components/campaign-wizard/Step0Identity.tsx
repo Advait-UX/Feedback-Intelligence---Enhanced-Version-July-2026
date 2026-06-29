@@ -117,13 +117,13 @@ export function Step0Identity({ c, set, showErr }: Props) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginTop: 18 }}>
-          <div>
+        <div style={{ display: 'flex', gap: 20, marginTop: 16 }}>
+          <div style={{ flex: 1 }}>
             <FieldLabel required>Start Time</FieldLabel>
             <FiTimePicker value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
             {startTimeErr && <ErrorMsg>Start time is required</ErrorMsg>}
           </div>
-          <div>
+          <div style={{ flex: 1 }}>
             <FieldLabel required>End Time</FieldLabel>
             <FiTimePicker value={c.endTime} onChange={v => set('endTime', v)} error={endTimeErr} />
             {endTimeErr && <ErrorMsg>End time is required</ErrorMsg>}
