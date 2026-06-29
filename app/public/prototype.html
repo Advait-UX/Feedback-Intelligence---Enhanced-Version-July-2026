@@ -7553,6 +7553,7 @@ const DEFAULT_CAMPAIGN = {
   suppressInternal: true,
 
   startTime: "",
+  endTime: "",
   surveyDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
 
   agentMode: "teams",
@@ -8164,7 +8165,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const SPECIAL_CHARS_RE = /[\\\/!+<>?#&,%"]/;
   const isEditing = !!editCampaign;
   const agentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && c.startTime && c.surveyDays?.length);
+  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && c.startTime && c.endTime && c.surveyDays?.length);
   const step2Valid = isEditing || !!(c.surveyDesignId);
 
   const ALL_STEPS = [
@@ -8289,7 +8290,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const canDraft    = !!(c.name && datesValid);
   const canActivate = !!(c.name && c.queues?.length && datesValid);
   const reviewAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !(c.surveyDays?.length) || !c.surveyDesignId);
+  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !c.endTime || !(c.surveyDays?.length) || !c.surveyDesignId);
 
   return (
     <div className="pane" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -8387,6 +8388,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const startDateErr  = showErr && !c.startDate;
             const endDateErr    = showErr && !c.ongoing && !c.endDate;
             const startTimeErr  = showErr && !c.startTime;
+            const endTimeErr    = showErr && !c.endTime;
             const surveyDaysErr = showErr && !(c.surveyDays?.length);
             const nameMsg = nameBlankErr ? "Required" : nameSpecialErr ? "Only alphanumeric characters are allowed" : "";
             const nameCounterRed = nameVal.length >= 50;
@@ -8443,7 +8445,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
                     </div>
 
-                    {/* Start Time */}
+                    {/* Start Time + End Time */}
                     <div className="field-grid-2" style={{ marginTop: "18px", borderTop: "none" }}>
                       <div className="field-cell">
                         <label className="field-label">Start Time<span className="req">*</span></label>
@@ -8453,7 +8455,14 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           Start time is required
                         </span></div>}
                       </div>
-                      <div className="field-cell"/>
+                      <div className="field-cell">
+                        <label className="field-label">End Time<span className="req">*</span></label>
+                        <FiTimePicker value={c.endTime} onChange={v => set("endTime", v)} error={endTimeErr}/>
+                        {endTimeErr && <div className="field-control"><span className="error-msg">
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          End time is required
+                        </span></div>}
+                      </div>
                     </div>
 
                     {/* Surveying Days */}
@@ -8844,7 +8853,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               </div>
             );
             const srAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !(c.surveyDays?.length) || !c.surveyDesignId);
+            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !c.endTime || !(c.surveyDays?.length) || !c.surveyDesignId);
             return (
               <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
@@ -8870,6 +8879,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       : <span style={{ color: "var(--color-status-error)" }}>Required</span>}
                   </SRRow>
                   <SRRow label="Start Time">{c.startTime || <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
+                  <SRRow label="End Time">{c.endTime || <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
                   <SRRow label="Surveying Days">{c.surveyDays?.length ? c.surveyDays.join(", ") : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
                   <SRRow label="Agent selection">{c.agentMode === "skills" ? "By skills" : "By teams / groups"}</SRRow>
                   {c.agentMode === "teams" && <>
@@ -9380,12 +9390,12 @@ function FloatingMetrics({ campaign: c }) {
     ? (c.ongoing ? `${c.startDate} — Ongoing` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
     : "Not set";
 
-  const startTime   = c.startTime || "Not set";
+  const surveyHours = c.startTime && c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime || c.endTime || "Not set";
   const surveyDays  = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
 
   const rows = [
     { icon: "calendar", label: "Active Date Range", value: dateRange },
-    { icon: "clock",    label: "Start Time",        value: startTime },
+    { icon: "clock",    label: "Survey Hours",      value: surveyHours },
     { icon: "days",     label: "Surveying Days",    value: surveyDays },
   ];
 
@@ -9648,7 +9658,7 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
 /* Campaign Summary sidebar card */
 function CampaignSummaryCard({ campaign: c }) {
   /* ── Config info ── */
-  const startTime  = c.startTime || "Not set";
+  const surveyHours = c.startTime && c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime || c.endTime || "Not set";
   const surveyDays = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
   const dateRange = c.startDate
     ? (c.ongoing ? `Ongoing from ${c.startDate}` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
@@ -9661,7 +9671,7 @@ function CampaignSummaryCard({ campaign: c }) {
     },
     {
       icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10.5 10"/></svg>,
-      label: "Start Time", value: startTime,
+      label: "Survey Hours", value: surveyHours,
     },
     {
       icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="10" x2="5" y2="10"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="11" y1="10" x2="11" y2="10"/></svg>,
@@ -9754,6 +9764,7 @@ function ConfigurationView({ campaign: rawC }) {
         {c.description && <DefRow label="Description">{c.description}</DefRow>}
         <DefRow label="Active Date Range">{dateRange}</DefRow>
         <DefRow label="Start Time">{c.startTime || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+        <DefRow label="End Time">{c.endTime || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         <DefRow label="Surveying Days">{c.surveyDays?.length ? c.surveyDays.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         <DefRow label="Agent selection">{c.agentMode === "skills" ? "By skills" : "By teams / groups"}</DefRow>
         {(c.agentMode !== "skills") && <>
