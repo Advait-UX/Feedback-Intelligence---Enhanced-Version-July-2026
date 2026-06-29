@@ -10,7 +10,7 @@ interface Props {
   showErr: boolean
 }
 
-function TimeSelect({ value, onChange, error }: { value: string; onChange: (v: string) => void; error?: boolean }) {
+function TimeSelect({ value, onChange, error }: { value?: string; onChange: (v: string) => void; error?: boolean }) {
   const slots: string[] = []
   for (let h = 0; h < 24; h++) {
     for (let m = 0; m < 60; m += 30) {
@@ -148,9 +148,9 @@ export function Step0Identity({ c, set, showErr }: Props) {
         </div>
 
         <div style={{ display: 'flex', gap: 20, marginTop: 16 }}>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <FieldLabel required>Start Time</FieldLabel>
-            <FiTimePicker value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
+            <TimeSelect value={c.startTime} onChange={v => set('startTime', v)} error={startTimeErr} />
             {startTimeErr && <ErrorMsg>Start time is required</ErrorMsg>}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>

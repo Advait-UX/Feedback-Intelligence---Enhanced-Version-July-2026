@@ -517,6 +517,7 @@ export default function App() {
       {fiSection === 'dashboard' ? (
         showWizard ? (
           <CampaignWizard
+            key="campaign-wizard-new"
             onCancel={() => setShowWizard(false)}
             onSave={() => setShowWizard(false)}
           />
