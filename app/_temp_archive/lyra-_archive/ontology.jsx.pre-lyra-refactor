@@ -1,0 +1,471 @@
+/* Feedback Intelligence — VU Score Model admin page.
+   Manages the four building blocks of VU score:
+   - Topics (the dimensions FI scores against)
+   - Weights (how much each topic contributes to the composite)
+   - Modifiers (rules that adjust scoring on certain conditions)
+   - Sentiment multipliers (how sentiment polarity scales the topic score)
+*/
+
+const SEED_TOPICS = [
+  { id: 1, name: "Resolution",          category: "Outcome",     weight: 25, active: true },
+  { id: 2, name: "Agent empathy",       category: "Experience",  weight: 15, active: true },
+  { id: 3, name: "Effort / ease",       category: "Experience",  weight: 15, active: true },
+  { id: 4, name: "Wait time",           category: "Experience",  weight: 10, active: true },
+  { id: 5, name: "Billing accuracy",    category: "Outcome",     weight: 10, active: true },
+  { id: 6, name: "Product knowledge",   category: "Outcome",     weight: 10, active: true },
+  { id: 7, name: "Self-service handoff",category: "Channel",     weight: 8,  active: true },
+  { id: 8, name: "Communication clarity",category:"Experience",  weight: 7,  active: true },
+  { id: 9, name: "Brand trust",         category: "Loyalty",     weight: 0,  active: false },
+];
+
+const SEED_MODIFIERS = [
+  { id: 1, name: "Escalation penalty",         when: "Interaction was escalated to supervisor",            effect: "multiply", value: 0.75, active: true },
+  { id: 2, name: "Repeat-contact penalty",     when: "Same customer contacted within 72h on same topic",   effect: "multiply", value: 0.80, active: true },
+  { id: 3, name: "First-contact resolution",   when: "Resolved without callback, transfer, or escalation", effect: "multiply", value: 1.15, active: true },
+  { id: 4, name: "Compliance violation",       when: "Compliance topic detected with negative sentiment",  effect: "add",      value: -15,  active: true },
+  { id: 5, name: "VIP segment uplift",         when: "Customer is in VIP / tier-1 segment",                effect: "add",      value: 5,    active: false },
+];
+
+const SEED_SENTIMENT = [
+  { id: "vpos", label: "Very positive",  range: "+0.6 to +1.0", multiplier: 1.20, color: "#1c5e25" },
+  { id: "pos",  label: "Positive",       range: "+0.2 to +0.6", multiplier: 1.10, color: "#1c5e25" },
+  { id: "neu",  label: "Neutral",        range: "−0.2 to +0.2", multiplier: 1.00, color: "#7b8a96" },
+  { id: "neg",  label: "Negative",       range: "−0.6 to −0.2", multiplier: 0.80, color: "#bf2323" },
+  { id: "vneg", label: "Very negative",  range: "−1.0 to −0.6", multiplier: 0.55, color: "#bf2323" },
+];
+
+const CATEGORIES = ["Outcome", "Experience", "Channel", "Loyalty"];
+
+function VUScoreModel() {
+  const [topics, setTopics] = React.useState(SEED_TOPICS);
+  const [modifiers, setModifiers] = React.useState(SEED_MODIFIERS);
+  const [sentiments, setSentiments] = React.useState(SEED_SENTIMENT);
+  const [dirty, setDirty] = React.useState(false);
+
+  const activeTopics = topics.filter(t => t.active);
+  const totalWeight = activeTopics.reduce((s, t) => s + t.weight, 0);
+  const balanced = totalWeight === 100;
+
+  const setTopic = (id, patch) => {
+    setTopics(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t));
+    setDirty(true);
+  };
+  const setMod = (id, patch) => {
+    setModifiers(prev => prev.map(m => m.id === id ? { ...m, ...patch } : m));
+    setDirty(true);
+  };
+  const setSent = (id, patch) => {
+    setSentiments(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s));
+    setDirty(true);
+  };
+
+  const addTopic = () => {
+    const nextId = Math.max(...topics.map(t => t.id)) + 1;
+    setTopics(prev => [...prev, { id: nextId, name: "New topic", category: "Experience", weight: 0, active: true }]);
+    setDirty(true);
+  };
+  const removeTopic = (id) => {
+    setTopics(prev => prev.filter(t => t.id !== id));
+    setDirty(true);
+  };
+  const normalize = () => {
+    if (totalWeight === 0) return;
+    const factor = 100 / totalWeight;
+    setTopics(prev => prev.map(t => t.active
+      ? { ...t, weight: Math.round(t.weight * factor) }
+      : t));
+    setDirty(true);
+  };
+
+  return (
+    <div className="pane">
+      <div className="pane-head" style={{ alignItems: "flex-start" }}>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ margin: 0 }}>VU Score Model</h1>
+          <div style={{ font: "400 13px/20px Inter", color: "#7b8a96", marginTop: 4, maxWidth: 720 }}>
+            Define the topics FI scores against, how each is weighted, the modifiers that adjust scoring on edge cases, and how sentiment polarity scales topic scores. This model drives the VU number on every survey response.
+          </div>
+          <div style={{ font: "400 12px/16px Inter", color: "#7b8a96", marginTop: 8 }}>
+            <span style={{ color: "#1d2630", fontWeight: 500 }}>v4.2</span>
+            <span style={{ margin: "0 8px" }}>·</span>
+            Last published May 04, 2026 by Maria Cohen
+            <span style={{ margin: "0 8px" }}>·</span>
+            Applied to <strong style={{ color: "#1d2630", fontWeight: 500 }}>5 active campaigns</strong>
+          </div>
+        </div>
+        <div className="head-actions" style={{ marginTop: 4 }}>
+          <button className="btn">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+            Version history
+          </button>
+          <button className="btn">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="9 12 12 9 15 12"/><line x1="12" y1="9" x2="12" y2="16"/></svg>
+            Test against sample
+          </button>
+          <button className="btn primary" disabled={!dirty}
+            style={{ opacity: dirty ? 1 : 0.55, cursor: dirty ? "pointer" : "default" }}>
+            <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
+            Publish changes
+          </button>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, overflow: "auto", padding: "16px 24px 32px", background: "#f8fafc" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16, maxWidth: 1400 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Topics & Weights */}
+            <SectionCard num="1" title="Topics & Weights"
+              sub="Each active topic contributes to the composite VU score. Weights should total 100% across active topics.">
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{
+                    height: 6, background: "#eef1f4", borderRadius: 3, overflow: "hidden",
+                    display: "flex",
+                  }}>
+                    {activeTopics.map(t => (
+                      <div key={t.id} title={`${t.name} · ${t.weight}%`} style={{
+                        width: `${(t.weight / Math.max(totalWeight, 100)) * 100}%`,
+                        background: catColor(t.category),
+                        borderRight: "1px solid #fff",
+                      }}/>
+                    ))}
+                    {totalWeight < 100 ? (
+                      <div style={{
+                        width: `${100 - totalWeight}%`,
+                        background: "repeating-linear-gradient(45deg, #eef1f4, #eef1f4 4px, #f8fafc 4px, #f8fafc 8px)",
+                      }}/>
+                    ) : null}
+                  </div>
+                </div>
+                <div style={{
+                  font: "600 13px/18px Inter",
+                  color: balanced ? "var(--fi-green)" : totalWeight > 100 ? "var(--fi-red)" : "var(--fi-amber)",
+                  minWidth: 80, textAlign: "right",
+                }}>
+                  {totalWeight}% / 100%
+                </div>
+                {!balanced ? (
+                  <button className="btn" onClick={normalize} style={{ font: "500 12px/16px Inter", padding: "4px 10px" }}>
+                    Normalize to 100%
+                  </button>
+                ) : null}
+              </div>
+
+              <table className="ont-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 28 }}/>
+                    <th>Topic</th>
+                    <th style={{ width: 140 }}>Category</th>
+                    <th style={{ width: 220 }}>Weight</th>
+                    <th style={{ width: 60, textAlign: "right" }}/>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topics.map(t => (
+                    <tr key={t.id} style={{ opacity: t.active ? 1 : 0.5 }}>
+                      <td>
+                        <SmallToggle checked={t.active} onChange={v => setTopic(t.id, { active: v })}/>
+                      </td>
+                      <td>
+                        <input className="ont-input" value={t.name}
+                          onChange={e => setTopic(t.id, { name: e.target.value })}/>
+                      </td>
+                      <td>
+                        <span className="cat-chip" style={{
+                          background: `${catColor(t.category)}1a`,
+                          color: catColor(t.category),
+                          borderColor: `${catColor(t.category)}40`,
+                        }}>{t.category}</span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <input type="range" min="0" max="50" value={t.weight}
+                            disabled={!t.active}
+                            onChange={e => setTopic(t.id, { weight: parseInt(e.target.value) })}
+                            style={{ flex: 1 }}/>
+                          <span style={{
+                            font: "600 13px/18px Inter", color: "#1d2630",
+                            minWidth: 36, textAlign: "right",
+                          }}>{t.weight}%</span>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button className="ont-iconbtn" title="Remove" onClick={() => removeTopic(t.id)}>
+                          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button className="ont-addbtn" onClick={addTopic}>
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add topic
+              </button>
+            </SectionCard>
+
+            {/* Modifiers */}
+            <SectionCard num="2" title="Modifiers"
+              sub="Conditional rules that adjust the composite score for edge cases. Applied in order, after weighted topics are summed.">
+              <table className="ont-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 28 }}/>
+                    <th>Name</th>
+                    <th>Condition</th>
+                    <th style={{ width: 200 }}>Effect</th>
+                    <th style={{ width: 60 }}/>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modifiers.map(m => (
+                    <tr key={m.id} style={{ opacity: m.active ? 1 : 0.5 }}>
+                      <td>
+                        <SmallToggle checked={m.active} onChange={v => setMod(m.id, { active: v })}/>
+                      </td>
+                      <td>
+                        <input className="ont-input" value={m.name}
+                          onChange={e => setMod(m.id, { name: e.target.value })}/>
+                      </td>
+                      <td style={{ color: "#526b7a", font: "400 13px/18px Inter" }}>
+                        When {m.when.charAt(0).toLowerCase() + m.when.slice(1)}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <select className="ont-input" style={{ width: 100 }}
+                            value={m.effect} onChange={e => setMod(m.id, { effect: e.target.value })}>
+                            <option value="multiply">Multiply by</option>
+                            <option value="add">Add</option>
+                          </select>
+                          <input type="number" className="ont-input" style={{ width: 70 }}
+                            step={m.effect === "multiply" ? 0.05 : 1}
+                            value={m.value}
+                            onChange={e => setMod(m.id, { value: parseFloat(e.target.value) })}/>
+                          <span style={{ font: "400 12px/16px Inter", color: "#9aa6b2" }}>
+                            {m.effect === "multiply" ? "×" : "pts"}
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <button className="ont-iconbtn" title="Remove" onClick={() => setModifiers(prev => prev.filter(x => x.id !== m.id))}>
+                          <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <button className="ont-addbtn" onClick={() => {
+                const id = Math.max(0, ...modifiers.map(m => m.id)) + 1;
+                setModifiers(prev => [...prev, { id, name: "New modifier", when: "Define the trigger condition", effect: "multiply", value: 1.0, active: true }]);
+                setDirty(true);
+              }}>
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add modifier
+              </button>
+            </SectionCard>
+
+            {/* Sentiment Multipliers */}
+            <SectionCard num="3" title="Sentiment Multipliers"
+              sub="How sentiment polarity scales each topic's contribution. Applied per-topic, before weights are summed.">
+              <table className="ont-table sent-table">
+                <thead>
+                  <tr>
+                    <th>Sentiment band</th>
+                    <th style={{ width: 180 }}>Polarity range</th>
+                    <th style={{ width: 240 }}>Multiplier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sentiments.map(s => (
+                    <tr key={s.id}>
+                      <td>
+                        <span style={{
+                          display: "inline-flex", alignItems: "center", gap: 8,
+                          font: "500 13px/18px Inter", color: "#1d2630",
+                        }}>
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.color }}/>
+                          {s.label}
+                        </span>
+                      </td>
+                      <td style={{ font: "400 13px/18px JetBrains Mono, Menlo, monospace", color: "#526b7a" }}>
+                        {s.range}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <input type="range" min="0" max="1.5" step="0.05" value={s.multiplier}
+                            onChange={e => setSent(s.id, { multiplier: parseFloat(e.target.value) })}
+                            style={{ flex: 1 }}/>
+                          <span style={{
+                            font: "600 13px/18px Inter", color: "#1d2630",
+                            minWidth: 48, textAlign: "right",
+                          }}>{s.multiplier.toFixed(2)}×</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div style={{
+                marginTop: 12, padding: "10px 12px", borderRadius: 6,
+                background: "var(--fi-purple-bg)", border: "1px solid rgba(120,86,186,0.18)",
+                font: "400 12px/18px Inter", color: "#1d2630",
+              }}>
+                <strong>Tip.</strong> Asymmetric multipliers (e.g. very-negative at 0.55× but very-positive at 1.20×) make the VU score punish bad experiences harder than it rewards good ones — usually what you want for an "early-warning" signal.
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Right rail — score preview */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <ScorePreview topics={activeTopics} sentiments={sentiments}/>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionCard({ num, title, sub, children }) {
+  return (
+    <div style={{
+      background: "#fff", border: "1px solid rgba(0,0,0,0.08)",
+      borderRadius: 12, overflow: "hidden",
+    }}>
+      <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{
+            width: 26, height: 26, borderRadius: "50%",
+            background: "var(--fi-accent-bg)", color: "var(--fi-accent-strong)",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            font: "600 12px/1 Inter",
+          }}>{num}</span>
+          <div style={{ font: "600 15px/20px Inter", color: "#1d2630", letterSpacing: "-0.01em" }}>{title}</div>
+        </div>
+        <div style={{ font: "400 13px/18px Inter", color: "#7b8a96", marginTop: 6, marginLeft: 38 }}>{sub}</div>
+      </div>
+      <div style={{ padding: "16px 20px 20px" }}>{children}</div>
+    </div>
+  );
+}
+
+function SmallToggle({ checked, onChange }) {
+  return (
+    <label style={{
+      display: "inline-flex", alignItems: "center",
+      width: 30, height: 18, position: "relative", cursor: "pointer",
+      background: checked ? "var(--fi-accent-strong)" : "#cbd3da",
+      borderRadius: 9, transition: "background 0.15s",
+    }}>
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
+        style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}/>
+      <span style={{
+        position: "absolute", top: 2, left: checked ? 14 : 2,
+        width: 14, height: 14, background: "#fff", borderRadius: "50%",
+        transition: "left 0.15s",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+      }}/>
+    </label>
+  );
+}
+
+function HealthRow({ ok, label, hint }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "flex-start", gap: 10,
+      padding: "8px 0", borderTop: "1px solid rgba(0,0,0,0.05)",
+    }}>
+      <span style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
+        background: ok ? "rgba(28,94,37,0.12)" : "rgba(166,79,0,0.12)",
+        color: ok ? "var(--fi-green)" : "var(--fi-amber)",
+        marginTop: 1,
+      }}>
+        {ok ? (
+          <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="4 12 10 18 20 6"/></svg>
+        ) : (
+          <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" strokeWidth="2.5" fill="none"><line x1="12" y1="6" x2="12" y2="13"/><circle cx="12" cy="17" r=".8" fill="currentColor"/></svg>
+        )}
+      </span>
+      <div>
+        <div style={{ font: "500 13px/18px Inter", color: "#1d2630" }}>{label}</div>
+        {hint ? <div style={{ font: "400 12px/16px Inter", color: "#7b8a96", marginTop: 2 }}>{hint}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+function ScorePreview({ topics, sentiments }) {
+  // Mock contributions for a sample "Tier-1 billing chat" interaction.
+  const sample = [
+    { topic: "Resolution",            sentiment: "neg",  raw: 60 },
+    { topic: "Agent empathy",         sentiment: "pos",  raw: 85 },
+    { topic: "Effort / ease",         sentiment: "neg",  raw: 55 },
+    { topic: "Wait time",             sentiment: "neu",  raw: 70 },
+    { topic: "Billing accuracy",      sentiment: "vneg", raw: 40 },
+  ];
+  const get = (name) => topics.find(t => t.name === name);
+  const sentMul = (id) => sentiments.find(s => s.id === id)?.multiplier ?? 1;
+  let weighted = 0, totalW = 0;
+  for (const row of sample) {
+    const t = get(row.topic);
+    if (!t || !t.active) continue;
+    weighted += row.raw * sentMul(row.sentiment) * (t.weight / 100);
+    totalW += t.weight;
+  }
+  const composite = totalW > 0 ? Math.round(weighted * (100 / totalW)) : 0;
+  const color = composite >= 70 ? "var(--fi-green)" : composite >= 50 ? "var(--fi-amber)" : "var(--fi-red)";
+
+  return (
+    <div style={{
+      background: "#fff", border: "1px solid rgba(0,0,0,0.08)",
+      borderRadius: 12, padding: 16,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <span className="ai-orb-sm" style={{ width: 20, height: 20 }}>
+          <svg viewBox="0 0 24 24" width="11" height="11"><path d="M12 2 13.5 10.5 22 12 13.5 13.5 12 22 10.5 13.5 2 12 10.5 10.5Z"/></svg>
+        </span>
+        <div style={{ font: "600 13px/18px Inter", color: "#1d2630" }}>Live score preview</div>
+      </div>
+      <div style={{ font: "400 12px/16px Inter", color: "#7b8a96", marginBottom: 14 }}>
+        Sample: Tier-1 billing chat · 8 min · escalated
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 4, marginBottom: 14 }}>
+        <span style={{ font: "600 56px/1 Inter", letterSpacing: "-0.03em", color }}>{composite}</span>
+        <span style={{ font: "500 14px/1 Inter", color: "#7b8a96" }}>/ 100</span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {sample.map((row, i) => {
+          const t = get(row.topic);
+          if (!t || !t.active) return null;
+          const contribution = row.raw * sentMul(row.sentiment) * (t.weight / 100);
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, font: "400 12px/16px Inter", color: "#526b7a" }}>
+              <span style={{ flex: 1, color: "#1d2630", fontWeight: 500 }}>{row.topic}</span>
+              <span style={{ color: "#9aa6b2" }}>{row.raw}</span>
+              <span style={{ color: "#9aa6b2", width: 36, textAlign: "right" }}>×{sentMul(row.sentiment).toFixed(2)}</span>
+              <span style={{ color: "#9aa6b2", width: 36, textAlign: "right" }}>×{(t.weight/100).toFixed(2)}</span>
+              <span style={{ color: "#1d2630", fontWeight: 600, width: 36, textAlign: "right" }}>
+                {contribution.toFixed(1)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function catColor(cat) {
+  return {
+    Outcome:    "#0d8a8a",
+    Experience: "#7856ba",
+    Channel:    "#a64f00",
+    Loyalty:    "#bf2323",
+  }[cat] || "#7b8a96";
+}
+
+Object.assign(window, { VUScoreModel });

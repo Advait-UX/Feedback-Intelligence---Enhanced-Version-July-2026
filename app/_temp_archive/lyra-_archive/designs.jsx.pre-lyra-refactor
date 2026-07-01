@@ -1,0 +1,587 @@
+/* Feedback Intelligence — Survey Templates admin page.
+   Survey templates are reusable presets separated from campaigns, so multiple
+   campaigns can share the same question set, display style, and delivery rules.
+   (Internal field names like `surveyDesignId` are kept for backward compatibility.) */
+
+const SEED_DESIGNS = [
+  { id: "csat-quick",     name: "Standard CSAT — Quick Reply",     description: "Default 1–5 star CSAT for digital channels. Quick-reply bubbles, AI questions on.", channel: "Digital", surveyType: "CSAT (1–5 star)", displayStyle: "Quick Reply", listPickerLabel: "", aiQuestions: true, maxQuestions: 2, freeText: "Conditional", welcomeMode: "with-optout", welcomeMessage: "{{First Name}}, we'd love to hear about your experience today. We have just a few quick questions, just two minutes of your time.", buttonToStart: "Get started", buttonToOptOut: "Not today", defaultScaleQuestion: "On a scale of 1 to 5, how would you rate your experience today?", defaultCommentQuestion: "What could we have done better?", expiryMinutes: 2880, realtimeAlerts: true, usedBy: 3, updated: "May 02, 2026", owner: "Maria Cohen" },
+  { id: "csat-list",      name: "CSAT — List Picker",              description: "Same questions as Standard CSAT, but renders as a list picker for desktop chat.",   channel: "Digital", surveyType: "CSAT (1–5 star)", displayStyle: "List Picker",  listPickerLabel: "Rate your experience", aiQuestions: true, maxQuestions: 2, freeText: "Conditional", welcomeMode: "without-optout", welcomeMessage: "{{First Name}}, we'd love your quick feedback. Just two minutes of your time.", buttonToStart: "Get started", buttonToOptOut: "Not today", defaultScaleQuestion: "On a scale of 1 to 5, how would you rate your experience today?", defaultCommentQuestion: "What could we have done better?", expiryMinutes: 2880, realtimeAlerts: true, usedBy: 1, updated: "Apr 28, 2026", owner: "Maria Cohen" },
+  { id: "bot-simple",     name: "Bot Handoff — 1 Question",         description: "Minimal one-question survey for AI bot deflection audits. No AI questions, no welcome.", channel: "Digital", surveyType: "Like / Dislike", displayStyle: "Quick Reply", listPickerLabel: "", aiQuestions: false, maxQuestions: 1, freeText: "Always off", welcomeMode: "none", welcomeMessage: "", buttonToStart: "Get started", buttonToOptOut: "Not today", defaultScaleQuestion: "Did the assistant solve your problem?", defaultCommentQuestion: "Anything we should know?", expiryMinutes: 1440, realtimeAlerts: false, usedBy: 1, updated: "Mar 30, 2026", owner: "Tomás Reyes" },
+  { id: "vip-followup",   name: "VIP Escalation Follow-Up",         description: "Longer survey for high-value customer escalations. Comment always on, no expiry pressure.", channel: "Both", surveyType: "Both",            displayStyle: "List Picker",  listPickerLabel: "How are we doing?", aiQuestions: true, maxQuestions: 3, freeText: "Always on", welcomeMode: "with-optout", welcomeMessage: "{{First Name}}, thank you for your patience. Your feedback shapes how we serve our VIP customers.", buttonToStart: "Share feedback", buttonToOptOut: "Maybe later", defaultScaleQuestion: "Overall, how would you rate your experience?", defaultCommentQuestion: "Tell us what went well — and what didn't.", expiryMinutes: 4320, realtimeAlerts: true, usedBy: 1, updated: "May 06, 2026", owner: "Maria Cohen" },
+  { id: "brand-pulse",    name: "Brand Health Pulse",               description: "Two-question brand-affinity survey for social DMs. Like/dislike + open comment.",       channel: "Digital", surveyType: "Like / Dislike", displayStyle: "Quick Reply", listPickerLabel: "", aiQuestions: false, maxQuestions: 2, freeText: "Always on", welcomeMode: "without-optout", welcomeMessage: "Quick pulse check — how are we doing?", buttonToStart: "Tell us", buttonToOptOut: "Not today", defaultScaleQuestion: "How do you feel about us today?", defaultCommentQuestion: "Tell us why in a few words.", expiryMinutes: 4320, realtimeAlerts: false, usedBy: 1, updated: "Apr 12, 2026", owner: "Aisha Khan" },
+];
+
+function designById(id) {
+  return SEED_DESIGNS.find(d => d.id === id) || SEED_DESIGNS[0];
+}
+
+function SurveyDesignsGrid({ onCreate, onOpen }) {
+  const [search, setSearch] = React.useState("");
+
+  const rows = SEED_DESIGNS.filter(d =>
+    !search || d.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="pane">
+      <div className="pane-head">
+        <h1>Survey Templates</h1>
+        <div className="head-actions">
+          <button className="btn primary" onClick={() => onCreate()}>
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Survey Template
+          </button>
+        </div>
+      </div>
+
+      <div style={{ padding: "0 24px 14px", font: "400 13px/20px Inter", color: "#7b8a96", maxWidth: 760 }}>
+        Reusable templates that define a survey's questions, display style, and delivery rules. Map one template to many campaigns — change the template once and every linked campaign picks it up.
+      </div>
+
+      <div className="toolbar" style={{ paddingTop: 4 }}>
+        <div className="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search survey templates"
+            value={search} onChange={e => setSearch(e.target.value)}/>
+        </div>
+      </div>
+
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Survey template</th>
+              <th>Channel</th>
+              <th>Type</th>
+              <th>Digital style</th>
+              <th>AI questions</th>
+              <th>Max Qs</th>
+              <th>Used by</th>
+              <th>Owner</th>
+              <th>Last updated</th>
+              <th style={{ width: 40 }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(d => (
+              <tr key={d.id}>
+                <td style={{ maxWidth: 360 }}>
+                  <a className="agent-link" href="#" onClick={e => { e.preventDefault(); onOpen(d); }}>
+                    {d.name}
+                  </a>
+                  <div style={{ font: "400 11px/15px Inter", color: "#7b8a96", marginTop: 2, whiteSpace: "normal", maxWidth: 340 }}>
+                    {d.description}
+                  </div>
+                </td>
+                <td>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    font: "500 12px/16px Inter",
+                    color: d.channel === "IVR" ? "var(--fi-amber)" : d.channel === "Both" ? "var(--fi-purple)" : "var(--fi-accent-strong)",
+                    background: d.channel === "IVR" ? "var(--fi-amber-bg)" : d.channel === "Both" ? "var(--fi-purple-bg)" : "var(--fi-accent-bg)",
+                    padding: "2px 8px", borderRadius: 4,
+                  }}>{d.channel || "Digital"}</span>
+                </td>
+                <td>{d.surveyType}</td>
+                <td>
+                  {(d.channel === "Digital" || d.channel === "Both") ? (
+                    <>
+                      {d.displayStyle}
+                      {d.displayStyle === "List Picker" && d.listPickerLabel ? (
+                        <div style={{ font: "400 11px/14px Inter", color: "#9aa6b2", marginTop: 2 }}>"{d.listPickerLabel}"</div>
+                      ) : null}
+                    </>
+                  ) : <span style={{ color: "#9aa6b2" }}>—</span>}
+                </td>
+                <td>
+                  <span style={{ color: d.aiQuestions ? "var(--fi-green)" : "#7b8a96", font: "500 12px/16px Inter" }}>
+                    ● {d.aiQuestions ? "On" : "Off"}
+                  </span>
+                </td>
+                <td>{d.maxQuestions}</td>
+                <td>
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    font: "500 12px/16px Inter",
+                    color: d.usedBy === 0 ? "#9aa6b2" : "#1d2630",
+                  }}>
+                    {d.usedBy} {d.usedBy === 1 ? "campaign" : "campaigns"}
+                  </span>
+                </td>
+                <td>{d.owner}</td>
+                <td>{d.updated}</td>
+                <td>
+                  <div className="kebab">
+                    <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const DEFAULT_DESIGN = {
+  name: "",
+  description: "",
+  channel: "Digital",
+  surveyType: "CSAT (1–5 star)",
+  displayStyle: "Quick Reply",
+  listPickerLabel: "Rate your experience",
+  welcomeMode: "with-optout",
+  welcomeMessage: "{{First Name}}, we'd love to hear about your experience today. We have just a few quick questions, just two minutes of your time.",
+  buttonToStart: "Get started",
+  buttonToOptOut: "Not today",
+  aiQuestions: true,
+  defaultScaleQuestion: "On a scale of 1 to 5, how would you rate your experience today?",
+  defaultCommentQuestion: "What could we have done better?",
+  maxQuestions: 2,
+  freeText: "Conditional",
+  expiryMinutes: 2880,
+  realtimeAlerts: true,
+};
+
+function CreateSurveyDesign({ onCancel, onSave, initial }) {
+  const [d, setD] = React.useState(initial || DEFAULT_DESIGN);
+  const set = (k, v) => setD(prev => ({ ...prev, [k]: v }));
+  const isEdit = !!initial;
+  const [activeStep, setActiveStep] = React.useState(1);
+
+  // Linked campaigns: seed from any campaign whose surveyDesignId matches this design's id.
+  const initialLinkedIds = React.useMemo(() => {
+    if (!initial || !window.CAMPAIGNS) return [];
+    return window.CAMPAIGNS.filter(c => c.surveyDesignId === initial.id).map(c => c.id);
+  }, [initial]);
+  const [linkedIds, setLinkedIds] = React.useState(initialLinkedIds);
+  const toggleLink = (id) => setLinkedIds(prev =>
+    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+  );
+
+  const STEPS = [
+    { n: 1, label: "Identity",         id: "dsec-1", done: !!d.name },
+    { n: 2, label: "Survey Content",   id: "dsec-2", done: !!d.defaultScaleQuestion },
+    { n: 3, label: "Delivery",         id: "dsec-3", done: true },
+    { n: 4, label: "Linked Campaigns", id: "dsec-4", done: linkedIds.length > 0 },
+  ];
+
+  return (
+    <div className="pane" style={{ overflow: "hidden" }}>
+      <div className="crumbs">
+        <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Feedback Intelligence</a>
+        <span className="sep">/</span>
+        <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Survey Templates</a>
+        <span className="sep">/</span>
+        <span className="last">{isEdit ? d.name : "New Survey Template"}</span>
+      </div>
+
+      <div className="pane-head" style={{ paddingTop: 6 }}>
+        <h1>{isEdit ? d.name : "New Survey Template"}</h1>
+        <div className="head-actions">
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className="btn primary" disabled={!d.name}
+            onClick={() => onSave(d)}>
+            <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
+            {isEdit ? "Save changes" : "Save template"}
+          </button>
+        </div>
+      </div>
+
+      <div className="create-grid">
+        {/* Side TOC */}
+        <nav className="form-toc">
+          {STEPS.map(s => (
+            <div key={s.n}
+              className={`toc-item ${activeStep === s.n ? "on" : ""} ${s.done ? "done" : ""}`}
+              onClick={() => {
+                setActiveStep(s.n);
+                document.getElementById(s.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
+              }}>
+              <span className="num">{s.n}</span>
+              {s.label}
+            </div>
+          ))}
+        </nav>
+
+        {/* Form pane */}
+        <div className="form-pane">
+
+        <FormSection num={1} title="Identity"
+          sub="A short name and description help others pick the right template later."
+          id="dsec-1" complete={!!d.name}>
+          <FieldRow label="Name" req hint="Admin-facing label, e.g. 'Standard CSAT — Quick Reply'">
+            <input className="fi-input" placeholder="e.g. Standard CSAT — Quick Reply"
+              value={d.name} onChange={e => set("name", e.target.value)}/>
+          </FieldRow>
+          <FieldRow label="Description" hint="What this template is for and which campaigns should use it">
+            <textarea className="fi-input"
+              placeholder="What is this template for? Which campaigns should use it?"
+              value={d.description} onChange={e => set("description", e.target.value)}/>
+          </FieldRow>
+        </FormSection>
+
+        <FormSection num={2} title="Survey Content"
+          sub="What questions the customer sees, and how."
+          id="dsec-2" complete={!!d.defaultScaleQuestion}>
+          <FieldRow label="Survey channel" req
+            hint="Where this survey will be delivered. Some downstream options depend on this choice.">
+            <Segmented options={["Digital", "IVR", "Both"]}
+              value={d.channel} onChange={v => set("channel", v)}/>
+            <div className="help">
+              {d.channel === "Digital" && "Digital channels: chat, AI sessions, social, and email."}
+              {d.channel === "IVR" && "IVR: voice-only delivery as a post-call survey."}
+              {d.channel === "Both" && "Survey is delivered across digital and IVR channels."}
+            </div>
+          </FieldRow>
+          <FieldRow label="Welcome message" req
+            hint="Plays before the first question. Opt Out lets the customer decline gracefully — recommended unless you have a separate consent surface.">
+            <div className="welcome-mode-radio">
+              {[
+                { v: "with-optout",    label: "Invitation with Opt Out",    desc: "Customer can decline before starting." },
+                { v: "without-optout", label: "Invitation without Opt Out", desc: "Customer sees the invitation and Start button only." },
+                { v: "none",           label: "None",                       desc: "Open with question 1 directly." },
+              ].map(opt => (
+                <label key={opt.v} className={`welcome-mode-option ${d.welcomeMode === opt.v ? "on" : ""}`}>
+                  <input type="radio" name="welcomeMode" value={opt.v}
+                    checked={d.welcomeMode === opt.v}
+                    onChange={() => set("welcomeMode", opt.v)}/>
+                  <span className="dot"/>
+                  <span className="body">
+                    <span className="title">{opt.label}</span>
+                    <span className="desc">{opt.desc}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {d.welcomeMode !== "none" ? (
+              <div style={{ marginTop: 14,
+                padding: 14, borderRadius: 8,
+                background: "#f5f7f9", border: "1px solid rgba(0,0,0,0.06)",
+              }}>
+                <div className="kicker">Invitation text</div>
+                <textarea className="fi-input" rows={3} maxLength={240}
+                  style={{ resize: "vertical", minHeight: 64, font: "400 13px/18px Inter", marginTop: 4, background: "#fff" }}
+                  placeholder="{{First Name}}, we'd love to hear about your experience…"
+                  value={d.welcomeMessage}
+                  onChange={e => set("welcomeMessage", e.target.value)}/>
+                <div className="help" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>
+                    Use <code style={{ background: "#fff", padding: "1px 5px", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 3, font: "500 11px/14px Inter", color: "var(--fi-accent-strong)" }}>{"{{First Name}}"}</code> to personalise.
+                  </span>
+                  <span style={{ color: (d.welcomeMessage || "").length > 220 ? "var(--fi-amber)" : "#9aa6b2" }}>
+                    {(d.welcomeMessage || "").length}/240
+                  </span>
+                </div>
+
+                {(d.channel === "Digital" || d.channel === "Both") ? (
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: d.welcomeMode === "with-optout" ? "1fr 1fr" : "1fr",
+                    gap: 14, marginTop: 14,
+                  }}>
+                    <div>
+                      <div className="kicker">Button to start</div>
+                      <input className="fi-input" disabled readOnly value={d.buttonToStart}
+                        style={{ marginTop: 4, background: "#eef1f4", color: "#526b7a", cursor: "not-allowed" }}/>
+                      <div className="help">Display only · system-defined label</div>
+                    </div>
+                    {d.welcomeMode === "with-optout" ? (
+                      <div>
+                        <div className="kicker">Button to opt out</div>
+                        <input className="fi-input" disabled readOnly value={d.buttonToOptOut}
+                          style={{ marginTop: 4, background: "#eef1f4", color: "#526b7a", cursor: "not-allowed" }}/>
+                        <div className="help">Display only · system-defined label</div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {d.channel === "IVR" ? (
+                  <div className="help" style={{ marginTop: 12, padding: "8px 10px", borderRadius: 4, background: "rgba(0,0,0,0.03)" }}>
+                    On IVR, the customer hears the invitation and presses 1 to start, or hangs up. No on-screen buttons.
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </FieldRow>
+          <FieldRow label="Survey type" req>
+            <Segmented options={["CSAT (1–5 star)", "Like / Dislike", "Both"]}
+              value={d.surveyType} onChange={v => set("surveyType", v)}/>
+          </FieldRow>
+          {(d.channel === "Digital" || d.channel === "Both") ? (
+            <>
+              <FieldRow label="Digital display style" req
+                hint="How the rating scale renders inside the digital chat thread">
+                <Segmented options={["Quick Reply", "List Picker"]}
+                  value={d.displayStyle} onChange={v => set("displayStyle", v)}/>
+                <div className="help">
+                  {d.displayStyle === "Quick Reply"
+                    ? "Inline tappable bubbles below the question — fastest to answer, best for ≤ 5 options on mobile."
+                    : "Opens a dropdown picker with a header label — handles longer scales and reads better on desktop chat."}
+                </div>
+              </FieldRow>
+              {d.displayStyle === "List Picker" ? (
+                <FieldRow label="List picker label" req
+                  hint="Header shown above the picker options">
+                  <input className="fi-input" maxLength={48}
+                    placeholder="Rate your experience"
+                    value={d.listPickerLabel}
+                    onChange={e => set("listPickerLabel", e.target.value)}/>
+                  <div className="help">{(d.listPickerLabel || "").length}/48 characters · keep it short.</div>
+                </FieldRow>
+              ) : null}
+            </>
+          ) : null}
+          <FieldRow label="AI-generated contextual questions"
+            hint="When on, AI generates questions from each interaction's topics. When off, every survey uses the preconfigured default questions only.">
+            <Toggle checked={d.aiQuestions} onChange={v => set("aiQuestions", v)}
+              label={d.aiQuestions ? "On — questions adapt to each interaction's topics" : "Off — send only the preconfigured default questions"}/>
+            {d.aiQuestions ? (
+              <>
+                <div style={{ marginTop: 10,
+                  display: "grid", gridTemplateColumns: "1fr", gap: 0,
+                  border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden",
+                  background: "#fff",
+                }}>
+                  {[
+                    { tag: "Configured topic found", desc: "AI generates contextual questions for the matched topic.", vu: true, tagColor: "var(--fi-green)", bg: "rgba(28,94,37,0.06)" },
+                    { tag: "Unmatched topic found", desc: "AI still generates contextual questions; the new topic is flagged for review.", vu: false, tagColor: "var(--fi-purple)", bg: "var(--fi-purple-bg)" },
+                    { tag: "No topic identified", desc: "Falls back to the preconfigured default questions below.", vu: false, tagColor: "#7b8a96", bg: "rgba(0,0,0,0.02)" },
+                  ].map((row, i) => (
+                    <div key={i} style={{
+                      display: "grid", gridTemplateColumns: "180px 1fr 120px", alignItems: "center", gap: 12,
+                      padding: "10px 12px",
+                      borderTop: i === 0 ? "none" : "1px solid rgba(0,0,0,0.06)",
+                      background: row.bg,
+                    }}>
+                      <span style={{ font: "600 12px/16px Inter", color: row.tagColor }}>● {row.tag}</span>
+                      <span style={{ font: "400 13px/18px Inter", color: "#1d2630" }}>{row.desc}</span>
+                      <span style={{ font: "500 12px/16px Inter", color: row.vu ? "var(--fi-green)" : "#9aa6b2", textAlign: "right" }}>
+                        {row.vu ? "VU score ✓" : "No VU score"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="help" style={{ marginTop: 10 }}>VU scoring requires a configured topic.</div>
+              </>
+            ) : (
+              <div className="help" style={{ marginTop: 10,
+                padding: "10px 12px", borderRadius: 6,
+                background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)", color: "#1d2630",
+              }}>
+                Every interaction will receive the two preconfigured default questions below — identical for all responses.
+              </div>
+            )}
+          </FieldRow>
+          <FieldRow label={d.aiQuestions ? "Default fallback questions" : "Preconfigured questions"} req
+            hint={d.aiQuestions
+              ? "Used when no topic is identified. One scale question and one comment question."
+              : "Sent on every survey since AI questions are off."}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div>
+                <div style={{ font: "500 12px/16px Inter", color: "#526b7a", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{
+                    font: "600 10px/14px Inter", letterSpacing: "0.02em", textTransform: "uppercase",
+                    color: "var(--fi-accent-strong)", background: "var(--fi-accent-bg)",
+                    padding: "1px 6px", borderRadius: 3,
+                  }}>Scale</span>
+                  Rating question
+                </div>
+                <input className="fi-input" maxLength={120}
+                  placeholder="On a scale of 1 to 5, how would you rate your experience today?"
+                  value={d.defaultScaleQuestion}
+                  onChange={e => set("defaultScaleQuestion", e.target.value)}/>
+              </div>
+              <div>
+                <div style={{ font: "500 12px/16px Inter", color: "#526b7a", marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{
+                    font: "600 10px/14px Inter", letterSpacing: "0.02em", textTransform: "uppercase",
+                    color: "#7b8a96", background: "rgba(0,0,0,0.05)",
+                    padding: "1px 6px", borderRadius: 3,
+                  }}>Text</span>
+                  Comment question
+                </div>
+                <input className="fi-input" maxLength={120}
+                  placeholder="What could we have done better?"
+                  value={d.defaultCommentQuestion}
+                  onChange={e => set("defaultCommentQuestion", e.target.value)}/>
+              </div>
+            </div>
+          </FieldRow>
+          <FieldRow label="Max questions"
+            hint="More than 3 significantly drops completion rates. Recommended default: 2.">
+            <div className="slider-row">
+              <input type="range" min="1" max="5" value={d.maxQuestions}
+                onChange={e => set("maxQuestions", parseInt(e.target.value))}/>
+              <span className="val">{d.maxQuestions}</span>
+            </div>
+          </FieldRow>
+          <FieldRow label="Free text"
+            hint="Conditional captures qualitative signal only when something went wrong">
+            <Segmented options={["Always on", "Conditional", "Always off"]}
+              value={d.freeText} onChange={v => set("freeText", v)}/>
+            {d.freeText === "Conditional" ? (
+              <div className="help">Free text only appears when the rating is ≤ 2 stars.</div>
+            ) : null}
+          </FieldRow>
+        </FormSection>
+
+        <FormSection num={3} title="Delivery"
+          sub="When the survey expires and how supervisors are alerted to low ratings."
+          id="dsec-3" complete>
+          <FieldRow label="Survey expiry window"
+            hint="Survey expires after X minutes — prevents stale responses skewing data">
+            <div className="inline-row">
+              <input type="number" className="fi-input" style={{ width: 80 }}
+                value={d.expiryMinutes} onChange={e => set("expiryMinutes", parseInt(e.target.value || 0))}/>
+              <span style={{ color: "#7b8a96", font: "400 13px/18px Inter" }}>minutes</span>
+            </div>
+          </FieldRow>
+          <FieldRow label="Real-time response alerting"
+            hint="Supervisor gets a push notification on 1- or 2-star responses">
+            <Toggle checked={d.realtimeAlerts} onChange={v => set("realtimeAlerts", v)}
+              label={d.realtimeAlerts ? "Push to supervisor on low-rating responses" : "Off"}/>
+          </FieldRow>
+        </FormSection>
+
+        <FormSection num={4} title="Linked Campaigns"
+          sub="Map the campaigns that should use this survey template. Changes apply to future surveys; in-flight responses keep the template they were sent under."
+          id="dsec-4" complete>
+          <LinkedCampaignsTable
+            linkedIds={linkedIds}
+            currentDesignId={initial?.id}
+            onToggle={toggleLink}
+          />
+        </FormSection>
+
+        <div className="form-foot">
+          <span className="muted" style={{ font: "400 12px/16px Inter" }}>
+            All changes auto-saved as draft · Last edited just now
+          </span>
+          <span className="grow"/>
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className="btn primary" disabled={!d.name} onClick={() => onSave(d)}>
+            {isEdit ? "Save changes" : "Save template"}
+          </button>
+        </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LinkedCampaignsTable({ linkedIds, currentDesignId, onToggle }) {
+  const [search, setSearch] = React.useState("");
+  const [hideOtherMapped, setHideOtherMapped] = React.useState(false);
+  const all = window.CAMPAIGNS || [];
+  const rows = all.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (hideOtherMapped && c.surveyDesignId && c.surveyDesignId !== currentDesignId && !linkedIds.includes(c.id)) return false;
+    return true;
+  });
+  const linkedCount = linkedIds.length;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10, flexWrap: "wrap" }}>
+        <div className="search" style={{ flex: "0 0 260px" }}>
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search campaigns"
+            value={search} onChange={e => setSearch(e.target.value)}/>
+        </div>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: 6, font: "400 13px/18px Inter", color: "#526b7a", cursor: "pointer" }}>
+          <input type="checkbox" checked={hideOtherMapped} onChange={e => setHideOtherMapped(e.target.checked)}/>
+          Hide campaigns mapped to another template
+        </label>
+        <span style={{ flex: 1 }}/>
+        <span style={{
+          font: "500 12px/16px Inter",
+          color: linkedCount > 0 ? "var(--fi-accent-strong)" : "#7b8a96",
+          background: linkedCount > 0 ? "var(--fi-accent-bg)" : "rgba(0,0,0,0.04)",
+          padding: "4px 10px", borderRadius: 999,
+        }}>
+          {linkedCount} {linkedCount === 1 ? "campaign" : "campaigns"} mapped
+        </span>
+      </div>
+
+      <div style={{ border: "1px solid rgba(0,0,0,0.08)", borderRadius: 8, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", font: "400 13px/20px Inter" }}>
+          <thead>
+            <tr>
+              <th style={{ width: 40, padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#fff" }}/>
+              <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", font: "500 12px/16px Inter", color: "#526b7a", background: "#fff" }}>Campaign</th>
+              <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", font: "500 12px/16px Inter", color: "#526b7a", background: "#fff" }}>Status</th>
+              <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", font: "500 12px/16px Inter", color: "#526b7a", background: "#fff" }}>Channels</th>
+              <th style={{ textAlign: "left", padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.06)", font: "500 12px/16px Inter", color: "#526b7a", background: "#fff" }}>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(c => {
+              const isLinked = linkedIds.includes(c.id);
+              const isMappedElsewhere = c.surveyDesignId && c.surveyDesignId !== currentDesignId;
+              return (
+                <tr key={c.id} style={{ background: isLinked ? "rgba(13,138,138,0.04)" : "transparent" }}>
+                  <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <input type="checkbox" checked={isLinked}
+                      onChange={() => onToggle(c.id)}/>
+                  </td>
+                  <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <div style={{ font: "500 13px/18px Inter", color: "#1d2630" }}>{c.name}</div>
+                    {c.hasWorkingCopy ? (
+                      <div style={{ marginTop: 4 }}>
+                        <WorkingCopyChip/>
+                      </div>
+                    ) : null}
+                  </td>
+                  <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <StatusPill s={c.status}/>
+                  </td>
+                  <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+                    <div className="channel-stack">
+                      {c.channels.map(k => <ChannelChip key={k} kind={k}/>)}
+                    </div>
+                  </td>
+                  <td style={{ padding: "10px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)", color: "#526b7a" }}>{c.owner}</td>
+                </tr>
+              );
+            })}
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ padding: "24px", textAlign: "center", color: "#9aa6b2", font: "400 13px/18px Inter" }}>
+                  No campaigns match the current filter.
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+
+      {linkedIds.some(id => {
+        const c = (window.CAMPAIGNS || []).find(x => x.id === id);
+        return c && c.surveyDesignId && c.surveyDesignId !== currentDesignId;
+      }) ? (
+        <div style={{
+          marginTop: 10, padding: "10px 12px", borderRadius: 6,
+          background: "var(--fi-amber-bg, rgba(166,79,0,0.08))",
+          border: "1px solid rgba(166,79,0,0.20)",
+          color: "var(--fi-amber)",
+          font: "400 12px/18px Inter",
+          display: "flex", alignItems: "flex-start", gap: 8,
+        }}>
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, flexShrink: 0 }}>
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r=".8" fill="currentColor"/>
+          </svg>
+          <span>
+            One or more selected campaigns are currently mapped to a different template. Saving will remap them — future surveys will use this template instead.
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+Object.assign(window, { SEED_DESIGNS, designById, SurveyDesignsGrid, CreateSurveyDesign, DEFAULT_DESIGN, LinkedCampaignsTable });

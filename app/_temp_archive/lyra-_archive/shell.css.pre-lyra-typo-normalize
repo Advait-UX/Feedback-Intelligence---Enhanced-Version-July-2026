@@ -1,0 +1,786 @@
+/* ============================================================================
+   Lyra — Suite Shell foundation
+   The chrome that wraps every CXone product page.
+   Use with colors_and_type.css. Pair with one or more <style> overrides for
+   product-specific accents. See ui_kits/wem-lyra/*.html for examples.
+   ============================================================================ */
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100vh;font-family:Inter,system-ui,sans-serif;color:var(--lyra-slate-900);background:var(--lyra-slate-100)}
+
+/* ----- App grid -----
+   The shell canvas color — topbar, sidebar, and main area all sit on this
+   same gray surface so they read as one continuous canvas (per Lyra Full Page).
+   The white .pane card "floats" on top of this canvas. */
+.app{
+  display:grid;
+  grid-template-rows:56px 1fr;
+  grid-template-columns: 256px 1fr;                    /* CXone sidebar exact width */
+  grid-template-areas:"header header" "nav main";
+  height:100vh;
+  background: rgb(243, 245, 246);                      /* Unified canvas surface */
+  transition: grid-template-columns .2s ease;          /* smooth collapse/expand */
+}
+.app.nav-minimized{
+  grid-template-columns: 60px 1fr;                     /* Lyra: 36px item + 12px*2 padding */
+}
+
+/* ----- Lyra Shell Top Bar (node 17702:7516): 56px, justify-between -----
+   Background matches the surrounding canvas (same as sidebar). The topbar and
+   sidebar form one continuous gray canvas; the white content card floats on top. */
+.topbar{
+  grid-area:header;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--space-2);                           /* Lyra: spacing/2 = 8px horizontal */
+  background: rgb(243, 245, 246);                      /* Match the canvas/sidebar surface */
+  /* No bottom border — topbar blends into the canvas (Lyra spec) */
+}
+/* Lyra _shellbar/app name (node 20232:24572): one clickable pill — smile + name + chev */
+.app-title{
+  display:flex; align-items:center;
+  gap: var(--space-1);                                 /* 4px default between siblings */
+  height: 40px;                                        /* Lyra: control-height/lg */
+  padding: 0 var(--space-2);                           /* Lyra: spacing/2 = 8px */
+  border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
+  /* Lyra Heading-md: Inter Medium 16/24, letter-spacing -0.16px */
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.16px;
+  color: var(--color-fg-default);                      /* Lyra: fg/default = rgba(0,0,0,0.8) */
+  cursor: pointer;
+  white-space: nowrap;
+}
+.app-title:hover  { background: var(--color-state-bg-hover); }   /* Lyra: state/bg/hover */
+.app-title:active { background: var(--color-state-bg-pressed); } /* Lyra: state/bg/pressed */
+.app-title .brand-mark{
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  margin-right: var(--space-3);                        /* +12px on top of 4px gap = 16px to name (Lyra spec) */
+  flex-shrink: 0;
+}
+.app-title .brand-mark img{ width:100%; height:100% }
+.app-title span{ white-space: nowrap; }
+.app-title .chev{ width:12px; height:12px; opacity:0.7 }   /* Lyra: chevron-down-sm 12px */
+/* Lyra Utilities slot2 (node 17643:44156): 3 service icons grouped + 8px gap to profile */
+.topbar-utilities{
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: var(--space-2);                                 /* Lyra: 8px between icon-group and avatar */
+  flex-shrink: 0;
+}
+.hdr-icon-group{
+  display: flex; align-items: center;
+  /* No gap — service icons sit flush together per Lyra spec */
+}
+.topbar .grow{ flex: 1; }                              /* (kept for backward-compat with other uses) */
+
+/* Lyra AI badge shown next to product name when in Feedback Intelligence */
+.fi-chip{
+  display:inline-flex;align-items:center;
+  padding:2px 6px;
+  border-radius:var(--radius-xs);                      /* Lyra: radius-xs = 4px */
+  background:var(--color-bg-ai);                       /* Lyra: lavender AI surface */
+  color:var(--color-fg-ai);                            /* Lyra: purple AI foreground */
+  font:600 12px/16px Inter;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+.grow{ flex:1 }
+
+/* Lyra _shellbar/service — 40px square icon button (node 19899:64827) */
+.hdr-icon{
+  width:40px; height:40px;
+  border-radius:var(--radius-md);                      /* Lyra: radius/md = 8px */
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  color:var(--color-fg-default);                       /* Lyra: fg/default */
+  position:relative;
+}
+.hdr-icon:hover  { background:var(--color-state-bg-hover); }   /* Lyra: state/bg/hover */
+.hdr-icon:active { background:var(--color-state-bg-pressed); } /* Lyra: state/bg/pressed */
+.hdr-icon svg{ width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round }
+.hdr-icon .dot-badge{
+  position:absolute; top:2px; right:2px;
+  background: #b62c2c;                                 /* Lyra: status/critical-strong */
+  color: var(--color-fg-inverse);
+  font: 400 12px/16px Inter; min-width:16px; height:16px;
+  border-radius: var(--radius-md);                     /* Lyra: badge radius/md */
+  display:flex; align-items:center; justify-content:center;
+  padding: 0 var(--space-1);
+  border: 1px solid rgba(255,255,255,0.8);             /* Lyra: border/inverse */
+  letter-spacing: 0.2px;
+}
+/* Lyra _shellbar/profile — 40px pill with 32px slate-500 avatar (node 19899:65954) */
+.hdr-avatar{
+  display:inline-flex; align-items:center;
+  gap: var(--space-2);                                 /* Lyra: 8px */
+  height: 40px;
+  padding: 0 var(--space-2);                           /* Lyra: 8px horizontal */
+  border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
+  cursor:pointer;
+}
+.hdr-avatar:hover  { background: var(--color-state-bg-hover); }
+.hdr-avatar:active { background: var(--color-state-bg-pressed); }
+.hdr-avatar .ava{
+  width:32px; height:32px;                             /* Lyra: 32px profile */
+  border-radius:20px;                                  /* Lyra: rounded-20 */
+  background: var(--lyra-slate-600);                   /* Lyra: base/slate/500 = #5d6a79 */
+  color: rgba(255,255,255,0.9);                        /* Lyra: 90% white */
+  display:flex; align-items:center; justify-content:center;
+  /* Lyra Body-md-emphasis: Inter Medium 14/20 */
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+.hdr-avatar .chev{ width:12px;height:12px;opacity:0.7;color:var(--color-fg-default) }
+
+/* ----- Left rail — matches CXone sidebar (SOL Sans, #f3f5f6) ----- */
+.nav{
+  grid-area:nav;
+  /* width is controlled by .app grid-template-columns (256px expanded / 60px minimized).
+     DO NOT set width here — that would override the grid and break collapse. */
+  background: rgb(243, 245, 246);                       /* CXone sidebar bg */
+  color: #333333;                                       /* CXone primary text */
+  /* SOL Sans is the NICE CXone font; falls back to Open Sans / Inter if not installed locally */
+  font-family: "SOL Sans", "Open Sans", "Inter", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  display:flex; flex-direction:column;
+  position:relative;
+  min-width: 0;                                         /* allow grid cell to shrink */
+  /* No overflow:auto here — let the collapse button extend past the panel edge.
+     Scrolling happens on .nav-scroll below. */
+}
+.nav-scroll{
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 8px;                                     /* CXone: padding-top 8px */
+  padding-left: var(--space-3);                         /* 12px horizontal */
+  padding-right: var(--space-3);
+  padding-bottom: var(--space-5);                       /* 20px bottom */
+  display: flex; flex-direction: column;
+  gap: 0;
+}
+.nav-collapse{
+  position:absolute;
+  top: var(--space-2);
+  right:-12px;                                          /* extends past the right edge */
+  width:24px; height:24px;
+  background:var(--lyra-white);
+  border:1px solid var(--color-border-subtle);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer; color:var(--color-fg-default);
+  z-index:5;
+  box-shadow: var(--shadow-sm);                         /* slight lift so it reads as a button */
+  transition: transform .15s;
+}
+.nav-collapse:hover{ background:var(--lyra-white); }
+.nav-collapse svg{ width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s; }
+
+/* Nav item — matches CXone sidebar (inherits SOL Sans 14/20 + #333 from .nav) */
+.nav-item{
+  position: relative;                                  /* anchor for active accent bar */
+  display:flex; align-items:center;
+  gap: var(--space-2);                                 /* 8px between icon and label */
+  height: 36px;                                        /* row-height/md */
+  padding: 0 10px;                                     /* pl/pr 10px */
+  border-radius: var(--radius-md);                     /* radius/md = 8px */
+  cursor:pointer;
+  /* font inherited from .nav: SOL Sans 14/20, color #333 */
+  font-weight: 400;
+  letter-spacing: 0;
+  overflow: hidden;
+}
+.nav-item:hover{ background: var(--color-state-bg-hover); }   /* Lyra: state/bg/hover */
+.nav-item.active{
+  background: var(--color-bg-active-moderate);         /* Lyra: bg/active/moderate = #d3e6fd */
+  color: var(--color-fg-active-strong);                /* Lyra: fg/active/strong = brand-700 */
+  font-weight: 500;                                    /* Lyra: Medium when selected */
+}
+/* 2px left accent bar on active items (Lyra spec) */
+.nav-item.active::before{
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: var(--color-fg-active-strong);
+  border-radius: 2px;
+}
+.nav-item .ico{
+  width: 16px; height: 16px;                           /* Lyra: 16px icon */
+  color: var(--color-fg-default);
+  stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  flex-shrink:0;
+}
+.nav-item.active .ico{ color: var(--color-fg-active-strong); }
+.nav-item .chev{
+  width:16px; height:16px;                             /* Lyra: 16px chevron */
+  margin-left:auto; opacity:0.6;
+  transition:transform .15s;
+}
+.nav-item.collapsed .chev{ transform:rotate(-90deg) }
+
+/* Child / sub-page items — Lyra SidebarNavChild */
+.nav-children{
+  display:flex; flex-direction:column;
+  gap:0;
+}
+.nav-children.hidden{ display:none }
+.nav-leaf{
+  position: relative;
+  display:flex; align-items:center;
+  gap: var(--space-4);                                 /* 16px gap (after the guide line) */
+  height: 36px;                                        /* row-height/md */
+  padding: 0 var(--space-2) 0 var(--space-5);          /* pl 20px, pr 8px */
+  border-radius: var(--radius-md);
+  cursor:pointer;
+  /* font inherited from .nav: SOL Sans 14/20, color #333 */
+  font-weight: 400;
+  letter-spacing: 0;
+}
+/* Vertical guide line on the left of each child (Lyra spec) */
+.nav-leaf::before{
+  content: "";
+  position: absolute;
+  left: 13px;                                          /* sits inside the 20px pl */
+  top: 0; bottom: 0;
+  width: 1px;
+  background: var(--color-border-subtle);
+}
+.nav-leaf:hover{ background: var(--color-state-bg-hover); }
+.nav-leaf.active{
+  background: var(--color-bg-active-moderate);
+  color: var(--color-fg-active-strong);
+  font-weight: 500;
+}
+.nav-leaf.active::before{                              /* hide guide line on active row */
+  background: transparent;
+}
+
+/* ----- Minimized sidebar (Lyra ShellSidebar minimized=yes, node 21450:137860) ----- */
+.nav.minimized .nav-scroll{
+  /* Lyra: 8px top, 20px bottom, 12px horizontal, 4px gap between items */
+  padding: var(--space-2) var(--space-3) var(--space-5);
+  gap: var(--space-1);                                 /* Lyra: 4px gap between minimized items */
+  align-items: center;
+}
+/* Hide labels, badges, chevrons, sub-group children */
+.nav.minimized .nav-label,
+.nav.minimized .nav-new-dot,
+.nav.minimized .nav-item .chev,
+.nav.minimized .nav-children{
+  display: none;
+}
+/* Each item becomes a 36x36 icon-only square */
+.nav.minimized .nav-item{
+  width: 36px;
+  padding: 0;
+  justify-content: center;
+  overflow: clip;                                      /* Lyra: overflow-clip */
+}
+.nav.minimized .nav-item.active::before{
+  /* Lyra: 2px accent bar at left-0, top 9.91 bottom 10.09 */
+  top: 9.91px;
+  bottom: 10.09px;
+  left: 0;                                             /* flush with item left edge */
+}
+
+/* ----- Main / panel ----- */
+.main{
+  grid-area:main;
+  background: rgb(243, 245, 246);                      /* Same canvas surface as topbar/sidebar */
+  padding:var(--space-2) var(--space-3) var(--space-3) 0;
+  min-height:0;
+  display:flex; flex-direction:column;
+  gap:var(--space-2);
+}
+.main.with-rail{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:var(--space-2);
+  padding-right:var(--space-3);
+}
+/* ----- Content shell (Lyra node 17887:61556) ----- */
+.pane{
+  background: var(--lyra-white);                                    /* Lyra: bg/surface/base */
+  border: 1px solid var(--color-border-subtle);                     /* Lyra: border/subtle = rgba(0,0,0,0.1) */
+  border-radius: var(--radius-lg);                                  /* Lyra: radius/lg = 12px */
+  box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.04);                     /* Lyra: Shadow sm */
+  flex:1; min-height:0;
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+
+/* ----- Page header (Lyra Page Header inside Content Shell) ----- */
+.pane-head{
+  display: flex; align-items: center;
+  min-height: 80px;                                                  /* Lyra spec */
+  padding: var(--space-4) var(--space-8);                            /* Lyra: 16px / 32px */
+  gap: 40px;                                                         /* Lyra: gap between title slot and actions */
+  border-bottom: 1px solid var(--color-border-subtle);               /* Lyra: subtle divider */
+}
+.pane-head h1{
+  /* Lyra Heading-lg: Inter Semi Bold 20/24, letter-spacing -0.3px */
+  font-family: var(--font-sans);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  margin: 0;
+  color: var(--color-fg-default);
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pane-head .head-actions{ display: flex; gap: var(--space-2); align-items: center }
+.crumbs{
+  display:flex;align-items:center;gap:6px;
+  font:400 12px/16px Inter; color:var(--lyra-slate-500);
+  padding:14px var(--space-6) 0;
+}
+.crumbs .sep{ opacity:0.5 }
+.crumbs .last{ color:var(--lyra-slate-900); font-weight:600 }
+.crumbs a{ color:inherit;text-decoration:none }
+.crumbs a:hover{ color:var(--lyra-slate-900) }
+
+/* ----- Buttons (Lyra _button/base node 16939:25772) ----- */
+.btn{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 10px;                                                         /* Lyra: 10px between icon and label */
+  height: 36px;                                                      /* Lyra: 36px */
+  min-width: 80px;                                                   /* Lyra: 80px min */
+  padding: 0 var(--space-4);                                         /* Lyra: 0 16px */
+  background: var(--lyra-white);                                     /* Lyra: bg/secondary */
+  border: 1px solid var(--color-border-soft);                        /* Lyra: border/soft = rgba(0,0,0,0.16) */
+  border-radius: var(--radius-md);                                   /* Lyra: radius/md = 8px */
+  /* Lyra Body-md-emphasis: Inter Medium 14/20, letter-spacing 0 */
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: var(--lyra-slate-600);                                      /* Lyra: fg/action = #5d6a79 */
+  cursor: pointer;
+}
+.btn:hover  { background: var(--color-state-bg-hover); }             /* Lyra: state/bg/hover */
+.btn:active { background: var(--color-state-bg-pressed); }           /* Lyra: state/bg/pressed */
+.btn svg{ width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round }
+
+.btn.primary{
+  background: var(--color-bg-primary);                               /* Lyra: bg/primary = #166cca */
+  color: var(--color-fg-on-primary);                                 /* Lyra: fg/on-primary = white */
+  border-color: var(--color-bg-primary);
+}
+.btn.primary:hover{
+  background: var(--color-bg-primary-hover);
+  border-color: var(--color-bg-primary-hover);
+}
+
+.btn.ghost{
+  background: transparent;
+  border-color: transparent;
+  color: var(--lyra-slate-600);
+}
+.btn.ghost:hover{ background: var(--color-state-bg-hover); }
+
+/* ----- Filter toolbar ----- */
+.toolbar{
+  display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;
+  padding:0 var(--space-6) 14px;
+}
+/* ----- Lyra Search input (node 16926:20974): 32px h, white bg, border/strong ----- */
+.search{ position:relative; flex:0 0 240px; height:32px; }
+.search svg{
+  position:absolute; left: var(--space-3); top:50%;
+  transform:translateY(-50%);
+  width:16px;height:16px; color:var(--lyra-slate-500);
+  stroke:currentColor;fill:none;stroke-width:1.8;
+}
+.search input{
+  width:100%; height:32px;
+  background: var(--lyra-white);                       /* Lyra: bg/field */
+  border: 1px solid rgba(0,0,0,0.46);                  /* Lyra: border/strong */
+  border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
+  /* Lyra Body-md: Inter Regular 14/20 */
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 400; line-height: 20px;
+  color: var(--color-fg-default);
+  padding: 0 var(--space-3) 0 36px;                    /* leave room for the 16px search icon */
+  outline: none;
+}
+.search input::placeholder{ color: rgba(0,0,0,0.6); }  /* Lyra: fg/secondary */
+.search input:focus{ border-color: var(--lyra-brand-700); }
+
+/* ----- Lyra Filter Chip (node 17671:39488) ----- */
+.filter-chip{
+  position: relative;
+  display: inline-flex; align-items: center;
+  height: 32px;                                        /* Lyra: control-height/md */
+  border-radius: var(--radius-md);                     /* Lyra: radius/md = 8px */
+  background: rgba(0,0,0,0.02);                        /* Lyra: bg/control-subtle (default) */
+  border: 1px solid var(--color-border-soft);          /* Lyra: border/soft (default) */
+  /* Lyra Body-md-emphasis: Inter Medium 14/20 */
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  letter-spacing: 0;
+  color: var(--color-fg-default);
+  cursor: default;
+}
+.filter-chip.active{                                   /* When a value is selected */
+  background: #f1f7fe;                                 /* Lyra: bg/active/subtle */
+  border-color: var(--color-fg-active-strong);         /* Lyra: border/active = #185ba4 */
+  color: var(--color-fg-active-strong);
+}
+.filter-chip-trigger{
+  display:inline-flex; align-items:center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  height: 100%;
+  cursor: pointer;
+}
+.filter-chip-value{ font-weight: 400; }                /* Value uses Regular weight per Lyra */
+.filter-chip-trigger .chev{ width:12px;height:12px;opacity:0.85; }
+.filter-chip-x{
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 100%;
+  background: transparent; border: 0;
+  color: inherit; cursor: pointer;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.filter-chip-x:hover{ background: rgba(0,0,0,0.06); }
+.filter-chip-x svg{ width:12px; height:12px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+
+/* Dropdown menu under a chip */
+.filter-chip-menu{
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 160px;
+  background: var(--lyra-white);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-1);
+  z-index: 100;
+  display: flex; flex-direction: column;
+}
+.filter-chip-menu-item{
+  display:flex; align-items:center;
+  padding: 6px var(--space-2);
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 400; line-height: 20px;
+  color: var(--color-fg-default);
+  background: transparent; border: 0;
+  text-align: left; cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.filter-chip-menu-item:hover{ background: var(--color-state-bg-hover); }
+.filter-chip-menu-item.selected{
+  background: #f1f7fe;
+  color: var(--color-fg-active-strong);
+  font-weight: 500;
+}
+
+/* "+ Add" button — Lyra Add filter button */
+.add-filter{
+  display:inline-flex; align-items:center; justify-content:center;
+  gap: 10px;
+  height: 32px;
+  min-width: 80px;
+  padding: 0 var(--space-3);
+  background: var(--lyra-white);                       /* Lyra: bg/control */
+  border: 1px solid var(--color-border-soft);          /* Lyra: border/soft */
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  color: var(--lyra-slate-600);                        /* Lyra: fg/action */
+  cursor: pointer;
+}
+.add-filter:hover{ background: var(--color-state-bg-hover); }
+.add-filter svg{ width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round; }
+
+/* Clear ghost button — Lyra Clear */
+.clear-link{
+  display: inline-flex; align-items: center;
+  height: 32px;
+  padding: 0 var(--space-2);
+  min-width: 80px; justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 500; line-height: 20px;
+  color: var(--lyra-slate-600);                        /* Lyra: fg/action */
+  background: transparent; border: 0; cursor: pointer;
+  border-radius: var(--radius-md);
+}
+.clear-link:hover{ background: var(--color-state-bg-hover); color: var(--color-fg-default); }
+
+/* ----- KPI strip (metric cards) ----- */
+.kpis{
+  display:flex; gap:var(--space-3);
+  padding:0 var(--space-6) var(--space-4);
+  flex-wrap:wrap;
+}
+.kpi{
+  flex:0 0 auto;
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:var(--radius-md);
+  padding:var(--space-3) 18px;
+  background:var(--lyra-white); min-width:128px;
+  cursor:pointer;
+}
+.kpi:hover{ border-color:rgba(0,0,0,0.20) }
+.kpi.active{
+  background:var(--lyra-brand-50);
+  border-color:var(--lyra-brand-500);
+  box-shadow:0 0 0 1px var(--lyra-brand-500);
+}
+.kpi .v{
+  font:600 24px/28px Inter; letter-spacing:-0.02em;
+  color:var(--lyra-slate-900);
+  display:flex;align-items:baseline;gap:6px;
+}
+.kpi .v .pct{ font:500 12px/16px Inter; color:var(--lyra-slate-500); letter-spacing:-0.005em }
+.kpi .meta{ font:500 12px/16px Inter; color:var(--lyra-slate-600); margin-top:2px; letter-spacing:-0.005em }
+.kpi .v.red{ color:var(--lyra-red-600) }
+.kpi .v.blue{ color:var(--lyra-brand-700) }
+.kpi .v.amber{ color:var(--lyra-orange-700) }
+.kpi .v.green{ color:var(--lyra-green-700) }
+
+/* ----- Tables — Lyra Grid (node 17074:36996) ----- */
+.table-wrap{ flex:1; overflow:auto }
+table{
+  width:100%; border-collapse:collapse;
+  /* Lyra Body-md: Inter Regular 14/20 letter-spacing 0 */
+  font-family: var(--font-sans);
+  font-size: 14px; font-weight: 400; line-height: 20px;
+  letter-spacing: 0;
+}
+/* GridHeader — comfortable density: 20px vertical padding (Lyra spacing/5) */
+thead th{
+  text-align: left;
+  padding: var(--space-5) var(--space-4);                      /* 20px top/bottom, 16px sides */
+  background: var(--lyra-white);
+  border-bottom: 1px solid var(--color-border-soft);           /* Lyra: border/soft */
+  /* Lyra Body-md-emphasis: Inter Medium 14/20 */
+  font-weight: 500;
+  color: var(--color-fg-default);                              /* Lyra: fg/default */
+  letter-spacing: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+/* GridCell — comfortable density: 20px vertical padding for visual rest between rows */
+tbody td{
+  padding: var(--space-5) var(--space-4);                      /* 20px top/bottom, 16px sides */
+  border-bottom: 1px solid var(--color-border-subtle);         /* Lyra: border/subtle */
+  color: var(--color-fg-default);
+  vertical-align: middle;
+}
+/* Row state colors (Lyra GridRow) */
+tbody tr{ position: relative; }
+tbody tr:hover td{ background: var(--color-state-bg-hover); }  /* Lyra: state/bg/hover */
+tbody tr.selected td{
+  background: #f1f7fe;                                         /* Lyra: bg/active/subtle */
+}
+tbody tr.selected:hover td{
+  background: #e8f2fc;                                         /* Lyra: state/bg/hover-active-subtle */
+}
+/* 2px left accent bar on selected rows (on the first cell) */
+tbody tr.selected td:first-child{
+  position: relative;
+}
+tbody tr.selected td:first-child::before{
+  content: "";
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--color-fg-active-strong);                   /* Lyra: fg/active/strong = #185ba4 */
+  border-radius: 2px;
+}
+
+/* Link cell (e.g., the Campaign name) — Lyra link styling */
+.agent-link{
+  color: var(--lyra-brand-700);                                /* Lyra: fg/link = brand-700 */
+  text-decoration: none;
+  font-weight: 400;                                            /* Lyra: links are regular weight, not medium */
+}
+.agent-link:hover{ text-decoration: underline; }
+.row-warn td:nth-child(2){ background: var(--fi-red-bg) }
+
+/* ----- Pills ----- */
+.pill{
+  display:inline-flex;align-items:center;
+  padding:3px 10px;
+  border-radius:var(--radius-round);
+  font:500 12px/16px Inter; letter-spacing:-0.005em;
+}
+.pill.high{ background:var(--fi-red-bg); color:var(--lyra-red-600) }
+.pill.medium{ background:var(--fi-amber-bg); color:var(--lyra-orange-700) }
+.pill.low{ background:var(--fi-green-bg); color:var(--lyra-green-700) }
+
+/* ----- Sparkle / AI affordance ----- */
+.ai-spark{
+  width:32px;height:32px;border-radius:var(--radius-md);
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  background:var(--lyra-white);
+  border:1px solid rgba(0,0,0,0.10);
+}
+.ai-spark:hover{ border-color:var(--lyra-purple-500) }
+.ai-spark svg{ width:18px;height:18px }
+
+/* ----- Right rail (AI Assistant) ----- */
+.assistant{
+  background:var(--lyra-white);
+  border:1px solid rgba(0,0,0,0.08);
+  border-radius:var(--radius-lg);
+  display:flex; flex-direction:column;
+  min-height:0;
+}
+.assistant-head{
+  display:flex;align-items:center;
+  padding:18px 18px 14px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+}
+.assistant-head h2{
+  font:600 16px/22px Inter; letter-spacing:-0.01em;
+  margin:0; color:var(--lyra-slate-900); flex:1;
+}
+.assistant-body{ flex:1; padding:var(--space-6) 18px; min-height:0; display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center }
+.assistant-orb{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,#a78bfa 0%, #6e7fe6 60%, var(--lyra-brand-500) 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 24px rgba(120,86,186,0.25);
+}
+.assistant-orb svg{ width:24px;height:24px;color:var(--lyra-white);fill:currentColor }
+.assistant-greeting{
+  font:500 14px/20px Inter; color:var(--lyra-slate-900);
+  letter-spacing:-0.005em;
+}
+.assistant-greeting .name{ display:block; color:var(--lyra-slate-900) }
+.assistant-greeting .ask{ display:block; color:var(--lyra-slate-600); font-weight:400 }
+.assistant-spacer{ flex:1 }
+.assistant-composer{
+  margin:0 14px 14px;
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:10px;
+  padding:10px var(--space-3);
+  display:flex;flex-direction:column;gap:var(--space-2);
+  background:var(--lyra-white);
+}
+.assistant-composer textarea{
+  width:100%; border:0; outline:0; resize:none;
+  font:400 14px/20px Inter; color:var(--lyra-slate-900);
+  background:transparent; min-height:32px;
+}
+.assistant-composer textarea::placeholder{ color:var(--lyra-slate-500) }
+.assistant-composer-row{
+  display:flex;align-items:center;gap:var(--space-2);
+}
+.assistant-chip{
+  display:inline-flex;align-items:center;gap:var(--space-1);
+  padding:var(--space-1) 10px;
+  border-radius:var(--radius-sm);
+  background:var(--lyra-slate-100);
+  font:500 12px/16px Inter; color:var(--lyra-slate-900);
+  letter-spacing:-0.005em;
+  cursor:pointer;
+}
+.assistant-chip:hover{ background:var(--lyra-slate-200) }
+.assistant-send{
+  margin-left:auto;
+  width:30px;height:30px;border-radius:var(--radius-sm);
+  background:var(--lyra-brand-500); color:var(--lyra-white);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer; border:0;
+}
+.assistant-send svg{ width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round }
+
+/* ----- App switcher dropdown ----- */
+.switcher{
+  position:absolute;
+  top:50px; left:14px;
+  width:240px;
+  background:var(--lyra-white);
+  border:1px solid rgba(0,0,0,0.10);
+  border-radius:var(--radius-lg);
+  box-shadow:0 8px 24px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  padding:var(--space-2);
+  z-index:10;
+}
+.switcher-section + .switcher-section{
+  border-top:1px solid rgba(0,0,0,0.06);
+  margin-top:6px; padding-top:6px;
+}
+.switcher-item{
+  display:flex;align-items:center;gap:10px;
+  padding:var(--space-2) 10px;
+  border-radius:var(--radius-sm);
+  font:500 14px/20px Inter; color:var(--lyra-slate-900);
+  cursor:pointer;
+  letter-spacing:-0.005em;
+}
+.switcher-item:hover{ background:rgba(0,0,0,0.04) }
+.switcher-item .ico{
+  width:18px;height:18px;
+  color:var(--lyra-slate-600);
+  stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+  flex-shrink:0;
+}
+
+/* ----- Tabs ----- */
+.tabs{
+  display:flex;gap:2px;
+  padding:0 var(--space-6);
+  border-bottom:1px solid rgba(0,0,0,0.08);
+}
+.tab{
+  padding:10px 14px;
+  font:500 14px/20px Inter; color:var(--lyra-slate-600);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  letter-spacing:-0.005em;
+  margin-bottom:-1px;
+}
+.tab:hover{ color:var(--lyra-slate-900) }
+.tab.active{
+  color:var(--lyra-brand-700);
+  border-bottom-color:var(--lyra-brand-500);
+}
+
+/* ----- Action menu (dot-dot-dot) ----- */
+.kebab{
+  width:28px;height:28px;border-radius:var(--radius-sm);
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer; color:var(--lyra-slate-600);
+}
+.kebab:hover{ background:rgba(0,0,0,0.05); color:var(--lyra-slate-900) }
+.kebab svg{ width:16px;height:16px;stroke:currentColor;fill:currentColor }
+
+/* ----- Split-button (with chevron) ----- */
+.split-btn{
+  display:inline-flex; align-items:stretch;
+  border:1px solid rgba(0,0,0,0.16); border-radius:var(--radius-sm);
+  overflow:hidden; background:var(--lyra-white); cursor:pointer;
+}
+.split-btn .label{
+  padding:6px var(--space-3);
+  font:500 14px/20px Inter; color:var(--lyra-slate-900);
+  letter-spacing:-0.005em;
+}
+.split-btn .chev-wrap{
+  display:flex;align-items:center;justify-content:center;
+  width:28px; border-left:1px solid rgba(0,0,0,0.10);
+  color:var(--lyra-slate-600);
+}
+.split-btn .chev-wrap svg{ width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round }
+.split-btn:hover{ border-color:rgba(0,0,0,0.28) }
+
+/* ----- Misc helpers ----- */
+.muted{ color:var(--lyra-slate-500) }
+.row{ display:flex; align-items:center; gap:var(--space-2) }
+.right{ margin-left:auto }

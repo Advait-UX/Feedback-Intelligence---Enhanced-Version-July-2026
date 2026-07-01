@@ -1,0 +1,1166 @@
+/* Survey Campaigns grid + Create New Survey Campaign form. */
+
+const CAMPAIGNS = [
+  { id: 1, name: "Post-Chat CSAT — Tier 1 Billing",
+    status: "active", channels: ["digital"], surveyDesignId: "csat-quick",
+    hasWorkingCopy: true, workingCopyVersion: 4, publishedVersion: 3, publishedAt: "May 04, 2026", workingCopyEditedBy: "Maria Cohen", workingCopyEditedAt: "May 10, 2026",
+    sampling: 50, sent: 12480, completion: 31.2, vu: 76,
+    owner: "Maria Cohen", created: "Mar 14, 2026", updated: "May 02, 2026" },
+  { id: 2, name: "Negative Sentiment Catcher — All Digital",
+    status: "active", channels: ["digital"], surveyDesignId: "csat-quick",
+    sampling: 100, sent: 4220, completion: 28.6, vu: 41,
+    owner: "Dev Patel", created: "Jan 22, 2026", updated: "May 08, 2026" },
+  { id: 3, name: "Email Support — Resolution Quality",
+    status: "active", channels: ["digital"], surveyDesignId: "csat-list",
+    sampling: 25, sent: 8910, completion: 22.4, vu: 68,
+    owner: "Maria Cohen", created: "Feb 04, 2026", updated: "Apr 28, 2026" },
+  { id: 4, name: "Cognigy AI Session — Bot Handoff Audit",
+    status: "active", channels: ["digital"], surveyDesignId: "bot-simple",
+    sampling: 80, sent: 6122, completion: 19.7, vu: 54,
+    owner: "Tomás Reyes", created: "Mar 30, 2026", updated: "May 09, 2026" },
+  { id: 5, name: "Social DM — Brand Health Pulse",
+    status: "paused", channels: ["digital"], surveyDesignId: "brand-pulse",
+    sampling: 100, sent: 1840, completion: 14.1, vu: 62,
+    owner: "Aisha Khan", created: "Dec 01, 2025", updated: "Apr 12, 2026" },
+  { id: 6, name: "VIP Escalation Follow-Up",
+    status: "draft", channels: ["digital"], surveyDesignId: "vip-followup",
+    sampling: 100, sent: 0, completion: 0, vu: null,
+    owner: "Maria Cohen", created: "May 06, 2026", updated: "May 06, 2026" },
+  { id: 7, name: "Holiday Returns — Email",
+    status: "ended", channels: ["digital"], surveyDesignId: "csat-quick",
+    sampling: 100, sent: 21450, completion: 26.8, vu: 71,
+    owner: "Dev Patel", created: "Nov 12, 2025", updated: "Jan 15, 2026" },
+];
+
+function ChannelChip({ kind }) {
+  const map = {
+    digital: <><path d="M7 4h9a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-1v2.5a.5.5 0 0 1-.82.39L10.5 16H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/><circle cx="9" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="12" cy="10" r="0.9" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r="0.9" fill="currentColor" stroke="none"/></>,
+    voice:  <><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></>,
+  };
+  return (
+    <span className="channel-chip" title={kind}>
+      <svg viewBox="0 0 24 24">{map[kind] || map.digital}</svg>
+    </span>
+  );
+}
+
+function StatusPill({ s }) {
+  const label = { active: "Active", paused: "Paused", draft: "Draft", ended: "Ended", working: "Working Copy" }[s] || s;
+  return <span className={`fi-pill ${s}`}><span className="dot"/>{label}</span>;
+}
+
+function WorkingCopyChip() {
+  return (
+    <span className="fi-pill working" title="This campaign has unpublished changes">
+      <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      Working Copy
+    </span>
+  );
+}
+
+function DesignPreviewCard({ design, compact }) {
+  if (!design) return null;
+  return (
+    <div style={{
+      marginTop: 8,
+      border: "1px solid rgba(0,0,0,0.08)",
+      borderRadius: 8,
+      background: "#fff",
+      overflow: "hidden",
+      maxWidth: 460,
+    }}>
+      <div style={{
+        padding: "10px 14px",
+        background: "var(--fi-accent-bg)",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--fi-accent-strong)" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/>
+        </svg>
+        <div style={{ flex: 1, font: "600 13px/18px Inter", color: "var(--fi-accent-strong)" }}>
+          {design.name}
+        </div>
+        <a className="agent-link" href="#" onClick={e => e.preventDefault()}
+          style={{ font: "500 12px/16px Inter" }}>
+          Open design →
+        </a>
+      </div>
+      <div style={{ padding: "10px 14px", display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <DesignChip label={design.surveyType}/>
+        <DesignChip label={design.displayStyle}/>
+        <DesignChip label={`AI questions ${design.aiQuestions ? "on" : "off"}`} on={design.aiQuestions}/>
+        <DesignChip label={`${design.maxQuestions} question${design.maxQuestions !== 1 ? "s" : ""}`}/>
+        <DesignChip label={`Free text: ${design.freeText}`}/>
+        <DesignChip label={`${design.expiryMinutes} min expiry`}/>
+        {design.realtimeAlerts ? <DesignChip label="Real-time alerts" on/> : null}
+      </div>
+    </div>
+  );
+}
+
+function DesignChip({ label, on }) {
+  return (
+    <span style={{
+      font: "500 11px/15px Inter",
+      color: on ? "var(--fi-green)" : "#526b7a",
+      background: on ? "rgba(28,94,37,0.08)" : "rgba(0,0,0,0.04)",
+      padding: "3px 8px", borderRadius: 4,
+    }}>{label}</span>
+  );
+}
+
+function Sparkline({ seed = 1, color = "#0d8a8a" }) {
+  // Deterministic pseudo-random sparkline.
+  const pts = [];
+  let x = seed * 17;
+  for (let i = 0; i < 14; i++) {
+    x = (x * 9301 + 49297) % 233280;
+    pts.push(8 + (x % 14));
+  }
+  const max = Math.max(...pts), min = Math.min(...pts);
+  const d = pts.map((p, i) => {
+    const xi = (i / (pts.length - 1)) * 80;
+    const yi = 22 - ((p - min) / (max - min || 1)) * 18;
+    return `${i === 0 ? "M" : "L"}${xi.toFixed(1)} ${yi.toFixed(1)}`;
+  }).join(" ");
+  return (
+    <svg className="spark" viewBox="0 0 80 22">
+      <path d={d} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+function SurveyCampaignsGrid({ onCreate, onOpen }) {
+  const [search, setSearch] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState("All");
+  const [order, setOrder] = React.useState(() => CAMPAIGNS.map(c => c.id));
+  const [dragId, setDragId] = React.useState(null);
+  const [dropBeforeId, setDropBeforeId] = React.useState(null);
+  const [selectedIds, setSelectedIds] = React.useState(() => new Set());
+  const [statusOverride, setStatusOverride] = React.useState({}); // id -> status
+  const [deletedIds, setDeletedIds] = React.useState(() => new Set());
+
+  const statusOf = (c) => statusOverride[c.id] || c.status;
+  const toggleSelect = (id) => setSelectedIds(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+  const clearSelection = () => setSelectedIds(new Set());
+  const selCount = selectedIds.size;
+  const selectedRows = () => [...selectedIds].map(id => CAMPAIGNS.find(c => c.id === id)).filter(Boolean);
+  const canActivate = selCount > 0 && selectedRows().some(c => statusOf(c) !== "active" && statusOf(c) !== "ended");
+  const canDeactivate = selCount > 0 && selectedRows().some(c => statusOf(c) === "active");
+  const canDelete = selCount > 0;
+  const bulkSetStatus = (status) => {
+    setStatusOverride(prev => {
+      const next = { ...prev };
+      selectedRows().forEach(c => {
+        if (status === "active" && statusOf(c) === "ended") return;
+        next[c.id] = status;
+      });
+      return next;
+    });
+    clearSelection();
+  };
+  const bulkDelete = () => {
+    setDeletedIds(prev => {
+      const next = new Set(prev);
+      selectedIds.forEach(id => next.add(id));
+      return next;
+    });
+    clearSelection();
+  };
+
+  // Routing-active = active + paused. Draft/Ended don't participate in priority.
+  const isRouting = c => {
+    if (deletedIds.has(c.id)) return false;
+    const s = statusOf(c);
+    return s === "active" || s === "paused";
+  };
+  const orderedAll = order.map(id => CAMPAIGNS.find(c => c.id === id)).filter(Boolean);
+  const priorityMap = {};
+  let p = 0;
+  orderedAll.forEach(c => { if (isRouting(c)) { p++; priorityMap[c.id] = p; } });
+
+  function reorder(srcId, beforeId) {
+    if (srcId === beforeId) return;
+    const next = order.filter(id => id !== srcId);
+    if (beforeId == null) next.push(srcId);
+    else {
+      const i = next.indexOf(beforeId);
+      next.splice(i, 0, srcId);
+    }
+    setOrder(next);
+  }
+
+  const liveCampaigns = CAMPAIGNS.filter(c => !deletedIds.has(c.id));
+  const counts = {
+    All: liveCampaigns.length,
+    Active: liveCampaigns.filter(c => statusOf(c) === "active").length,
+    Paused: liveCampaigns.filter(c => statusOf(c) === "paused").length,
+    Draft: liveCampaigns.filter(c => statusOf(c) === "draft").length,
+    Ended: liveCampaigns.filter(c => statusOf(c) === "ended").length,
+  };
+
+  const rows = orderedAll.filter(c => {
+    if (deletedIds.has(c.id)) return false;
+    const s = statusOf(c);
+    if (statusFilter !== "All" && s !== statusFilter.toLowerCase()) return false;
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  });
+  const allRowsSelected = rows.length > 0 && rows.every(r => selectedIds.has(r.id));
+  const someRowsSelected = rows.some(r => selectedIds.has(r.id)) && !allRowsSelected;
+
+  return (
+    <div className="pane">
+      <div className="pane-head">
+        <h1>Survey Campaigns</h1>
+        <div className="head-actions">
+          <button className="btn primary" onClick={onCreate}>
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Create Campaign
+          </button>
+        </div>
+      </div>
+
+      <div className="tabs">
+        {["All", "Active", "Paused", "Draft", "Ended"].map(t => (
+          <span key={t} className={`tab ${statusFilter === t ? "active" : ""}`}
+            onClick={() => setStatusFilter(t)}>
+            {t} <span style={{ color: "#7b8a96", fontWeight: 400, marginLeft: 4 }}>{counts[t]}</span>
+          </span>
+        ))}
+      </div>
+
+      <div className="toolbar" style={{ paddingTop: 14 }}>
+        <div className="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search campaigns"
+            value={search} onChange={e => setSearch(e.target.value)}/>
+        </div>
+        <span style={{ flex: 1 }}/>
+        {selCount > 0 && (
+          <span style={{ font: "500 12px/16px Inter", color: "var(--fi-accent-strong)", marginRight: 4 }}>
+            {selCount} selected
+            <span style={{ color: "#9aa6b2", marginLeft: 8, cursor: "pointer", textDecoration: "underline" }} onClick={clearSelection}>Clear</span>
+          </span>
+        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <button className="btn" disabled={!canActivate}
+            style={!canActivate ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+            title={selCount === 0 ? "Select campaigns to enable" : "Activate selected"}
+            onClick={() => canActivate && bulkSetStatus("active")}>
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Activate
+          </button>
+          <button className="btn" disabled={!canDeactivate}
+            style={!canDeactivate ? { opacity: 0.5, cursor: "not-allowed" } : undefined}
+            title={selCount === 0 ? "Select campaigns to enable" : "Pause selected"}
+            onClick={() => canDeactivate && bulkSetStatus("paused")}>
+            <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+            Deactivate
+          </button>
+          <button className="btn" disabled={!canDelete}
+            style={!canDelete ? { opacity: 0.5, cursor: "not-allowed" } : { color: "var(--fi-red)" }}
+            title={selCount === 0 ? "Select campaigns to enable" : "Delete selected"}
+            onClick={() => canDelete && window.confirm(`Delete ${selCount} campaign${selCount===1?"":"s"}? This cannot be undone.`) && bulkDelete()}>
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <div style={{ font: "400 12px/16px Inter", color: "#7b8a96", margin: "6px 0 10px", display: "flex", alignItems: "center", gap: 6 }}>
+        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Drag any row by its grip handle to reorder routing priority. When an interaction matches multiple campaigns, the lower-numbered campaign wins. Draft and ended campaigns don't participate.
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: 28, padding: 0 }}></th>
+              <th style={{ width: 36 }}>
+                <input type="checkbox"
+                  checked={allRowsSelected}
+                  ref={el => { if (el) el.indeterminate = someRowsSelected; }}
+                  onChange={e => {
+                    if (e.target.checked) setSelectedIds(new Set(rows.map(r => r.id)));
+                    else clearSelection();
+                  }}/>
+              </th>
+              <th style={{ width: 110 }} title="Drag rows to reorder routing priority">
+                Campaign priority
+                <svg viewBox="0 0 24 24" width="11" height="11" style={{ marginLeft: 4, opacity: 0.5, verticalAlign: "-1px" }} stroke="currentColor" fill="none" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+              </th>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Channels</th>
+              <th>Sampling</th>
+              <th>Owner</th>
+              <th>Last updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((c, idx) => {
+              const routing = isRouting(c);
+              const isDragging = dragId === c.id;
+              const dropAbove = dropBeforeId === c.id;
+              return (
+                <tr key={c.id}
+                  draggable={routing}
+                  onDragStart={e => {
+                    if (!routing) { e.preventDefault(); return; }
+                    setDragId(c.id);
+                    e.dataTransfer.effectAllowed = "move";
+                    e.dataTransfer.setData("text/plain", String(c.id));
+                  }}
+                  onDragOver={e => {
+                    if (dragId == null || !routing) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const above = (e.clientY - rect.top) < rect.height / 2;
+                    setDropBeforeId(above ? c.id : (rows[idx+1]?.id ?? null));
+                  }}
+                  onDragLeave={() => { /* no-op */ }}
+                  onDrop={e => {
+                    e.preventDefault();
+                    if (dragId != null) reorder(dragId, dropBeforeId);
+                    setDragId(null);
+                    setDropBeforeId(null);
+                  }}
+                  onDragEnd={() => { setDragId(null); setDropBeforeId(null); }}
+                  style={{
+                    opacity: isDragging ? 0.4 : 1,
+                    boxShadow: dropAbove ? "inset 0 2px 0 var(--fi-accent-strong)" : undefined,
+                    cursor: routing ? "default" : undefined,
+                  }}>
+                  <td style={{ padding: 0, textAlign: "center", color: "#9aa6b2",
+                    cursor: routing ? "grab" : "not-allowed",
+                    opacity: routing ? 1 : 0.25 }}
+                    title={routing ? "Drag to reorder" : "Draft/Ended campaigns don't participate in routing"}>
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                      <circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/>
+                      <circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/>
+                      <circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>
+                    </svg>
+                  </td>
+                  <td onClick={e => e.stopPropagation()}>
+                    <input type="checkbox"
+                      checked={selectedIds.has(c.id)}
+                      onChange={() => toggleSelect(c.id)}/>
+                  </td>
+                  <td>
+                    {routing ? (
+                      <div style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        minWidth: 28, height: 24, padding: "0 8px", borderRadius: 6,
+                        background: priorityMap[c.id] === 1 ? "var(--fi-accent-strong)" : "var(--fi-accent-bg)",
+                        color: priorityMap[c.id] === 1 ? "#fff" : "var(--fi-accent-strong)",
+                        font: "600 13px/1 Inter", letterSpacing: "-0.01em",
+                      }}>
+                        {priorityMap[c.id]}
+                      </div>
+                    ) : (
+                      <span style={{ color: "#9aa6b2", font: "500 13px/1 Inter" }}>—</span>
+                    )}
+                  </td>
+                  <td>
+                    <a className="agent-link" href="#" onClick={e => { e.preventDefault(); onOpen && onOpen(c); }}>
+                      {c.name}
+                    </a>
+                    <div style={{ font: "400 11px/14px Inter", color: "#7b8a96", marginTop: 2 }}>
+                      Created {c.created}
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <StatusPill s={statusOf(c)}/>
+                      {c.hasWorkingCopy ? <WorkingCopyChip/> : null}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="channel-stack">
+                      {c.channels.map(k => <ChannelChip key={k} kind={k}/>)}
+                    </div>
+                  </td>
+                  <td>{c.sampling}%</td>
+                  <td>{c.owner}</td>
+                  <td>{c.updated}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ========================= Create New Survey Campaign ========================= */
+
+const DEFAULT_CAMPAIGN = {
+  name: "",
+  description: "",
+  ongoing: true,
+  startDate: "2026-05-12",
+  endDate: "",
+  channels: ["digital"],
+  queues: ["All queues"],
+  teams: ["All teams"],
+
+  samplingPct: 50,
+  minCustomerTurns: 3,
+  minAgentTurns: 2,
+  perAgentPerDay: 3,
+
+  suppressOptOut: true,
+  suppressRecent: true,
+  recentDays: 30,
+  suppressInternal: true,
+
+  triggerEvent: "Post-digital interaction",
+  delay: "Immediate",
+  delayValue: 0,
+
+  surveyDesignId: "csat-quick",
+};
+
+function FieldRow({ label, hint, req, children }) {
+  return (
+    <div className="field-row">
+      <label className="field-label">
+        {label}{req ? <span className="req">*</span> : null}
+        {hint ? <span className="hint">{hint}</span> : null}
+      </label>
+      <div className="field-control">{children}</div>
+    </div>
+  );
+}
+
+function Segmented({ options, value, onChange }) {
+  return (
+    <div className="seg">
+      {options.map(o => (
+        <button key={o} className={value === o ? "on" : ""} onClick={() => onChange(o)}>{o}</button>
+      ))}
+    </div>
+  );
+}
+
+function Toggle({ checked, onChange, label }) {
+  return (
+    <label className="switch-row">
+      <span className="switch">
+        <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}/>
+        <span className="slider"/>
+      </span>
+      {label ? <span>{label}</span> : null}
+    </label>
+  );
+}
+
+function ChipWell({ values, onChange, placeholder, brand }) {
+  const [draft, setDraft] = React.useState("");
+  function addChip(v) {
+    v = v.trim();
+    if (!v) return;
+    if (values.includes(v)) return;
+    onChange([...values, v]);
+    setDraft("");
+  }
+  return (
+    <div className="chip-well">
+      {values.map(v => (
+        <span key={v} className={`chip ${brand ? "brand" : ""}`}>
+          {v}
+          <span className="x" onClick={() => onChange(values.filter(x => x !== v))}>
+            <svg viewBox="0 0 16 16" width="10" height="10"><line x1="4" y1="4" x2="12" y2="12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/><line x1="12" y1="4" x2="4" y2="12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></svg>
+          </span>
+        </span>
+      ))}
+      <input
+        placeholder={placeholder}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onKeyDown={e => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addChip(draft); } }}
+        onBlur={() => addChip(draft)}
+      />
+    </div>
+  );
+}
+
+function FormSection({ num, title, sub, defaultOpen = true, complete, children, id }) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <section className={`form-section ${open ? "" : "collapsed"}`} id={id}>
+      <header className={`form-section-head ${complete ? "complete" : ""}`} onClick={() => setOpen(!open)}>
+        <span className="step-num">{num}</span>
+        <div>
+          <h3>{title}</h3>
+          {sub ? <div className="sub">{sub}</div> : null}
+        </div>
+        <svg className="chev" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </header>
+      <div className="form-section-body">{children}</div>
+    </section>
+  );
+}
+
+function FiDatePicker({ value, onChange, disabled, placeholder = "Select date" }) {
+  const ref = React.useRef(null);
+  const fmt = (iso) => {
+    if (!iso) return "";
+    const [y, m, d] = iso.split("-").map(Number);
+    if (!y || !m || !d) return "";
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return `${months[m-1]} ${String(d).padStart(2,"0")}, ${y}`;
+  };
+  return (
+    <div style={{ position: "relative", flex: 1, minWidth: 160 }}>
+      <input
+        type="text"
+        readOnly
+        className="fi-input"
+        placeholder={placeholder}
+        disabled={disabled}
+        value={fmt(value)}
+        onClick={() => !disabled && (ref.current?.showPicker ? ref.current.showPicker() : ref.current?.focus())}
+        style={{ cursor: disabled ? "not-allowed" : "pointer", paddingRight: 36 }}
+      />
+      <svg viewBox="0 0 24 24" width="14" height="14"
+        style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+          color: disabled ? "#cbd3da" : "#7b8a96", pointerEvents: "none" }}
+        stroke="currentColor" fill="none" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="5" width="18" height="16" rx="2"/>
+        <line x1="3" y1="9" x2="21" y2="9"/>
+        <line x1="8" y1="3" x2="8" y2="7"/>
+        <line x1="16" y1="3" x2="16" y2="7"/>
+      </svg>
+      <input
+        ref={ref}
+        type="date"
+        value={value || ""}
+        disabled={disabled}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          position: "absolute", inset: 0, opacity: 0, pointerEvents: "none",
+          width: "100%", height: "100%", border: 0,
+        }}
+      />
+    </div>
+  );
+}
+
+function CreateCampaign({ onCancel, onSave }) {
+  const [c, setC] = React.useState(DEFAULT_CAMPAIGN);
+  const [activeStep, setActiveStep] = React.useState(1);
+  const set = (k, v) => setC(prev => ({ ...prev, [k]: v }));
+
+  const STEPS = [
+    { n: 1, label: "Identity & Scope", id: "sec-1", done: !!c.name },
+    { n: 2, label: "Volume & Sampling", id: "sec-2", done: c.samplingPct > 0 },
+    { n: 3, label: "Suppression Rules", id: "sec-3", done: true },
+    { n: 4, label: "Trigger Rules", id: "sec-4", done: true },
+  ];
+
+  return (
+    <div className="pane" style={{ overflow: "hidden" }}>
+      <div className="crumbs">
+        <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Feedback Intelligence</a>
+        <span className="sep">/</span>
+        <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Survey Campaigns</a>
+        <span className="sep">/</span>
+        <span className="last">Create New Survey Campaign</span>
+      </div>
+
+      <div className="pane-head" style={{ paddingTop: 6 }}>
+        <h1>Create New Survey Campaign</h1>
+        <div className="head-actions">
+          <button className="ai-sparkle-btn">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 13.5 10.5 22 12 13.5 13.5 12 22 10.5 13.5 2 12 10.5 10.5Z"/></svg>
+            Suggest from past campaigns
+          </button>
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className="btn" onClick={() => onSave({ ...c, status: "draft" })}>Save as draft</button>
+          <button className="btn primary" disabled={!c.name} onClick={() => onSave({ ...c, status: "active" })}>
+            Review &amp; activate
+          </button>
+        </div>
+      </div>
+
+      <div className="create-grid">
+        {/* Side TOC */}
+        <nav className="form-toc">
+          {STEPS.map(s => (
+            <div key={s.n}
+              className={`toc-item ${activeStep === s.n ? "on" : ""} ${s.done ? "done" : ""}`}
+              onClick={() => {
+                setActiveStep(s.n);
+                document.getElementById(s.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
+              }}>
+              <span className="num">{s.n}</span>
+              {s.label}
+            </div>
+          ))}
+        </nav>
+
+        {/* Form pane */}
+        <div className="form-pane">
+          <FloatingMetrics campaign={c}/>
+          <FormSection num={1} title="Campaign Identity & Scope"
+            sub="Name, scope, channels, and agent teams. Routing priority is set on the campaigns list."
+            id="sec-1" complete={!!c.name}>
+            <FieldRow label="Name" req hint="Admin-defined label for internal use">
+              <input className="fi-input" placeholder="e.g. Post-Chat CSAT — Tier 1 Billing"
+                value={c.name} onChange={e => set("name", e.target.value)}/>
+            </FieldRow>
+            <FieldRow label="Description" hint="Internal purpose and notes">
+              <textarea className="fi-input"
+                placeholder="What is this campaign measuring? Who reviews the results?"
+                value={c.description} onChange={e => set("description", e.target.value)}/>
+            </FieldRow>
+            <FieldRow label="Active date range">
+              <div className="inline-row">
+                <FiDatePicker value={c.startDate} onChange={v => set("startDate", v)} placeholder="Start date"/>
+                <span style={{ color: "#7b8a96" }}>to</span>
+                <FiDatePicker value={c.endDate} onChange={v => set("endDate", v)} disabled={c.ongoing} placeholder="End date"/>
+                <Toggle checked={c.ongoing} onChange={v => set("ongoing", v)} label="Ongoing"/>
+              </div>
+            </FieldRow>
+            <FieldRow label="Channels" req hint="Voice arrives later — articulation planning">
+              <div className="inline-row">
+                {[
+                  { k: "digital", l: "Digital" },
+                  { k: "voice",   l: "Voice (Later)", disabled: true },
+                ].map(opt => {
+                  const on = c.channels.includes(opt.k);
+                  return (
+                    <button key={opt.k}
+                      disabled={opt.disabled}
+                      onClick={() => set("channels",
+                        on ? c.channels.filter(x => x !== opt.k) : [...c.channels, opt.k])}
+                      className="filter-chip"
+                      style={{
+                        background: on ? "var(--fi-accent-bg)" : "#fff",
+                        borderColor: on ? "var(--fi-accent)" : "rgba(0,0,0,0.16)",
+                        color: opt.disabled ? "#9aa6b2" : on ? "var(--fi-accent-strong)" : "#1d2630",
+                        cursor: opt.disabled ? "not-allowed" : "pointer",
+                      }}>
+                      <ChannelChip kind={opt.k}/>
+                      {opt.l}
+                    </button>
+                  );
+                })}
+              </div>
+            </FieldRow>
+            <FieldRow label="Agent Teams" hint="Multi-select or all">
+              <ChipWell values={c.queues} onChange={v => set("queues", v)} brand
+                placeholder="Type an agent team name and press Enter"/>
+            </FieldRow>
+            <FieldRow label="Agents Groups">
+              <ChipWell values={c.teams} onChange={v => set("teams", v)} brand
+                placeholder="Type an agents group name and press Enter"/>
+            </FieldRow>
+            <FieldRow label="Routing priority"
+              hint="Priority is now set by drag-to-reorder on the campaigns list — not on this form.">
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "10px 12px", borderRadius: 8,
+                background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.06)",
+              }}>
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#7b8a96" fill="none" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <div style={{ font: "400 13px/18px Inter", color: "#1d2630" }}>
+                  When this campaign goes live, it will be added at the bottom of the routing list. Drag rows on the Survey Campaigns page to reorder.
+                </div>
+              </div>
+            </FieldRow>
+            <FieldRow label="Language" hint="Locked for MVP — additional languages coming post-GA">
+              <div className="inline-row">
+                <span className="chip brand">
+                  <svg viewBox="0 0 16 16" width="12" height="12" style={{ marginRight: 4 }}>
+                    <path d="M2 4h12M8 2v12M3 7c2 2 8 2 10 0M3 11c2-2 8-2 10 0"
+                      stroke="currentColor" strokeWidth="1.4" fill="none"/>
+                  </svg>
+                  English
+                </span>
+                <span className="locked" style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  font: "500 11px/14px Inter", color: "#7b8a96",
+                  background: "rgba(0,0,0,0.05)", padding: "2px 6px", borderRadius: 4,
+                }}>
+                  <svg viewBox="0 0 24 24" width="11" height="11" stroke="currentColor" fill="none" strokeWidth="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                  MVP
+                </span>
+                <span className="help">Non-English interactions are excluded from this campaign.</span>
+              </div>
+            </FieldRow>
+          </FormSection>
+
+          <FormSection num={2} title="Volume & Sampling"
+            sub="How many interactions get a survey, and which ones."
+            id="sec-2" complete={c.samplingPct > 0}>
+            <FieldRow label="Sampling %"
+              hint="e.g. 50% = every other eligible interaction">
+              <div className="slider-row">
+                <input type="range" min="1" max="100" value={c.samplingPct}
+                  onChange={e => set("samplingPct", parseInt(e.target.value))}/>
+                <span className="val">{c.samplingPct}%</span>
+              </div>
+            </FieldRow>
+            <FieldRow label="Interaction length filter"
+              hint="FI scores transcripts, not durations — so we count turns, not seconds. Filters out misdials, bot-only deflections, and one-shot questions.">
+              <div className="inline-row">
+                <span style={{ color: "#7b8a96", font: "400 13px/18px Inter", minWidth: 110 }}>Customer turns ≥</span>
+                <input type="number" min="1" max="20" className="fi-input" style={{ width: 72 }}
+                  value={c.minCustomerTurns} onChange={e => set("minCustomerTurns", parseInt(e.target.value || 0))}/>
+                <span style={{ color: "#9aa6b2", font: "400 12px/16px Inter" }}>default 3</span>
+              </div>
+              <div className="inline-row" style={{ marginTop: 8 }}>
+                <span style={{ color: "#7b8a96", font: "400 13px/18px Inter", minWidth: 110 }}>Agent turns ≥</span>
+                <input type="number" min="1" max="20" className="fi-input" style={{ width: 72 }}
+                  value={c.minAgentTurns} onChange={e => set("minAgentTurns", parseInt(e.target.value || 0))}/>
+                <span style={{ color: "#9aa6b2", font: "400 12px/16px Inter" }}>default 2</span>
+              </div>
+              <div className="help">A "turn" is one continuous message from one party before the other replies. Channel-native — works identically for digital chat, AI sessions, and (eventually) transcribed voice calls.</div>
+            </FieldRow>
+            <FieldRow label="Surveys per agent / day"
+              hint="Caps how many of one agent's interactions can be surveyed daily">
+              <div className="inline-row">
+                <input type="number" className="fi-input" style={{ width: 80 }}
+                  value={c.perAgentPerDay} onChange={e => set("perAgentPerDay", parseInt(e.target.value || 0))}/>
+                <span style={{ color: "#7b8a96", font: "400 13px/18px Inter" }}>per agent per day</span>
+              </div>
+            </FieldRow>
+          </FormSection>
+
+          <FormSection num={3} title="Suppression Rules"
+            sub="When NOT to send a survey, even if everything else qualifies."
+            id="sec-3" complete>
+            <div className="sup-row">
+              <Toggle checked={c.suppressOptOut} onChange={v => set("suppressOptOut", v)}/>
+              <div className="meta">
+                <div className="title">Opt-out tag</div>
+                <div className="ex">Skip any customer flagged as opted out in the platform. A customer who previously unsubscribed — sending anyway destroys trust and risks compliance.</div>
+              </div>
+            </div>
+            <div className="sup-row">
+              <Toggle checked={c.suppressRecent} onChange={v => set("suppressRecent", v)}/>
+              <div className="meta">
+                <div className="title">Recency window</div>
+                <div className="ex">Don't send if the same customer was surveyed within</div>
+                <div className="inline-row" style={{ marginTop: 8 }}>
+                  <input type="number" className="fi-input" style={{ width: 80 }}
+                    value={c.recentDays} onChange={e => set("recentDays", parseInt(e.target.value || 0))}
+                    disabled={!c.suppressRecent}/>
+                  <span style={{ color: "#7b8a96", font: "400 13px/18px Inter" }}>days (default 30)</span>
+                </div>
+              </div>
+            </div>
+            <div className="sup-row">
+              <Toggle checked={c.suppressInternal} onChange={() => {}} disabled/>
+              <div className="meta">
+                <div className="title">Internal / test interactions</div>
+                <div className="ex">Suppress interactions flagged as internal or test. Hard-coded — QA agents testing IVR flows never generate customer surveys.</div>
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection num={4} title="Trigger Rules"
+            sub="Event and delay conditions that fire the survey."
+            id="sec-4" complete>
+            <FieldRow label="Trigger event" req
+              hint="MVP scope covers all digital interactions (including AI / bot sessions). Post-call will follow in later releases.">
+              <Segmented options={["Post-digital interaction", "Post-call (Later)"]}
+                value={c.triggerEvent}
+                onChange={v => v === "Post-digital interaction" && set("triggerEvent", v)}/>
+            </FieldRow>
+            <FieldRow label="Delay"
+              hint="Allows a cooling-off period before the survey lands">
+              <div className="inline-row">
+                <Segmented options={["Immediate", "Minutes", "Hours"]}
+                  value={c.delay} onChange={v => set("delay", v)}/>
+                {c.delay !== "Immediate" ? (
+                  <>
+                    <input type="number" className="fi-input" style={{ width: 80 }}
+                      value={c.delayValue || 5} onChange={e => set("delayValue", parseInt(e.target.value || 0))}/>
+                    <span style={{ color: "#7b8a96", font: "400 13px/18px Inter" }}>{c.delay.toLowerCase()} after end</span>
+                  </>
+                ) : null}
+              </div>
+            </FieldRow>
+          </FormSection>
+
+
+          {!c.name ? (
+            <div className="val-banner">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="1.8" fill="none"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r=".8" fill="currentColor"/></svg>
+              Campaign needs a name before it can be activated.
+            </div>
+          ) : null}
+
+          <div className="form-foot">
+            <span className="muted" style={{ font: "400 12px/16px Inter" }}>
+              All changes auto-saved as draft · Last edited just now
+            </span>
+            <span className="grow"/>
+            <button className="btn" onClick={onCancel}>Cancel</button>
+            <button className="btn" onClick={() => onSave({ ...c, status: "draft" })}>Save as draft</button>
+            <button className="btn primary" disabled={!c.name}
+              onClick={() => onSave({ ...c, status: "active" })}>
+              Review &amp; activate
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== Campaign Detail ============================== */
+
+function MiniBar({ data, max, color = "#0d8a8a", labels }) {
+  const m = max || Math.max(...data, 1);
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 120, padding: "0 4px" }}>
+      {data.map((v, i) => (
+        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+          <div style={{
+            width: "100%",
+            height: `${(v / m) * 100}%`,
+            background: color,
+            borderRadius: "4px 4px 0 0",
+            minHeight: 2,
+            opacity: 0.85,
+          }}/>
+          <div style={{ font: "400 10px/12px Inter", color: "#7b8a96" }}>{labels?.[i]}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DonutRing({ value, max = 100, color = "#0d8a8a", size = 96, label, sub }) {
+  const r = (size - 14) / 2;
+  const C = 2 * Math.PI * r;
+  const off = C - (value / max) * C;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#eef1f4" strokeWidth="10"/>
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth="10"
+          strokeDasharray={C} strokeDashoffset={off} strokeLinecap="round"
+          transform={`rotate(-90 ${size/2} ${size/2})`}/>
+      </svg>
+      <div style={{
+        position: "absolute", inset: 0,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+      }}>
+        <div style={{ font: "700 22px/26px Inter", color: "#1d2630", letterSpacing: "-0.02em" }}>{label}</div>
+        {sub ? <div style={{ font: "500 10px/14px Inter", color: "#7b8a96" }}>{sub}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+const RECENT_RESPONSES = [
+  { id: 1, rating: 1, customer: "C-48201", agent: "Alice Johnson", topic: "Billing dispute", sentiment: "Negative", time: "2m ago", flagged: true, comment: "Agent transferred me 3 times. Still no resolution on the duplicate charge." },
+  { id: 2, rating: 5, customer: "C-48198", agent: "Bob Smith",     topic: "Plan upgrade",    sentiment: "Positive", time: "8m ago", flagged: false, comment: "Bob made it painless. Upgrade took 4 minutes." },
+  { id: 3, rating: 2, customer: "C-48177", agent: "Charlie Davis", topic: "Modem swap",      sentiment: "Negative", time: "23m ago", flagged: true, comment: "Was promised same-day shipping, but tracking still shows pending." },
+  { id: 4, rating: 4, customer: "C-48160", agent: "Diana Evans",   topic: "Address change",  sentiment: "Neutral",  time: "41m ago", flagged: false, comment: "Easy enough. Took a bit longer than I expected." },
+  { id: 5, rating: 5, customer: "C-48142", agent: "Ethan Foster",  topic: "Refund inquiry",  sentiment: "Positive", time: "1h ago",  flagged: false, comment: "Ethan went the extra mile to find the missing transaction." },
+  { id: 6, rating: 1, customer: "C-48129", agent: "Hannah Hall",   topic: "Service outage",  sentiment: "Negative", time: "1h ago",  flagged: true, comment: "Third outage this month. No credit offered without me asking." },
+];
+
+const TOP_TOPICS = [
+  { name: "Billing dispute", pct: 24, delta: "+6", trend: "up" },
+  { name: "Service outage",  pct: 18, delta: "+3", trend: "up" },
+  { name: "Plan upgrade",    pct: 12, delta: "-1", trend: "down" },
+  { name: "Address change",  pct: 9,  delta: "0",  trend: "flat" },
+  { name: "Refund inquiry",  pct: 8,  delta: "-2", trend: "down" },
+];
+
+function Stars({ n, size = 14 }) {
+  return (
+    <span style={{ display: "inline-flex", gap: 1, color: "#efb840" }}>
+      {[1,2,3,4,5].map(i => (
+        <svg key={i} viewBox="0 0 24 24" width={size} height={size}
+          fill={i <= n ? "currentColor" : "#e3e7eb"}>
+          <polygon points="12 2 15 9 22 9.3 16.5 14 18.5 21 12 17 5.5 21 7.5 14 2 9.3 9 9"/>
+        </svg>
+      ))}
+    </span>
+  );
+}
+
+function FloatingMetrics({ campaign }) {
+  const c = campaign;
+  const hasData = c.sent > 0;
+  return (
+    <div style={{
+      position: "sticky", top: 0, float: "right",
+      width: 248, marginLeft: 20, marginBottom: 16,
+      background: "#fff",
+      border: "1px solid rgba(0,0,0,0.08)",
+      borderRadius: 12,
+      boxShadow: "0 4px 16px rgba(13,33,55,0.06), 0 1px 3px rgba(13,33,55,0.04)",
+      overflow: "hidden",
+      zIndex: 2,
+    }}>
+      <div style={{
+        padding: "10px 16px",
+        background: "linear-gradient(135deg, var(--fi-accent-bg) 0%, #fff 100%)",
+        borderBottom: "1px solid rgba(0,0,0,0.06)",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="var(--fi-accent-strong)" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 17l4-4 4 4 6-7 4 4"/><path d="M14 10h4v4"/>
+        </svg>
+        <div style={{ font: "600 12px/16px Inter", color: "var(--fi-accent-strong)", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+          Campaign metrics
+        </div>
+      </div>
+
+      <div style={{ padding: "14px 16px 12px", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
+        <div style={{ font: "500 11px/14px Inter", color: "#7b8a96", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+          Total surveys sent
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 4 }}>
+          <span style={{
+            font: "700 28px/32px Inter", letterSpacing: "-0.02em",
+            color: hasData ? "#1d2630" : "#cbd3da",
+          }}>
+            {hasData ? c.sent.toLocaleString() : "—"}
+          </span>
+        </div>
+        <div style={{ font: "400 11px/14px Inter", color: "#9aa6b2", marginTop: 2 }}>
+          {hasData ? `Since ${c.created}` : "No surveys sent yet"}
+        </div>
+      </div>
+
+      <div style={{ padding: "12px 16px 14px" }}>
+        <div style={{ font: "500 11px/14px Inter", color: "#7b8a96", letterSpacing: "0.02em", textTransform: "uppercase" }}>
+          Avg completion rate
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginTop: 4 }}>
+          <span style={{
+            font: "700 28px/32px Inter", letterSpacing: "-0.02em",
+            color: !hasData ? "#cbd3da"
+              : c.completion >= 30 ? "var(--fi-green)"
+              : c.completion >= 20 ? "var(--fi-amber)"
+              : "var(--fi-red)",
+          }}>
+            {hasData ? c.completion.toFixed(1) : "—"}
+          </span>
+          {hasData ? <span style={{ font: "500 14px/1 Inter", color: "#7b8a96" }}>%</span> : null}
+        </div>
+        <div style={{ marginTop: 8, height: 4, background: "#eef1f4", borderRadius: 2, overflow: "hidden" }}>
+          <div style={{
+            width: hasData ? `${Math.min(c.completion, 100)}%` : "0%",
+            height: "100%",
+            background: hasData
+              ? (c.completion >= 30 ? "var(--fi-green)" : c.completion >= 20 ? "var(--fi-amber)" : "var(--fi-red)")
+              : "transparent",
+            borderRadius: 2,
+            transition: "width 0.2s",
+          }}/>
+        </div>
+        <div style={{ font: "400 11px/14px Inter", color: "#9aa6b2", marginTop: 6 }}>
+          Industry benchmark: 25–35%
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CampaignDetail({ campaign, onBack, onEdit }) {
+  const [c, setC] = React.useState(campaign);
+  const [toast, setToast] = React.useState(null);
+  React.useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  const publishWorkingCopy = () => {
+    setC({ ...c, hasWorkingCopy: false, publishedVersion: c.workingCopyVersion, publishedAt: "May 13, 2026" });
+    setToast({ msg: `Working copy published as v${c.workingCopyVersion}. Campaign is now live with new configuration.` });
+  };
+  const discardWorkingCopy = () => {
+    if (!window.confirm("Discard all unpublished changes? The campaign will return to v" + c.publishedVersion + ".")) return;
+    setC({ ...c, hasWorkingCopy: false });
+    setToast({ msg: `Working copy discarded. v${c.publishedVersion} remains active.` });
+  };
+
+  return (
+    <div className="pane" style={{ overflow: "hidden" }}>
+      <div className="crumbs">
+        <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>Feedback Intelligence</a>
+        <span className="sep">/</span>
+        <a href="#" onClick={e => { e.preventDefault(); onBack(); }}>Survey Campaigns</a>
+        <span className="sep">/</span>
+        <span className="last">{c.name}</span>
+      </div>
+
+      <div className="pane-head" style={{ paddingTop: 6, alignItems: "flex-start" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <h1 style={{ margin: 0 }}>{c.name}</h1>
+            <StatusPill s={c.status}/>
+            {c.hasWorkingCopy ? <WorkingCopyChip/> : null}
+            {(c.status === "active" || c.status === "paused") ? (
+              <span style={{ font: "500 12px/16px Inter", color: "#7b8a96",
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "2px 8px", borderRadius: 6,
+                background: "var(--fi-accent-bg)", color: "var(--fi-accent-strong)",
+              }}>
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><circle cx="9" cy="6" r="1.1"/><circle cx="15" cy="6" r="1.1"/><circle cx="9" cy="12" r="1.1"/><circle cx="15" cy="12" r="1.1"/><circle cx="9" cy="18" r="1.1"/><circle cx="15" cy="18" r="1.1"/></svg>
+                Routing position {(() => {
+                  const routing = CAMPAIGNS.filter(x => x.status === "active" || x.status === "paused");
+                  const idx = routing.findIndex(x => x.id === c.id);
+                  return idx >= 0 ? `${idx + 1} of ${routing.length}` : "—";
+                })()}
+              </span>
+            ) : null}
+          </div>
+          <div style={{ font: "400 12px/18px Inter", color: "#7b8a96", marginTop: 6 }}>
+            Owner: <strong style={{ color: "#1d2630", fontWeight: 500 }}>{c.owner}</strong>
+            <span style={{ margin: "0 8px" }}>·</span>
+            Created {c.created}
+            <span style={{ margin: "0 8px" }}>·</span>
+            Last updated {c.updated}
+          </div>
+        </div>
+        <div className="head-actions" style={{ marginTop: 4 }}>
+          <button className="btn">
+            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            {c.status === "active" ? "Pause" : "Resume"}
+          </button>
+          <button className="btn">
+            <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>
+            Duplicate
+          </button>
+          <button className="btn primary" onClick={() => onEdit(c)}>
+            <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            Edit configuration
+          </button>
+          <div className="kebab">
+            <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+          </div>
+        </div>
+      </div>
+
+      {c.hasWorkingCopy ? (
+        <div className="working-banner">
+          <div className="working-banner-ico">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+            </svg>
+          </div>
+          <div className="working-banner-body">
+            <div className="working-banner-title">This campaign has unpublished changes</div>
+            <div className="working-banner-sub">
+              Active version <strong>v{c.publishedVersion}</strong> (published {c.publishedAt}) continues to run.
+              Working copy <strong>v{c.workingCopyVersion}</strong> was edited by {c.workingCopyEditedBy} on {c.workingCopyEditedAt}.
+            </div>
+          </div>
+          <div className="working-banner-actions">
+            <button className="btn" onClick={discardWorkingCopy}>
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Discard changes
+            </button>
+            <button className="btn primary" onClick={publishWorkingCopy}>
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 13 10 19 20 5"/></svg>
+              Publish v{c.workingCopyVersion}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div style={{ flex: 1, overflow: "auto", padding: "16px 24px 24px", background: "#f8fafc", position: "relative" }}>
+        <FloatingMetrics campaign={c}/>
+        <ConfigurationView campaign={c}/>
+      </div>
+      {toast ? (
+        <div className="toast">
+          <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
+          {toast.msg}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function DefRow({ label, children }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center",
+      padding: "8px 0",
+      borderTop: "1px solid rgba(0,0,0,0.05)",
+      font: "400 13px/18px Inter", color: "#1d2630",
+    }}>
+      <div style={{ flex: "0 0 130px", color: "#7b8a96" }}>{label}</div>
+      <div style={{ flex: 1, fontWeight: 500 }}>{children}</div>
+    </div>
+  );
+}
+
+function ConfigGroup({ title, num, children }) {
+  return (
+    <div style={{ background: "#fff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 12, marginBottom: 12, overflow: "hidden" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 18px", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <span className="step-num" style={{ width: 24, height: 24, borderRadius: "50%", background: "var(--fi-accent-bg)", color: "var(--fi-accent-strong)", display: "inline-flex", alignItems: "center", justifyContent: "center", font: "600 11px/1 Inter" }}>{num}</span>
+        <div style={{ font: "600 14px/20px Inter", color: "#1d2630" }}>{title}</div>
+      </div>
+      <div style={{ padding: "8px 18px 12px" }}>{children}</div>
+    </div>
+  );
+}
+
+function ConfigurationView({ campaign }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 0, maxWidth: 900 }}>
+      <ConfigGroup num="1" title="Identity & Scope">
+        <DefRow label="Name">{campaign.name}</DefRow>
+        <DefRow label="Active date range">Ongoing from {campaign.created}</DefRow>
+        <DefRow label="Channels">
+          <div className="channel-stack">{campaign.channels.map(k => <ChannelChip key={k} kind={k}/>)}</div>
+        </DefRow>
+        <DefRow label="Agent Teams">All teams</DefRow>
+        <DefRow label="Agents Groups">All groups</DefRow>
+        <DefRow label="Routing priority">{(() => {
+          const routing = CAMPAIGNS.filter(x => x.status === "active" || x.status === "paused");
+          const idx = routing.findIndex(x => x.id === campaign.id);
+          return (campaign.status === "active" || campaign.status === "paused") && idx >= 0
+            ? `Position ${idx + 1} of ${routing.length} · Reorder on the campaigns list`
+            : "—";
+        })()}</DefRow>
+        <DefRow label="Language">English <span style={{ color: "#7b8a96", fontWeight: 400, marginLeft: 6 }}>· MVP scope</span></DefRow>
+      </ConfigGroup>
+
+      <ConfigGroup num="2" title="Volume & Sampling">
+        <DefRow label="Sampling">{campaign.sampling}%</DefRow>
+        <DefRow label="Min interaction length">≥ 3 customer turns · ≥ 2 agent turns</DefRow>
+        <DefRow label="Per-agent cap">3 surveys / day</DefRow>
+      </ConfigGroup>
+
+      <ConfigGroup num="3" title="Suppression Rules">
+        <DefRow label="Opt-out tag"><span style={{ color: "var(--fi-green)" }}>● Enabled</span></DefRow>
+        <DefRow label="Recency window"><span style={{ color: "var(--fi-green)" }}>● Enabled</span> · 30 days</DefRow>
+        <DefRow label="Internal / test"><span style={{ color: "#7b8a96" }}>● Always on (hard-coded)</span></DefRow>
+      </ConfigGroup>
+
+      <ConfigGroup num="4" title="Trigger Rules">
+        <DefRow label="Trigger event">Post-digital interaction</DefRow>
+        <DefRow label="Delay">Immediate</DefRow>
+      </ConfigGroup>
+
+    </div>
+  );
+}
+
+Object.assign(window, { SurveyCampaignsGrid, CreateCampaign, CampaignDetail, ChannelChip, StatusPill, Sparkline, CAMPAIGNS, WorkingCopyChip });

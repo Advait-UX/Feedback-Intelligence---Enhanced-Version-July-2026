@@ -12,6 +12,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    __BUILD_TIME__: JSON.stringify(Date.now()),
+    __PROTO_FILE__: JSON.stringify('prototype.html'),
+  },
   build: {
     outDir: 'dist-single',
     assetsInlineLimit: 100000000,
