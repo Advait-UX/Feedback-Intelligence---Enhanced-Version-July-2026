@@ -611,7 +611,7 @@ export default function App() {
         <iframe
           key={fiSection}
           ref={protoIframeRef}
-          src={`./prototype.html?embed=full&section=${fiSection}`}
+          src={`./prototype.html?embed=full&section=${fiSection}&v=${__BUILD_TIME__}`}
           title={FI_TITLES[fiSection]}
           style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
         />
