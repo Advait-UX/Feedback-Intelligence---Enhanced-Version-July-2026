@@ -7979,6 +7979,9 @@ function FiTimePicker({ value, onChange, disabled, error, minTime, maxTime }) {
   const ref = React.useRef(null);
   const listRef = React.useRef(null);
 
+  /* Sync inputVal when value prop changes externally (e.g. allDay toggle) */
+  React.useEffect(() => { setInputVal(value || ""); }, [value]);
+
   /* Generate 30-min slots: 00:00 … 23:30 (24hr) */
   const slots = React.useMemo(() => {
     const out = [];
@@ -8508,7 +8511,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           onClick={() => {
                             const next = !c.allDay;
                             set("allDay", next);
-                            if (next) { set("startTime", "00:00"); set("endTime", "23:30"); }
+                            if (next) { set("startTime", "00:00"); set("endTime", "23:59"); }
                             else { set("startTime", ""); set("endTime", ""); }
                           }}
                           style={{
@@ -8541,7 +8544,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
                       <div className="field-cell">
                         <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>End Time{!c.allDay && <span className="req">*</span>}</label>
-                        <FiTimePicker value={c.allDay ? "23:30" : c.endTime} onChange={v => set("endTime", v)} error={!c.allDay && endTimeErr} minTime={c.allDay ? undefined : c.startTime} disabled={c.allDay}/>
+                        <FiTimePicker value={c.allDay ? "23:59" : c.endTime} onChange={v => set("endTime", v)} error={!c.allDay && endTimeErr} minTime={c.allDay ? undefined : c.startTime} disabled={c.allDay}/>
                         {!c.allDay && endTimeErr && <div className="field-control"><span className="error-msg">
                           <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                           End time is required
@@ -8552,7 +8555,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     {/* Survey hours summary */}
                     {(c.allDay || (c.startTime && c.endTime)) && (() => {
                       const startT = c.allDay ? "00:00" : c.startTime;
-                      const endT   = c.allDay ? "23:30" : c.endTime;
+                      const endT   = c.allDay ? "23:59" : c.endTime;
                       const [sh, sm] = startT.split(":").map(Number);
                       const [eh, em] = endT.split(":").map(Number);
                       const totalMins = (eh * 60 + em) - (sh * 60 + sm);
@@ -9045,7 +9048,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     if (c.allDay) return (
                       <span>
                         <span style={{ fontWeight: 500 }}>All Day</span>
-                        <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 30 min</span>
+                        <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 59 min</span>
                       </span>
                     );
                     if (!c.startTime) return <span style={{ color: "var(--color-status-error)" }}>Required</span>;
@@ -9573,7 +9576,7 @@ function FloatingMetrics({ campaign: c }) {
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
   const surveyHours = (() => {
-    if (c.allDay) return { main: "All Day · 23 hr 30 min", sub: "🌑 Midnight to 🌙 Night" };
+    if (c.allDay) return { main: "00:00 – 23:59 · 23 hr 59 min", sub: "🌑 Midnight to 🌙 Night · All Day" };
     if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
     const totalMins = (parseInt(c.endTime) * 60 + parseInt(c.endTime.split(":")[1])) - (parseInt(c.startTime) * 60 + parseInt(c.startTime.split(":")[1]));
     const hrs = Math.floor(totalMins / 60), mins = totalMins % 60;
@@ -9984,7 +9987,7 @@ function ConfigurationView({ campaign: rawC }) {
           if (c.allDay) return (
             <span>
               <span style={{ fontWeight: 500 }}>All Day</span>
-              <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 30 min</span>
+              <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 59 min</span>
             </span>
           );
           if (!c.startTime && !c.endTime) return <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>;
