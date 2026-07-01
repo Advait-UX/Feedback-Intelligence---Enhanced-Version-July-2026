@@ -7972,7 +7972,7 @@ function FiDatePicker({ value, onChange, disabled, placeholder = "Select date", 
 }
 
 /* ── Lyra-style Time Picker ──────────────────────────────────────────────── */
-function FiTimePicker({ value, onChange, disabled, error, minTime }) {
+function FiTimePicker({ value, onChange, disabled, error, minTime, maxTime }) {
   const [open, setOpen] = React.useState(false);
   const [inputVal, setInputVal] = React.useState(value || "");
   const ref = React.useRef(null);
@@ -7992,9 +7992,12 @@ function FiTimePicker({ value, onChange, disabled, error, minTime }) {
   /* Convert "HH:MM" to total minutes for comparison */
   const toMins = t => { if (!t) return -1; const [h, m] = t.split(":").map(Number); return h * 60 + m; };
   const minMins = toMins(minTime);
+  const maxMins = toMins(maxTime);
 
-  /* Filter list by what user typed */
-  const filtered = inputVal
+  /* When dropdown is open, always show all slots (so selection is visible + scrollable).
+     Only filter when user is actively typing (inputVal differs from the committed value). */
+  const isTyping = inputVal !== "" && inputVal !== value;
+  const filtered = isTyping
     ? slots.filter(s => s.toLowerCase().startsWith(inputVal.toLowerCase()))
     : slots;
 
@@ -8006,14 +8009,11 @@ function FiTimePicker({ value, onChange, disabled, error, minTime }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  /* Scroll selected item into view */
+  /* Scroll selected item into view when dropdown opens */
   React.useEffect(() => {
     if (open && listRef.current && value) {
-      const idx = slots.indexOf(value);
-      if (idx >= 0) {
-        const item = listRef.current.children[idx];
-        if (item) item.scrollIntoView({ block: "nearest" });
-      }
+      const el = listRef.current.querySelector(`[data-slot="${value}"]`);
+      if (el) el.scrollIntoView({ block: "center" });
     }
   }, [open]);
 
@@ -8039,7 +8039,7 @@ function FiTimePicker({ value, onChange, disabled, error, minTime }) {
           value={inputVal}
           disabled={disabled}
           onChange={handleInput}
-          onFocus={() => !disabled && setOpen(true)}
+          onFocus={() => { if (!disabled) { setInputVal(value || ""); setOpen(true); } }}
           style={{ paddingRight: value ? 56 : 36, cursor: disabled ? "not-allowed" : "text", borderColor: error ? "var(--color-status-error)" : undefined }}
         />
         {/* Clear button — only when a value is selected */}
@@ -8100,23 +8100,32 @@ function FiTimePicker({ value, onChange, disabled, error, minTime }) {
                   <span>{group.icon}</span>{group.label}
                 </div>
                 {group.slots.map(slot => {
-                  const isDisabled = minMins >= 0 && toMins(slot) <= minMins;
+                  const slotMins = toMins(slot);
+                  const isDisabled = (minMins >= 0 && slotMins <= minMins) || (maxMins >= 0 && slotMins >= maxMins);
+                  const isSelected = slot === value;
                   return (
                     <div
                       key={slot}
+                      data-slot={slot}
                       onMouseDown={e => { e.preventDefault(); if (!isDisabled) select(slot); }}
                       style={{
                         padding: "8px 16px",
-                        font: "400 14px/20px var(--font-sans)",
-                        color: isDisabled ? "var(--lyra-color-fg-disabled, rgba(0,0,0,0.3))" : slot === value ? "var(--lyra-color-fg-active-strong, #185ba4)" : "var(--lyra-color-fg-default, rgba(0,0,0,0.8))",
-                        background: slot === value ? "var(--lyra-color-bg-active-subtle, #f1f7fe)" : "transparent",
+                        font: isSelected ? "500 14px/20px var(--font-sans)" : "400 14px/20px var(--font-sans)",
+                        color: isDisabled ? "var(--lyra-color-fg-disabled, rgba(0,0,0,0.3))" : isSelected ? "var(--lyra-color-fg-active-strong, #185ba4)" : "var(--lyra-color-fg-default, rgba(0,0,0,0.8))",
+                        background: isSelected ? "var(--lyra-color-bg-active-subtle, #f1f7fe)" : "transparent",
                         cursor: isDisabled ? "not-allowed" : "pointer",
                         transition: "background 100ms",
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
                       }}
-                      onMouseEnter={e => { if (slot !== value && !isDisabled) e.currentTarget.style.background = "var(--lyra-color-state-bg-hover-opacity, rgba(0,0,0,0.04))"; }}
-                      onMouseLeave={e => { if (slot !== value) e.currentTarget.style.background = "transparent"; }}
+                      onMouseEnter={e => { if (!isSelected && !isDisabled) e.currentTarget.style.background = "var(--lyra-color-state-bg-hover-opacity, rgba(0,0,0,0.04))"; }}
+                      onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = "transparent"; }}
                     >
-                      {slot}
+                      <span>{slot}</span>
+                      {isSelected && (
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--lyra-color-fg-active-strong, #185ba4)", flexShrink: 0 }}>
+                          <polyline points="3 8 6.5 11.5 13 4.5"/>
+                        </svg>
+                      )}
                     </div>
                   );
                 })}
@@ -8488,10 +8497,11 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Start Time + End Time */}
-                    <div className="field-grid-2" style={{ marginTop: "16px", borderTop: "none" }}>
+                    <div style={{ marginTop: "16px", font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Survey Hours</div>
+                    <div className="field-grid-2" style={{ marginTop: "var(--space-2)", borderTop: "none" }}>
                       <div className="field-cell">
                         <label className="field-label">Start Time<span className="req">*</span></label>
-                        <FiTimePicker value={c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={startTimeErr}/>
+                        <FiTimePicker value={c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={startTimeErr} maxTime={c.endTime}/>
                         {startTimeErr && <div className="field-control"><span className="error-msg">
                           <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                           Start time is required
@@ -8555,32 +8565,44 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       <span className="section-heading" style={{ padding: 0 }}>Agents</span>
                     </div>
 
-                    {/* Radio toggle — Teams/Groups vs Skills */}
-                    <div style={{ display: "flex", gap: "var(--space-6)", marginBottom: "var(--space-4)" }}>
+                    {/* Segmented toggle — Teams/Groups vs Skills */}
+                    <div style={{
+                      display: "inline-flex", alignItems: "stretch",
+                      border: "1px solid var(--lyra-color-border-soft)",
+                      borderRadius: "var(--radius-lg)",
+                      overflow: "hidden",
+                      background: "var(--lyra-color-bg-surface-base)",
+                      marginBottom: "var(--space-4)",
+                    }}>
                       {[
-                        { val: "teams", label: "Teams / Groups" },
-                        { val: "skills", label: "Skills" },
-                      ].map(opt => (
-                        <label key={opt.val} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                            border: c.agentMode === opt.val ? "5px solid var(--lyra-brand-600)" : "1.5px solid var(--lyra-color-border-medium, rgba(0,0,0,0.32))",
-                            background: "var(--lyra-color-bg-field, #fff)",
-                            transition: "border 120ms",
-                            cursor: "pointer",
-                          }} onClick={() => {
-                            set("agentMode", opt.val);
-                            if (opt.val === "skills") { set("queues", []); set("teams", []); }
-                            else { set("skills", []); }
-                          }}/>
-                          <span onClick={() => {
-                            set("agentMode", opt.val);
-                            if (opt.val === "skills") { set("queues", []); set("teams", []); }
-                            else { set("skills", []); }
-                          }}>{opt.label}</span>
-                        </label>
-                      ))}
+                        { val: "teams", label: "Teams / Groups", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="5.5" cy="5" r="2"/><path d="M1 13c0-2.2 1.8-4 4-4h1"/><circle cx="11" cy="5" r="2"/><path d="M7.5 13c0-2.2 1.8-4 4-4h1c2.2 0 3.5 1.8 3.5 4"/></svg> },
+                        { val: "skills", label: "Skills", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.6 3.5L8 10l-3.1 1.5.6-3.5L3 5.5l3.5-.5z"/></svg> },
+                      ].map((opt, i) => {
+                        const sel = c.agentMode === opt.val;
+                        return (
+                          <button key={opt.val} type="button"
+                            onClick={() => {
+                              set("agentMode", opt.val);
+                              if (opt.val === "skills") { set("queues", []); set("teams", []); }
+                              else { set("skills", []); }
+                            }}
+                            style={{
+                              display: "flex", alignItems: "center", gap: "var(--space-2)",
+                              padding: "8px 20px",
+                              background: sel ? "var(--lyra-color-bg-active-subtle)" : "transparent",
+                              color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-default)",
+                              font: sel ? "500 14px/20px var(--font-sans)" : "400 14px/20px var(--font-sans)",
+                              border: "none",
+                              borderLeft: i > 0 ? "1px solid var(--lyra-color-border-soft)" : "none",
+                              cursor: "pointer", outline: "none",
+                              transition: "background 120ms, color 120ms",
+                              whiteSpace: "nowrap",
+                            }}>
+                            <span style={{ color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-action)", display: "flex" }}>{opt.icon}</span>
+                            {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
 
                     {/* Teams / Groups row — only shown when teams mode active */}
@@ -9510,9 +9532,16 @@ function FloatingMetrics({ campaign: c }) {
   const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
-  const surveyHours = c.startTime && c.endTime
-    ? { main: `${c.startTime} – ${c.endTime}`, sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}` }
-    : { main: c.startTime || "Not set", sub: null };
+  const surveyHours = (() => {
+    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
+    const totalMins = (parseInt(c.endTime) * 60 + parseInt(c.endTime.split(":")[1])) - (parseInt(c.startTime) * 60 + parseInt(c.startTime.split(":")[1]));
+    const hrs = Math.floor(totalMins / 60), mins = totalMins % 60;
+    const duration = totalMins > 0 ? (hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`) : null;
+    return {
+      main: `${c.startTime} – ${c.endTime}${duration ? ` · ${duration}` : ""}`,
+      sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}`,
+    };
+  })();
   const surveyDays  = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
 
   const rows = [
@@ -9787,9 +9816,18 @@ function CampaignSummaryCard({ campaign: c }) {
   const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
-  const surveyHoursValue = c.startTime && c.endTime
-    ? { main: `${c.startTime} – ${c.endTime}`, sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}` }
-    : { main: c.startTime || "Not set", sub: null };
+  const surveyHoursValue = (() => {
+    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
+    const totalMins = (sh * 60 + parseInt(c.startTime.split(":")[1]));
+    const endMins = (eh * 60 + parseInt(c.endTime.split(":")[1]));
+    const diff = endMins - totalMins;
+    const hrs = Math.floor(diff / 60), mins = diff % 60;
+    const duration = diff > 0 ? (hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`) : null;
+    return {
+      main: `${c.startTime} – ${c.endTime}${duration ? ` · ${duration}` : ""}`,
+      sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}`,
+    };
+  })();
   const surveyDays = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
   const dateRange = c.startDate
     ? (c.ongoing ? `Ongoing from ${c.startDate}` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
