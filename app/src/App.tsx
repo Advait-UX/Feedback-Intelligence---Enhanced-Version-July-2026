@@ -432,7 +432,7 @@ export default function App() {
           onAppSwitch={handleAppSwitch}
         />
         <iframe
-          src="./prototype.html?embed=topbar"
+          src={`./prototype.html?embed=topbar&v=${__BUILD_TIME__}`}
           title="Feedback Intelligence prototype"
           style={{ flex: 1, width: '100%', border: 0, display: 'block' }}
         />
