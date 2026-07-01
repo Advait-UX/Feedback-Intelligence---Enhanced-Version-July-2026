@@ -9390,12 +9390,12 @@ function FloatingMetrics({ campaign: c }) {
     ? (c.ongoing ? `${c.startDate} — Ongoing` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
     : "Not set";
 
-  const startTime   = c.startTime || "Not set";
+  const surveyHours = c.startTime && c.endTime ? `${c.startTime} – ${c.endTime}` : c.startTime || "Not set";
   const surveyDays  = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
 
   const rows = [
     { icon: "calendar", label: "Active Date Range", value: dateRange },
-    { icon: "clock",    label: "Start Time",        value: startTime },
+    { icon: "clock",    label: "Survey Hours",      value: surveyHours },
     { icon: "days",     label: "Surveying Days",    value: surveyDays },
   ];
 
