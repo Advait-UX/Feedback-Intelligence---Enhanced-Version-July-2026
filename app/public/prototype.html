@@ -8446,7 +8446,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Start Time + End Time */}
-                    <div className="field-grid-2" style={{ marginTop: "18px", borderTop: "none" }}>
+                    <div className="field-grid-2" style={{ marginTop: "16px", borderTop: "none" }}>
                       <div className="field-cell">
                         <label className="field-label">Start Time<span className="req">*</span></label>
                         <FiTimePicker value={c.startTime} onChange={v => set("startTime", v)} error={startTimeErr}/>
@@ -8466,7 +8466,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Surveying Days */}
-                    <div style={{ marginTop: "18px" }}>
+                    <div style={{ marginTop: "16px" }}>
                       <label className="field-label" style={{ marginBottom: "var(--space-2)", display: "block" }}>Select Surveying Days<span className="req">*</span></label>
                       <SurveyingDays value={c.surveyDays || []} onChange={v => set("surveyDays", v)}/>
                       {surveyDaysErr && <div className="field-control" style={{ marginTop: "var(--space-1)" }}><span className="error-msg">
