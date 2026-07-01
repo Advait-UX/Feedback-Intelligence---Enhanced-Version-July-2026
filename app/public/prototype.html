@@ -7557,6 +7557,7 @@ const DEFAULT_CAMPAIGN = {
   recentDays: 30,
   suppressInternal: true,
 
+  allDay: false,
   startTime: "",
   endTime: "",
   surveyDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
@@ -8216,7 +8217,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const SPECIAL_CHARS_RE = /[\\\/!+<>?#&,%"]/;
   const isEditing = !!editCampaign;
   const agentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && c.startTime && c.endTime && c.surveyDays?.length);
+  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && (c.allDay || (c.startTime && c.endTime)) && c.surveyDays?.length);
   const step2Valid = isEditing || !!(c.surveyDesignId);
 
   const ALL_STEPS = [
@@ -8341,7 +8342,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const canDraft    = !!(c.name && datesValid);
   const canActivate = !!(c.name && c.queues?.length && datesValid);
   const reviewAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !(c.surveyDays?.length) || !c.surveyDesignId);
+  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId);
 
   return (
     <div className="pane" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -8496,21 +8497,52 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
                     </div>
 
-                    {/* Start Time + End Time */}
-                    <div style={{ marginTop: "16px", font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Survey Hours</div>
+                    {/* Survey Hours label + All Day toggle */}
+                    <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Survey Hours</span>
+                      <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
+                        <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>All Day</span>
+                        <span
+                          role="switch"
+                          aria-checked={!!c.allDay}
+                          onClick={() => {
+                            const next = !c.allDay;
+                            set("allDay", next);
+                            if (next) { set("startTime", "00:00"); set("endTime", "23:30"); }
+                            else { set("startTime", ""); set("endTime", ""); }
+                          }}
+                          style={{
+                            display: "inline-flex", alignItems: "center",
+                            width: 36, height: 20, borderRadius: "var(--radius-full)",
+                            background: c.allDay ? "var(--lyra-color-bg-primary)" : "var(--lyra-slate-300)",
+                            transition: "background 160ms",
+                            position: "relative", cursor: "pointer", flexShrink: 0,
+                          }}>
+                          <span style={{
+                            position: "absolute",
+                            left: c.allDay ? 18 : 2,
+                            width: 16, height: 16,
+                            borderRadius: "var(--radius-full)",
+                            background: "#fff",
+                            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                            transition: "left 160ms",
+                          }}/>
+                        </span>
+                      </label>
+                    </div>
                     <div className="field-grid-2" style={{ marginTop: "var(--space-2)", borderTop: "none" }}>
                       <div className="field-cell">
-                        <label className="field-label">Start Time<span className="req">*</span></label>
-                        <FiTimePicker value={c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={startTimeErr} maxTime={c.endTime}/>
-                        {startTimeErr && <div className="field-control"><span className="error-msg">
+                        <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>Start Time{!c.allDay && <span className="req">*</span>}</label>
+                        <FiTimePicker value={c.allDay ? "00:00" : c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={!c.allDay && startTimeErr} maxTime={c.allDay ? undefined : c.endTime} disabled={c.allDay}/>
+                        {!c.allDay && startTimeErr && <div className="field-control"><span className="error-msg">
                           <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                           Start time is required
                         </span></div>}
                       </div>
                       <div className="field-cell">
-                        <label className="field-label">End Time<span className="req">*</span></label>
-                        <FiTimePicker value={c.endTime} onChange={v => set("endTime", v)} error={endTimeErr} minTime={c.startTime}/>
-                        {endTimeErr && <div className="field-control"><span className="error-msg">
+                        <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>End Time{!c.allDay && <span className="req">*</span>}</label>
+                        <FiTimePicker value={c.allDay ? "23:30" : c.endTime} onChange={v => set("endTime", v)} error={!c.allDay && endTimeErr} minTime={c.allDay ? undefined : c.startTime} disabled={c.allDay}/>
+                        {!c.allDay && endTimeErr && <div className="field-control"><span className="error-msg">
                           <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
                           End time is required
                         </span></div>}
@@ -8518,9 +8550,11 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Survey hours summary */}
-                    {c.startTime && c.endTime && (() => {
-                      const [sh, sm] = c.startTime.split(":").map(Number);
-                      const [eh, em] = c.endTime.split(":").map(Number);
+                    {(c.allDay || (c.startTime && c.endTime)) && (() => {
+                      const startT = c.allDay ? "00:00" : c.startTime;
+                      const endT   = c.allDay ? "23:30" : c.endTime;
+                      const [sh, sm] = startT.split(":").map(Number);
+                      const [eh, em] = endT.split(":").map(Number);
                       const totalMins = (eh * 60 + em) - (sh * 60 + sm);
                       if (totalMins <= 0) return null;
                       const hrs = Math.floor(totalMins / 60);
@@ -8980,7 +9014,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               </div>
             );
             const srAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || !c.startTime || !(c.surveyDays?.length) || !c.surveyDesignId);
+            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId);
             return (
               <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
@@ -9008,6 +9042,12 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   <SRRow label="Survey Hours">{(() => {
                     const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
                     const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
+                    if (c.allDay) return (
+                      <span>
+                        <span style={{ fontWeight: 500 }}>All Day</span>
+                        <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 30 min</span>
+                      </span>
+                    );
                     if (!c.startTime) return <span style={{ color: "var(--color-status-error)" }}>Required</span>;
                     if (!c.endTime) return <span style={{ color: "var(--color-status-error)" }}>End time required</span>;
                     const sh = parseInt(c.startTime), eh = parseInt(c.endTime);
@@ -9533,6 +9573,7 @@ function FloatingMetrics({ campaign: c }) {
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
   const surveyHours = (() => {
+    if (c.allDay) return { main: "All Day · 23 hr 30 min", sub: "🌑 Midnight to 🌙 Night" };
     if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
     const totalMins = (parseInt(c.endTime) * 60 + parseInt(c.endTime.split(":")[1])) - (parseInt(c.startTime) * 60 + parseInt(c.startTime.split(":")[1]));
     const hrs = Math.floor(totalMins / 60), mins = totalMins % 60;
@@ -9919,6 +9960,7 @@ function ConfigurationView({ campaign: rawC }) {
     skills: [],
     digitalChannels: [],
     surveyDigitalChannels: "",
+    allDay: false,
     ...rawC,
   };
 
@@ -9939,6 +9981,12 @@ function ConfigurationView({ campaign: rawC }) {
         <DefRow label="Survey Hours">{(() => {
           const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
           const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
+          if (c.allDay) return (
+            <span>
+              <span style={{ fontWeight: 500 }}>All Day</span>
+              <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 30 min</span>
+            </span>
+          );
           if (!c.startTime && !c.endTime) return <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>;
           if (!c.endTime) return <span>{c.startTime} <span style={{ color: "var(--color-fg-secondary)" }}>(end time not set)</span></span>;
           const sh = parseInt(c.startTime), eh = parseInt(c.endTime);
