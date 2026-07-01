@@ -286,8 +286,13 @@
 .field-row {
   display: flex; flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-6) 0;
+  padding: 0;
   align-items: stretch;
+}
+.field-row + .field-row,
+.field-grid-2 + .field-row,
+.field-row + .field-grid-2 {
+  margin-top: 38px;
 }
 /* Inter-row divider handled by .form-section-body > * + * (above) — no per-pair rule needed */
 .field-label {
@@ -435,7 +440,7 @@ select.fi-input {
   display: grid;
   grid-template-columns: minmax(0, 400px) minmax(0, 400px);
   gap: var(--space-5);
-  padding: var(--space-2) 0 0;
+  padding: 0;
 }
 .field-grid-2 + .field-row,
 .field-row + .field-grid-2,
@@ -876,7 +881,7 @@ select.fi-input {
   overflow: visible;
 }
 .setup-section + .setup-section {
-  margin-top: 36px;
+  margin-top: 38px;
   padding-top: 0;
   border-top: none;
 }
@@ -923,7 +928,7 @@ select.fi-input {
 }
 /* Survey wizard sub-groups within a step */
 .sc-group {
-  margin-top: 36px;
+  margin-top: 38px;
   padding-top: 0;
   border-top: none;
 }
@@ -1130,7 +1135,7 @@ select.fi-input {
 /* ── Wizard form sub-sections — borderless, divider-separated ── */
 .wz-form-section {
   padding-top: 0;
-  margin-top: 36px;
+  margin-top: 38px;
   border-top: none;
 }
 .wz-form-section:first-child {
@@ -2261,7 +2266,7 @@ select.fi-input {
 }
 .intel-sub-section + .intel-sub-section {
   padding-top: 0;
-  margin-top: 36px;
+  margin-top: 38px;
   border-top: none;
 }
 .intel-sub-label {
@@ -4104,7 +4109,7 @@ tbody tr.selected td:first-child::before{
 .field-row {
   display: flex; flex-direction: column;
   gap: var(--space-2);                                 /* 8px between label and control */
-  padding: var(--space-3) 0;                           /* 12px vertical */
+  padding: 0;
   align-items: stretch;
 }
 /* Inter-row divider handled by .form-section-body > * + * (above) — no per-pair rule needed */
@@ -4362,7 +4367,7 @@ select.fi-input {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);                                 /* 16px between columns */
-  padding: var(--space-3) 0;                           /* 12px vertical */
+  padding: 0;
 }
 .field-grid-2 + .field-row,
 .field-row + .field-grid-2,
@@ -5655,7 +5660,7 @@ select.fi-input {
 }
 .intel-sub-section + .intel-sub-section {
   padding-top: 0;
-  margin-top: 32px;
+  margin-top: 38px;
   border-top: none;
 }
 .intel-sub-label {
@@ -7560,10 +7565,10 @@ const DEFAULT_CAMPAIGN = {
   skills: [],
 
   interactionChannel: "voice",
-  digitalChannel: "",
+  digitalChannels: [],
 
   surveyChannel: "voice",
-  surveyDigitalChannels: [],
+  surveyDigitalChannels: "",
 
   triggerEvent: "Post-digital interaction",
   delay: "Immediate",
@@ -8418,7 +8423,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   </div>
 
                   {/* Active Date Range */}
-                  <div className="wz-form-section">
+                  <div className="wz-form-section" style={{ borderTop: "1px solid var(--lyra-color-border-subtle)", paddingTop: "38px" }}>
                     <div className="wz-form-section-head">
                       <span className="section-heading" style={{ padding: 0 }}>Active Date Range</span>
                       <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)", cursor: "pointer" }}>
@@ -8477,7 +8482,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   </div>
 
                   {/* Agents */}
-                  <div className="wz-form-section">
+                  <div className="wz-form-section" style={{ borderTop: "1px solid var(--lyra-color-border-subtle)", paddingTop: "38px" }}>
                     <div className="wz-form-section-head">
                       <span className="section-heading" style={{ padding: 0 }}>Agents</span>
                     </div>
@@ -8581,143 +8586,175 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
                   </div>
 
-                  {/* Interaction Channel */}
-                  <div className="wz-form-section">
-                    <div className="wz-form-section-head">
-                      <span className="section-heading" style={{ padding: 0 }}>Select interaction channel</span>
-                    </div>
+                  {/* Interaction Channel + Survey Channel — grey panel */}
+                  <div style={{ marginTop: "38px" }}>
+                    <div style={{
+                      background: "var(--lyra-color-bg-surface-shell)",
+                      borderRadius: "var(--radius-lg)",
+                      overflow: "hidden",
+                    }}>
 
-                    {/* Voice / Digital radio */}
-                    <div style={{ display: "flex", gap: "var(--space-6)", marginBottom: "var(--space-4)" }}>
-                      {[
-                        { val: "voice", label: "Voice" },
-                        { val: "digital", label: "Digital" },
-                      ].map(opt => (
-                        <label key={opt.val} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                            border: c.interactionChannel === opt.val ? "5px solid var(--lyra-brand-600)" : "1.5px solid var(--lyra-color-border-medium, rgba(0,0,0,0.32))",
-                            background: "var(--lyra-color-bg-field, #fff)",
-                            transition: "border 120ms",
-                            cursor: "pointer",
-                          }} onClick={() => { set("interactionChannel", opt.val); if (opt.val === "voice") set("digitalChannel", ""); }}/>
-                          <span onClick={() => { set("interactionChannel", opt.val); if (opt.val === "voice") set("digitalChannel", ""); }}>{opt.label}</span>
-                        </label>
-                      ))}
-                    </div>
-
-                    {/* Digital sub-channel — single select, only shown when Digital is selected */}
-                    {c.interactionChannel === "digital" && (
-                      <div className="field-grid-2">
-                        <div className="field-cell">
-                          <label className="field-label">Digital channel<span className="req">*</span></label>
-                          <div style={{ position: "relative" }}>
-                            <select
-                              className="fi-input"
-                              value={c.digitalChannel || ""}
-                              onChange={e => set("digitalChannel", e.target.value)}
-                              style={{ appearance: "none", WebkitAppearance: "none", paddingRight: 36, cursor: "pointer", color: c.digitalChannel ? "var(--lyra-color-fg-default)" : "var(--lyra-color-fg-disabled)" }}
-                            >
-                              <option value="" disabled>Select digital channel</option>
-                              {["Email","WhatsApp","Instagram Messenger","Facebook Messenger","Live Chat","SMS","Twitter / X","WeChat","Telegram","LINE"].map(ch => (
-                                <option key={ch} value={ch}>{ch}</option>
-                              ))}
-                            </select>
-                            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-                              style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "var(--lyra-color-fg-action)", pointerEvents: "none" }}>
-                              <polyline points="4 6 8 10 12 6"/>
-                            </svg>
-                          </div>
+                      {/* Interaction Channel */}
+                      <div style={{ padding: "24px 28px" }}>
+                        <div style={{ marginBottom: "var(--space-3)" }}>
+                          <span className="section-heading" style={{ padding: 0 }}>Select interaction channel</span>
                         </div>
-                        <div className="field-cell"/>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Survey Channel */}
-                  <div className="wz-form-section">
-                    <div className="wz-form-section-head">
-                      <span className="section-heading" style={{ padding: 0 }}>Select survey channel</span>
-                    </div>
-
-                    {/* Voice / Digital radio */}
-                    <div style={{ display: "flex", gap: "var(--space-6)", marginBottom: "var(--space-4)" }}>
-                      {[
-                        { val: "voice", label: "Voice" },
-                        { val: "digital", label: "Digital" },
-                      ].map(opt => (
-                        <label key={opt.val} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                          <span style={{
-                            display: "inline-flex", alignItems: "center", justifyContent: "center",
-                            width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                            border: c.surveyChannel === opt.val ? "5px solid var(--lyra-brand-600)" : "1.5px solid var(--lyra-color-border-medium, rgba(0,0,0,0.32))",
-                            background: "var(--lyra-color-bg-field, #fff)",
-                            transition: "border 120ms", cursor: "pointer",
-                          }} onClick={() => { set("surveyChannel", opt.val); if (opt.val === "voice") set("surveyDigitalChannels", []); }}/>
-                          <span onClick={() => { set("surveyChannel", opt.val); if (opt.val === "voice") set("surveyDigitalChannels", []); }}>{opt.label}</span>
-                        </label>
-                      ))}
-                    </div>
-
-                    {/* Digital sub-channels — multiselect, only shown when Digital selected */}
-                    {c.surveyChannel === "digital" && (
-                      <div className="field-grid-2">
-                        <div className="field-cell">
-                          <label className="field-label">Digital channel<span className="req">*</span></label>
-                          <MultiSelectField
-                            options={["Email","WhatsApp","Instagram Messenger","Facebook Messenger","Live Chat","SMS","Twitter / X","WeChat","Telegram","LINE"]}
-                            value={c.surveyDigitalChannels || []}
-                            onChange={v => set("surveyDigitalChannels", v)}
-                            placeholder="Select digital channels"
-                          />
-                          {/* Selected chips — max 5 shown */}
-                          {(c.surveyDigitalChannels?.length > 0) && (
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-2)", marginTop: "var(--space-2)" }}>
-                              {c.surveyDigitalChannels.slice(0, 5).map(ch => (
-                                <span key={ch} style={{
-                                  display: "inline-flex", alignItems: "center", gap: 4,
-                                  padding: "2px 8px 2px 10px",
-                                  background: "var(--lyra-color-bg-active-subtle)",
-                                  border: "1px solid var(--lyra-color-border-active)",
-                                  borderRadius: "var(--radius-full)",
-                                  font: "500 12px/20px var(--font-sans)",
-                                  color: "var(--lyra-color-fg-active-strong)",
+                        <div style={{
+                          display: "inline-flex", alignItems: "stretch",
+                          border: "1px solid var(--lyra-color-border-soft)",
+                          borderRadius: "var(--radius-lg)",
+                          overflow: "hidden",
+                          background: "var(--lyra-color-bg-surface-base)",
+                        }}>
+                          {[
+                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
+                            { val: "digital", label: "Digital", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg> },
+                          ].map((opt, i) => {
+                            const sel = c.interactionChannel === opt.val;
+                            return (
+                              <button key={opt.val} type="button"
+                                onClick={() => { set("interactionChannel", opt.val); if (opt.val === "voice") set("digitalChannels", []); }}
+                                style={{
+                                  display: "flex", alignItems: "center", gap: "var(--space-2)",
+                                  padding: "8px 20px",
+                                  background: sel ? "var(--lyra-color-bg-active-subtle)" : "transparent",
+                                  color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-default)",
+                                  font: sel ? "500 14px/20px var(--font-sans)" : "400 14px/20px var(--font-sans)",
+                                  border: "none",
+                                  borderLeft: i > 0 ? "1px solid var(--lyra-color-border-soft)" : "none",
+                                  cursor: "pointer", outline: "none",
+                                  transition: "background 120ms, color 120ms",
+                                  whiteSpace: "nowrap",
                                 }}>
-                                  {ch}
-                                  <button type="button" onClick={() => set("surveyDigitalChannels", c.surveyDigitalChannels.filter(d => d !== ch))}
-                                    aria-label={`Remove ${ch}`}
-                                    style={{ all: "unset", cursor: "pointer", display: "flex", alignItems: "center", color: "var(--lyra-color-fg-active-strong)", opacity: 0.7, lineHeight: 1 }}
-                                    onMouseEnter={e => e.currentTarget.style.opacity = 1}
-                                    onMouseLeave={e => e.currentTarget.style.opacity = 0.7}>
-                                    <svg viewBox="0 0 12 12" width="10" height="10" stroke="currentColor" fill="none" strokeWidth="2" strokeLinecap="round">
-                                      <line x1="9" y1="3" x2="3" y2="9"/><line x1="3" y1="3" x2="9" y2="9"/>
-                                    </svg>
-                                  </button>
-                                </span>
-                              ))}
-                              {c.surveyDigitalChannels.length > 5 && (
-                                <span style={{
-                                  display: "inline-flex", alignItems: "center",
-                                  padding: "2px 10px",
-                                  background: "var(--lyra-slate-100)",
-                                  borderRadius: "var(--radius-full)",
-                                  font: "500 12px/20px var(--font-sans)",
-                                  color: "var(--lyra-color-fg-secondary)",
-                                }}>
-                                  +{c.surveyDigitalChannels.length - 5} more
-                                </span>
-                              )}
+                                <span style={{ color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-action)", display: "flex" }}>{opt.icon}</span>
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Digital sub-channel — checkboxes shown inline when Digital is selected */}
+                        {c.interactionChannel === "digital" && (
+                          <div style={{ marginTop: "var(--space-4)" }}>
+                            <label className="field-label" style={{ marginBottom: "var(--space-3)", display: "block" }}>Digital channel<span className="req">*</span></label>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
+                              {[
+                                { val: "SMS", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 2h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4l-3 3V3a1 1 0 0 1 1-1z"/></svg> },
+                                { val: "Chat", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3l3 3 3-3h3a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg> },
+                                { val: "WhatsApp", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M5.5 5.5c.3-.7 1.2-1 1.8-.5l.7.7c.3.3.3.8 0 1.1l-.4.4c.4.8 1.2 1.5 2 2l.4-.4c.3-.3.8-.3 1.1 0l.7.7c.5.6.2 1.5-.5 1.8C9 12.3 4.7 8 5.5 5.5z"/></svg> },
+                                { val: "FB Messenger", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M4 9.5l2.5-3 2 1.5 2.5-3"/></svg> },
+                                { val: "Apple Business", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11.5 2A2.5 2.5 0 0 1 14 4.5v7A2.5 2.5 0 0 1 11.5 14h-7A2.5 2.5 0 0 1 2 11.5v-7A2.5 2.5 0 0 1 4.5 2h7zM8 5a3 3 0 1 0 0 6A3 3 0 0 0 8 5z"/></svg> },
+                              ].map(({ val: ch, icon }) => {
+                                const checked = (c.digitalChannels || []).includes(ch);
+                                const toggle = () => {
+                                  const curr = c.digitalChannels || [];
+                                  set("digitalChannels", checked ? curr.filter(x => x !== ch) : [...curr, ch]);
+                                };
+                                return (
+                                  <label key={ch} onClick={toggle} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", font: "400 14px/20px var(--font-sans)", color: "var(--color-fg-default)", userSelect: "none" }}>
+                                    <span style={{
+                                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                      width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+                                      border: checked ? "none" : "1.5px solid var(--lyra-color-border-medium)",
+                                      background: checked ? "var(--lyra-brand-600)" : "var(--lyra-color-bg-field)",
+                                      transition: "background 120ms, border 120ms",
+                                    }}>
+                                      {checked && (
+                                        <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <polyline points="2 6 5 9 10 3"/>
+                                        </svg>
+                                      )}
+                                    </span>
+                                    <span style={{ display: "flex", alignItems: "center", gap: "var(--space-1)", color: checked ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-action)" }}>{icon}</span>
+                                    <span style={{ color: checked ? "var(--lyra-color-fg-active-strong)" : "var(--color-fg-default)", fontWeight: checked ? 500 : 400 }}>{ch}</span>
+                                  </label>
+                                );
+                              })}
                             </div>
-                          )}
-                        </div>
-                        <div className="field-cell"/>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      {/* Divider between the two channel rows */}
+                      <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "0 28px" }}/>
+
+                      {/* Survey Channel */}
+                      <div style={{ padding: "24px 28px" }}>
+                        <div style={{ marginBottom: "var(--space-3)" }}>
+                          <span className="section-heading" style={{ padding: 0 }}>Select survey channel</span>
+                        </div>
+                        <div style={{
+                          display: "inline-flex", alignItems: "stretch",
+                          border: "1px solid var(--lyra-color-border-soft)",
+                          borderRadius: "var(--radius-lg)",
+                          overflow: "hidden",
+                          background: "var(--lyra-color-bg-surface-base)",
+                        }}>
+                          {[
+                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
+                            { val: "digital", label: "Digital", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg> },
+                          ].map((opt, i) => {
+                            const sel = c.surveyChannel === opt.val;
+                            return (
+                              <button key={opt.val} type="button"
+                                onClick={() => { set("surveyChannel", opt.val); if (opt.val === "voice") set("surveyDigitalChannels", ""); }}
+                                style={{
+                                  display: "flex", alignItems: "center", gap: "var(--space-2)",
+                                  padding: "8px 20px",
+                                  background: sel ? "var(--lyra-color-bg-active-subtle)" : "transparent",
+                                  color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-default)",
+                                  font: sel ? "500 14px/20px var(--font-sans)" : "400 14px/20px var(--font-sans)",
+                                  border: "none",
+                                  borderLeft: i > 0 ? "1px solid var(--lyra-color-border-soft)" : "none",
+                                  cursor: "pointer", outline: "none",
+                                  transition: "background 120ms, color 120ms",
+                                  whiteSpace: "nowrap",
+                                }}>
+                                <span style={{ color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-action)", display: "flex" }}>{opt.icon}</span>
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Digital sub-channels — radio with icons, shown when Digital selected */}
+                        {c.surveyChannel === "digital" && (
+                          <div style={{ marginTop: "var(--space-4)" }}>
+                            <label className="field-label" style={{ marginBottom: "var(--space-3)", display: "block" }}>Digital channel<span className="req">*</span></label>
+                            <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--space-6)" }}>
+                              {[
+                                { val: "SMS", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 2h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4l-3 3V3a1 1 0 0 1 1-1z"/></svg> },
+                                { val: "Chat", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H2a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h3l3 3 3-3h3a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg> },
+                                { val: "WhatsApp", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M5.5 5.5c.3-.7 1.2-1 1.8-.5l.7.7c.3.3.3.8 0 1.1l-.4.4c.4.8 1.2 1.5 2 2l.4-.4c.3-.3.8-.3 1.1 0l.7.7c.5.6.2 1.5-.5 1.8C9 12.3 4.7 8 5.5 5.5z"/></svg> },
+                                { val: "FB Messenger", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="8" r="7"/><path d="M4 9.5l2.5-3 2 1.5 2.5-3"/></svg> },
+                                { val: "Apple Business", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11.5 2A2.5 2.5 0 0 1 14 4.5v7A2.5 2.5 0 0 1 11.5 14h-7A2.5 2.5 0 0 1 2 11.5v-7A2.5 2.5 0 0 1 4.5 2h7zM8 5a3 3 0 1 0 0 6A3 3 0 0 0 8 5z"/></svg> },
+                              ].map(({ val: ch, icon }) => {
+                                const sel = c.surveyDigitalChannels === ch;
+                                const toggle = () => set("surveyDigitalChannels", sel ? "" : ch);
+                                return (
+                                  <label key={ch} onClick={toggle} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
+                                    <span style={{
+                                      display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                      width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+                                      border: sel ? "5px solid var(--lyra-brand-600)" : "1.5px solid var(--lyra-color-border-medium)",
+                                      background: "var(--lyra-color-bg-field)",
+                                      transition: "border 120ms",
+                                    }}/>
+                                    <span style={{ color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--lyra-color-fg-action)", display: "flex" }}>{icon}</span>
+                                    <span style={{ font: sel ? "500 14px/20px var(--font-sans)" : "400 14px/20px var(--font-sans)", color: sel ? "var(--lyra-color-fg-active-strong)" : "var(--color-fg-default)" }}>{ch}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
                   </div>
 
                   {/* Language */}
-                  <div className="wz-form-section">
+                  <div className="wz-form-section" style={{ marginTop: "38px" }}>
                     <FieldRow label="Language">
                       <label className="lyra-check disabled" style={{ pointerEvents: "none" }}>
                         <input type="checkbox" checked readOnly disabled/>
@@ -8727,7 +8764,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   </div>
 
                   {/* Interaction Length */}
-                  <div className="wz-form-section">
+                  <div className="wz-form-section" style={{ borderTop: "1px solid var(--lyra-color-border-subtle)", paddingTop: "38px" }}>
                     <FieldRow label="Interaction Length">
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ color: "var(--color-fg-secondary)", fontSize: 13, flexShrink: 0 }}>Minimum</span>
@@ -8891,11 +8928,11 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   )}
                   <SRRow label="Interaction channel">{c.interactionChannel === "digital" ? "Digital" : "Voice"}</SRRow>
                   {c.interactionChannel === "digital" && (
-                    <SRRow label="Digital channel">{c.digitalChannel || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
+                    <SRRow label="Digital channel">{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
                   )}
                   <SRRow label="Survey channel">{c.surveyChannel === "digital" ? "Digital" : "Voice"}</SRRow>
                   {c.surveyChannel === "digital" && (
-                    <SRRow label="Survey digital channels">{c.surveyDigitalChannels?.length ? c.surveyDigitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
+                    <SRRow label="Survey digital channel">{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
                   )}
                   <SRRow label="Language">English (Default)</SRRow>
                   <SRRow label="Interaction Length">Minimum {c.interactionLength ?? 2} mins</SRRow>
@@ -9745,7 +9782,8 @@ function ConfigurationView({ campaign: rawC }) {
     surveyChannel: "voice",
     surveyDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
     skills: [],
-    surveyDigitalChannels: [],
+    digitalChannels: [],
+    surveyDigitalChannels: "",
     ...rawC,
   };
 
@@ -9776,11 +9814,11 @@ function ConfigurationView({ campaign: rawC }) {
         )}
         <DefRow label="Interaction channel">{c.interactionChannel === "digital" ? "Digital" : "Voice"}</DefRow>
         {c.interactionChannel === "digital" && (
-          <DefRow label="Digital channel">{c.digitalChannel || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+          <DefRow label="Digital channel">{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         )}
         <DefRow label="Survey channel">{c.surveyChannel === "digital" ? "Digital" : "Voice"}</DefRow>
         {c.surveyChannel === "digital" && (
-          <DefRow label="Survey digital channels">{c.surveyDigitalChannels?.length ? c.surveyDigitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+          <DefRow label="Survey digital channel">{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         )}
         <DefRow label="Language">English (Default)</DefRow>
         <DefRow label="Interaction Length">Minimum {c.interactionLength ?? 2} mins</DefRow>
@@ -10280,7 +10318,7 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
                 </div>
 
                 {/* Welcome Message */}
-                <div style={{ marginTop: 36, marginBottom: "var(--space-5)" }}>
+                <div style={{ marginTop: 32, marginBottom: "var(--space-5)" }}>
                   <div style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Welcome Message</div>
                   <DefRow label="Message Mode">{welcomeLabel[d.welcomeMode] || d.welcomeMode}</DefRow>
                   {d.welcomeMode !== "none" && d.welcomeMessage && (
@@ -10295,7 +10333,7 @@ function SurveyTemplateDetail({ design: initial, onBack, onEdit }) {
                 </div>
 
                 {/* Rating Format */}
-                <div style={{ marginTop: 36, marginBottom: "var(--space-5)" }}>
+                <div style={{ marginTop: 32, marginBottom: "var(--space-5)" }}>
                   <div style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "var(--space-1)" }}>Rating Format</div>
                   <DefRow label="Display Style">{d.displayStyle}</DefRow>
                   {d.listPickerLabel && <DefRow label="List Picker Label">{d.listPickerLabel}</DefRow>}
