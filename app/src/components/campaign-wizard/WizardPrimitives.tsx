@@ -9,7 +9,8 @@ export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: 
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       style={{
-        width: 36, height: 20, borderRadius: 9999, border: 'none', cursor: 'pointer',
+        display: 'inline-flex', alignItems: 'center',
+        width: 44, height: 24, borderRadius: 9999, border: 'none', cursor: 'pointer',
         background: checked ? 'var(--lyra-brand-600)' : 'var(--lyra-slate-300)',
         position: 'relative', flexShrink: 0, transition: 'background 0.2s',
         padding: 0,
@@ -17,11 +18,18 @@ export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: 
     >
       <span style={{
         position: 'absolute', top: 2,
-        left: checked ? 18 : 2,
-        width: 16, height: 16, borderRadius: '50%',
+        left: checked ? 22 : 2,
+        width: 20, height: 20, borderRadius: '50%',
         background: '#fff', transition: 'left 0.2s',
         boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-      }} />
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {checked ? (
+          <Check size={12} strokeWidth={2.5} color="var(--lyra-brand-600)" />
+        ) : (
+          <span style={{ width: 10, height: 2, borderRadius: 1, background: 'var(--lyra-slate-400)' }} />
+        )}
+      </span>
     </button>
   )
 }
@@ -174,6 +182,10 @@ export function FiTimePicker({
 
 /* ── SurveyingDays ── */
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+export const DAY_LABELS: Record<string, string> = {
+  Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday',
+  Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday',
+}
 export function SurveyingDays({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
   function toggle(day: string) {
     onChange(value.includes(day) ? value.filter(d => d !== day) : [...value, day])
@@ -187,7 +199,7 @@ export function SurveyingDays({ value, onChange }: { value: string[]; onChange: 
             key={day}
             onClick={() => toggle(day)}
             style={{
-              width: 48, height: 36, borderRadius: 'var(--radius-sm)',
+              height: 36, padding: '0 12px', borderRadius: 'var(--radius-sm)',
               border: `1.5px solid ${active ? 'var(--lyra-brand-600)' : 'var(--lyra-color-border-soft)'}`,
               background: active ? 'var(--lyra-color-bg-active-subtle)' : 'var(--lyra-color-bg-surface-base)',
               color: active ? 'var(--lyra-color-fg-active-strong)' : 'var(--lyra-color-fg-secondary)',
@@ -195,7 +207,7 @@ export function SurveyingDays({ value, onChange }: { value: string[]; onChange: 
               cursor: 'pointer', transition: 'all 0.15s',
             }}
           >
-            {day}
+            {DAY_LABELS[day]}
           </button>
         )
       })}

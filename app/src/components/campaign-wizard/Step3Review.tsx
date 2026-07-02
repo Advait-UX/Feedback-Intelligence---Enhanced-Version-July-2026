@@ -2,6 +2,7 @@ import React from 'react'
 import type { WizardCampaign } from '../../lib/campaignWizard'
 import { SURVEY_DESIGNS } from '../../lib/campaignWizard'
 import { Edit2 } from 'lucide-react'
+import { DAY_LABELS } from './WizardPrimitives'
 
 interface Props {
   c: WizardCampaign
@@ -71,7 +72,7 @@ export function Step3Review({ c, isEditing, onGoToStep }: Props) {
         <SRRow label="Active Date Range">{dateRange}</SRRow>
         <SRRow label="Start Time">{c.startTime || <Req />}</SRRow>
         <SRRow label="End Time">{c.endTime || <Req />}</SRRow>
-        <SRRow label="Surveying Days">{c.surveyDays.length ? c.surveyDays.join(', ') : <Req />}</SRRow>
+        <SRRow label="Surveying Days">{c.surveyDays.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(', ') : <Req />}</SRRow>
         <SRRow label="Agent Selection">{c.agentMode === 'skills' ? 'By skills' : 'By teams / groups'}</SRRow>
         {c.agentMode === 'teams' && <>
           <SRRow label="Teams">{c.queues.length ? truncateList(c.queues) : <Req />}</SRRow>

@@ -7,6 +7,7 @@ import { Step0Identity } from './Step0Identity'
 import { Step1Suppression } from './Step1Suppression'
 import { Step2Template } from './Step2Template'
 import { Step3Review } from './Step3Review'
+import { DAY_LABELS } from './WizardPrimitives'
 
 interface Props {
   editCampaign?: Partial<WizardCampaign> & { name: string }
@@ -149,7 +150,7 @@ export function CampaignWizard({ editCampaign, onCancel, onSave }: Props) {
               </div>
               <div>
                 <div className="wz-summary-row-label">Surveying Days</div>
-                <div className="wz-summary-row-value">{c.surveyDays.length ? c.surveyDays.join(', ') : 'Not set'}</div>
+                <div className="wz-summary-row-value">{c.surveyDays.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(', ') : 'Not set'}</div>
               </div>
             </div>
           </div>

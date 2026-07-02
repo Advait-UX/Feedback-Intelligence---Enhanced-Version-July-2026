@@ -552,8 +552,8 @@ select.fi-input {
   font-family: var(--font-sans); font-size: 12px; font-weight: 600; flex-shrink: 0;
 }
 .sr-section-title { font: var(--text-h-sm); font-weight: 500; color: var(--color-fg-default); }
-.sr-section-body { padding: var(--space-1) var(--space-4) var(--space-3); }
-.sr-row { display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-2) 0; font-family: var(--font-sans); font-size: 14px; line-height: 20px; }
+.sr-section-body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-3); }
+.sr-row { display: flex; align-items: flex-start; gap: var(--space-4); font-family: var(--font-sans); font-size: 14px; line-height: 20px; }
 .sr-row-label { flex: 0 0 160px; font-weight: 500; color: var(--color-fg-secondary); font-size: 13px; }
 .sr-row-value { flex: 1; color: var(--color-fg-default); }
 
@@ -1077,7 +1077,7 @@ select.fi-input {
 /* Sticky summary rail — always visible, aligned to wizard bar bottom */
 .wz-summary-rail {
   flex-shrink: 0;
-  width: 280px;
+  width: 340px;
   padding: var(--space-8) var(--space-6) var(--space-6) 0; /* 32px top aligns with section header */
   overflow-y: auto;
   align-self: stretch;
@@ -1188,7 +1188,7 @@ select.fi-input {
   background: var(--color-bg-canvas);
 }
 .detail-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-3); }
-.detail-sidebar { flex: 0 0 280px; }
+.detail-sidebar { flex: 0 0 340px; }
 
 /* ── Campaign Summary sidebar card ───────────────────────────────────── */
 .detail-summary-card {
@@ -1259,10 +1259,10 @@ select.fi-input {
 .cfg-group-title { flex: 1; font: var(--text-h-sm); font-weight: 500; color: var(--color-fg-default); letter-spacing: -0.01rem; }
 .cfg-group-chev { width: 16px; height: 16px; color: var(--color-fg-secondary); transition: transform 0.15s; flex-shrink: 0; }
 .cfg-group--closed .cfg-group-chev { transform: rotate(-90deg); }
-.cfg-group-body { padding: var(--space-1) var(--space-5) var(--space-4); }
+.cfg-group-body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-3); }
 
 /* ── DefRow ─────────────────────────────────────────────────────────── */
-.def-row { display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-3) 0; font-family: var(--font-sans); font-size: 14px; line-height: 20px; color: var(--color-fg-default); }
+.def-row { display: flex; align-items: flex-start; gap: var(--space-4); font-family: var(--font-sans); font-size: 14px; line-height: 20px; color: var(--color-fg-default); }
 .def-row-label { flex: 0 0 200px; font-weight: 400; color: var(--color-fg-secondary); font-size: 14px; }
 .def-row-value { flex: 1; font-weight: 400; color: var(--color-fg-default); }
 
@@ -7557,18 +7557,18 @@ const DEFAULT_CAMPAIGN = {
   recentDays: 30,
   suppressInternal: true,
 
-  allDay: false,
-  startTime: "",
-  endTime: "",
+  allDay: true,
+  startTime: "00:00",
+  endTime: "23:59",
   surveyDays: ["Mon", "Tue", "Wed", "Thu", "Fri"],
 
   agentMode: "teams",
   skills: [],
 
-  interactionChannel: "voice",
+  interactionChannel: "digital",
   digitalChannels: [],
 
-  surveyChannel: "voice",
+  surveyChannel: "digital",
   surveyDigitalChannels: "",
 
   triggerEvent: "Post-digital interaction",
@@ -7617,12 +7617,37 @@ function Segmented({ options, value, onChange, disabled = [] }) {
 
 function Toggle({ checked, onChange, label }) {
   return (
-    <label className="switch-row">
-      <span className="switch">
-        <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}/>
-        <span className="slider"/>
+    <label style={{ display: "inline-flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
+      <span
+        role="switch"
+        aria-checked={!!checked}
+        onClick={() => onChange(!checked)}
+        style={{
+          display: "inline-flex", alignItems: "center",
+          width: 44, height: 24, borderRadius: "var(--radius-full)",
+          background: checked ? "var(--lyra-color-bg-primary)" : "var(--lyra-slate-300)",
+          transition: "background 160ms",
+          position: "relative", cursor: "pointer", flexShrink: 0,
+        }}>
+        <span style={{
+          position: "absolute",
+          left: checked ? 22 : 2,
+          top: 2,
+          width: 20, height: 20,
+          borderRadius: "var(--radius-full)",
+          background: "#fff",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          transition: "left 160ms",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {checked ? (
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-color-bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>
+          ) : (
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-slate-400)" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="8" x2="13" y2="8"/></svg>
+          )}
+        </span>
       </span>
-      {label ? <span>{label}</span> : null}
+      {label ? <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>{label}</span> : null}
     </label>
   );
 }
@@ -8072,11 +8097,11 @@ function FiTimePicker({ value, onChange, disabled, error, minTime, maxTime }) {
       {open && !disabled && filtered.length > 0 && (() => {
         /* Group slots into time-of-day bands */
         const GROUPS = [
-          { label: "Midnight", icon: "🌑", range: [0, 5] },
-          { label: "Morning",  icon: "🌅", range: [5, 12] },
-          { label: "Afternoon",icon: "☀️",  range: [12, 17] },
-          { label: "Evening",  icon: "🌇", range: [17, 21] },
-          { label: "Night",    icon: "🌙", range: [21, 24] },
+          { label: "Midnight", hour: 0,  range: [0, 5] },
+          { label: "Morning",  hour: 5,  range: [5, 12] },
+          { label: "Afternoon",hour: 12, range: [12, 17] },
+          { label: "Evening",  hour: 17, range: [17, 21] },
+          { label: "Night",    hour: 21, range: [21, 24] },
         ];
         const grouped = GROUPS.map(g => ({
           ...g,
@@ -8101,7 +8126,7 @@ function FiTimePicker({ value, onChange, disabled, error, minTime, maxTime }) {
               <div key={group.label}>
                 {/* Group heading */}
                 <div style={{ padding: gi === 0 ? "6px 12px 4px" : "10px 12px 4px", font: "500 11px/16px var(--font-sans)", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--lyra-color-fg-secondary, rgba(0,0,0,0.6))", display: "flex", alignItems: "center", gap: 5 }}>
-                  <span>{group.icon}</span>{group.label}
+                  <TodDot hour={group.hour} />{group.label}
                 </div>
                 {group.slots.map(slot => {
                   const slotMins = toMins(slot);
@@ -8143,6 +8168,21 @@ function FiTimePicker({ value, onChange, disabled, error, minTime, maxTime }) {
 }
 
 /* ── Surveying Days selector ─────────────────────────────────────────────── */
+const DAY_LABELS = { Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday", Sun: "Sunday" };
+
+/* ── Time-of-day status dot ───────────────────────────────────────────── */
+const TOD_LABEL = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
+const TOD_DOT_COLOR = h => h < 5 ? "var(--lyra-slate-400, #a8b3bb)"
+  : h < 12 ? "var(--lyra-yellow-500, #f8a10a)"
+  : h < 17 ? "var(--lyra-orange-500, #ec7000)"
+  : h < 21 ? "var(--lyra-purple-500, #7856ba)"
+  : "var(--lyra-brand-500, #3d81e7)";
+function TodDot({ hour }) {
+  return <span aria-hidden="true" style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: TOD_DOT_COLOR(hour), flexShrink: 0 }} />;
+}
+function TodLabel({ hour }) {
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><TodDot hour={hour} />{TOD_LABEL(hour)}</span>;
+}
 function SurveyingDays({ value = [], onChange, disabled }) {
   const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   function toggle(day) {
@@ -8161,7 +8201,7 @@ function SurveyingDays({ value = [], onChange, disabled }) {
             disabled={disabled}
             style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              width: 40, height: 36,
+              height: 36, padding: "0 12px",
               font: "500 13px/16px var(--font-sans)",
               borderRadius: "var(--radius-sm, 6px)",
               border: active
@@ -8181,7 +8221,7 @@ function SurveyingDays({ value = [], onChange, disabled }) {
             onMouseEnter={e => { if (!active && !disabled) e.currentTarget.style.background = "var(--lyra-color-state-bg-hover-opacity, rgba(0,0,0,0.04))"; }}
             onMouseLeave={e => { if (!active && !disabled) e.currentTarget.style.background = "var(--lyra-color-bg-field, #fff)"; }}
           >
-            {day}
+            {DAY_LABELS[day]}
           </button>
         );
       })}
@@ -8220,7 +8260,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const SPECIAL_CHARS_RE = /[\\\/!+<>?#&,%"]/;
   const isEditing = !!editCampaign;
   const agentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && (c.allDay || (c.startTime && c.endTime)) && c.surveyDays?.length);
+  const digitalChannelsValid = c.interactionChannel !== "digital" || !!(c.digitalChannels?.length);
+  const surveyDigitalChannelValid = c.surveyChannel !== "digital" || !!c.surveyDigitalChannels;
+  const step0Valid = isEditing || !!(c.name && !SPECIAL_CHARS_RE.test(c.name) && c.startDate && (c.ongoing || c.endDate) && agentValid && (c.allDay || (c.startTime && c.endTime)) && c.surveyDays?.length && digitalChannelsValid && surveyDigitalChannelValid);
   const step2Valid = isEditing || !!(c.surveyDesignId);
 
   const ALL_STEPS = [
@@ -8345,7 +8387,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
   const canDraft    = !!(c.name && datesValid);
   const canActivate = !!(c.name && c.queues?.length && datesValid);
   const reviewAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId);
+  const reviewMissingRequired = !isEditing && (!c.name || !reviewAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId || !digitalChannelsValid || !surveyDigitalChannelValid);
 
   return (
     <div className="pane" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -8445,6 +8487,8 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const startTimeErr  = showErr && !c.startTime;
             const endTimeErr    = showErr && !c.endTime;
             const surveyDaysErr = showErr && !(c.surveyDays?.length);
+            const digitalChannelsErr = showErr && c.interactionChannel === "digital" && !(c.digitalChannels?.length);
+            const surveyDigitalChannelErr = showErr && c.surveyChannel === "digital" && !c.surveyDigitalChannels;
             const nameMsg = nameBlankErr ? "Required" : nameSpecialErr ? "Only alphanumeric characters are allowed" : "";
             const nameCounterRed = nameVal.length >= 50;
             return <div className="wz-step-content">
@@ -8504,7 +8548,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Survey Hours</span>
                       <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
-                        <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>All Day</span>
                         <span
                           role="switch"
                           aria-checked={!!c.allDay}
@@ -8516,21 +8559,30 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           }}
                           style={{
                             display: "inline-flex", alignItems: "center",
-                            width: 36, height: 20, borderRadius: "var(--radius-full)",
+                            width: 44, height: 24, borderRadius: "var(--radius-full)",
                             background: c.allDay ? "var(--lyra-color-bg-primary)" : "var(--lyra-slate-300)",
                             transition: "background 160ms",
                             position: "relative", cursor: "pointer", flexShrink: 0,
                           }}>
                           <span style={{
                             position: "absolute",
-                            left: c.allDay ? 18 : 2,
-                            width: 16, height: 16,
+                            left: c.allDay ? 22 : 2,
+                            top: 2,
+                            width: 20, height: 20,
                             borderRadius: "var(--radius-full)",
                             background: "#fff",
                             boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                             transition: "left 160ms",
-                          }}/>
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                          }}>
+                            {c.allDay ? (
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-color-bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>
+                            ) : (
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-slate-400)" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="8" x2="13" y2="8"/></svg>
+                            )}
+                          </span>
                         </span>
+                        <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>All Day (24hrs)</span>
                       </label>
                     </div>
                     <div className="field-grid-2" style={{ marginTop: "var(--space-2)", borderTop: "none" }}>
@@ -8563,23 +8615,20 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       const hrs = Math.floor(totalMins / 60);
                       const mins = totalMins % 60;
                       const duration = hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`;
-                      const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
-                      const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
-                      const startLabel = `${todIcon(sh)} ${tod(sh)}`;
-                      const endLabel = `${todIcon(eh)} ${tod(eh)}`;
-                      const sameLabel = startLabel === endLabel;
+                      const sameLabel = TOD_LABEL(sh) === TOD_LABEL(eh);
                       return (
-                        <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "8px 12px", background: "var(--lyra-color-bg-surface-shell)", borderRadius: "var(--radius-md)", border: "1px solid var(--lyra-color-border-subtle)" }}>
+                        <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "8px 12px", background: "var(--lyra-color-bg-surface-shell)", borderRadius: "var(--radius-md)" }}>
                           <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>
                             <circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10.5 9.5"/>
                           </svg>
                           <span style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
                             <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.startTime}</strong>
-                            <span style={{ fontSize: 12 }}>{startLabel}</span>
+                            <span style={{ fontSize: 12 }}><TodLabel hour={sh} /></span>
                             <svg viewBox="0 0 16 6" width="20" height="6" fill="none" style={{ flexShrink: 0, color: "var(--lyra-color-fg-disabled)" }}><path d="M0 3h14M11 1l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.endTime}</strong>
-                            {!sameLabel && <span style={{ fontSize: 12 }}>{endLabel}</span>}
-                            <span style={{ marginLeft: 4, padding: "2px 8px", background: "var(--lyra-color-bg-active-subtle)", color: "var(--lyra-color-fg-active-strong)", borderRadius: "var(--radius-full)", font: "500 12px/16px var(--font-sans)" }}>{duration}</span>
+                            {!sameLabel && <span style={{ fontSize: 12 }}><TodLabel hour={eh} /></span>}
+                            <span style={{ width: 1, height: 12, background: "var(--lyra-color-border-soft)", flexShrink: 0 }}/>
+                            <span style={{ fontSize: 12, color: "var(--lyra-color-fg-default)" }}>{duration}</span>
                           </span>
                         </div>
                       );
@@ -8660,12 +8709,12 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           </span></div>}
                         </div>
                         <div className="field-cell">
-                          <label className="field-label">Group</label>
+                          <label className="field-label">Groups</label>
                           <MultiSelectField
                             options={["North America", "EMEA", "APAC"]}
                             value={c.teams || []}
                             onChange={v => set("teams", v)}
-                            placeholder="Select Group"
+                            placeholder="Select groups"
                           />
                         </div>
                       </div>
@@ -8734,8 +8783,8 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           background: "var(--lyra-color-bg-surface-base)",
                         }}>
                           {[
-                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
                             { val: "digital", label: "Digital", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg> },
+                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
                           ].map((opt, i) => {
                             const sel = c.interactionChannel === opt.val;
                             return (
@@ -8782,7 +8831,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                                     <span style={{
                                       display: "inline-flex", alignItems: "center", justifyContent: "center",
                                       width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-                                      border: checked ? "none" : "1.5px solid var(--lyra-color-border-medium)",
+                                      border: checked ? "none" : digitalChannelsErr ? "1.5px solid var(--color-status-error)" : "1.5px solid var(--lyra-color-border-medium)",
                                       background: checked ? "var(--lyra-brand-600)" : "var(--lyra-color-bg-field)",
                                       transition: "background 120ms, border 120ms",
                                     }}>
@@ -8798,6 +8847,10 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                                 );
                               })}
                             </div>
+                            {digitalChannelsErr && <div className="field-control" style={{ marginTop: "var(--space-2)" }}><span className="error-msg">
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                              Select at least one digital channel
+                            </span></div>}
                           </div>
                         )}
                       </div>
@@ -8818,8 +8871,8 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                           background: "var(--lyra-color-bg-surface-base)",
                         }}>
                           {[
-                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
                             { val: "digital", label: "Digital", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M5 14h6M8 12v2"/></svg> },
+                            { val: "voice", label: "Voice", icon: <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 2.5A.5.5 0 0 1 6 2h1a1 1 0 0 1 1 1v2a1 1 0 0 1-.6.92L6.5 6.5A8 8 0 0 0 9.5 9.5l1.08-.9A1 1 0 0 1 11.5 8.5h1.5a1 1 0 0 1 1 1v1.5c0 1.38-1.12 2-2.5 2C5.3 13 2 9.7 2 5.5c0-1.38.62-2.5 2-2.5H5.5z"/></svg> },
                           ].map((opt, i) => {
                             const sel = c.surveyChannel === opt.val;
                             return (
@@ -8863,7 +8916,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                                     <span style={{
                                       display: "inline-flex", alignItems: "center", justifyContent: "center",
                                       width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
-                                      border: sel ? "5px solid var(--lyra-brand-600)" : "1.5px solid var(--lyra-color-border-medium)",
+                                      border: sel ? "5px solid var(--lyra-brand-600)" : surveyDigitalChannelErr ? "1.5px solid var(--color-status-error)" : "1.5px solid var(--lyra-color-border-medium)",
                                       background: "var(--lyra-color-bg-field)",
                                       transition: "border 120ms",
                                     }}/>
@@ -8873,6 +8926,10 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                                 );
                               })}
                             </div>
+                            {surveyDigitalChannelErr && <div className="field-control" style={{ marginTop: "var(--space-2)" }}><span className="error-msg">
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                              Select a digital channel
+                            </span></div>}
                           </div>
                         )}
                       </div>
@@ -9010,14 +9067,16 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                 <div className="sr-section-body">{children}</div>
               </div>
             );
-            const SRRow = ({ label, children }) => (
-              <div className="sr-row">
+            const SRRow = ({ label, children, divider }) => (
+              <div className="sr-row" style={divider ? { paddingBottom: "var(--space-5)", borderBottom: "1px solid var(--lyra-color-border-subtle)" } : undefined}>
                 <div className="sr-row-label">{label}</div>
                 <div className="sr-row-value">{children || <span style={{ color: "var(--color-fg-secondary)" }}>—</span>}</div>
               </div>
             );
             const srAgentValid = c.agentMode === "skills" ? !!(c.skills?.length) : !!(c.queues?.length);
-            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId);
+            const srDigitalChannelsValid = c.interactionChannel !== "digital" || !!(c.digitalChannels?.length);
+            const srSurveyDigitalChannelValid = c.surveyChannel !== "digital" || !!c.surveyDigitalChannels;
+            const missingRequired = !isEditing && (!c.name || !srAgentValid || !c.startDate || (!c.ongoing && !c.endDate) || (!c.allDay && !c.startTime) || !(c.surveyDays?.length) || !c.surveyDesignId || !srDigitalChannelsValid || !srSurveyDigitalChannelValid);
             return (
               <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
                 {missingRequired && (
@@ -9036,19 +9095,17 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
                 <SRSection title="Campaign, Identity &amp; Scope" num={1}>
                   <SRRow label="Campaign Name">{c.name || <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
-                  {c.description && <SRRow label="Description">{c.description}</SRRow>}
+                  {c.description && <SRRow label="Description" divider>{c.description}</SRRow>}
                   <SRRow label="Active Date Range">
                     {c.startDate
                       ? (c.ongoing ? `Ongoing from ${c.startDate}` : c.endDate ? `${c.startDate} — ${c.endDate}` : <span style={{ color: "var(--color-status-error)" }}>End date required</span>)
                       : <span style={{ color: "var(--color-status-error)" }}>Required</span>}
                   </SRRow>
                   <SRRow label="Survey Hours">{(() => {
-                    const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
-                    const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
                     if (c.allDay) return (
                       <span>
-                        <span style={{ fontWeight: 500 }}>All Day</span>
-                        <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 59 min</span>
+                        <span style={{ fontWeight: 500 }}>All Day (24hrs)</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 4, font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}><TodLabel hour={0} /> to <TodLabel hour={23} /> · 23 hr 59 min</span>
                       </span>
                     );
                     if (!c.startTime) return <span style={{ color: "var(--color-status-error)" }}>Required</span>;
@@ -9057,28 +9114,28 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     return (
                       <span>
                         <span style={{ fontWeight: 500 }}>{c.startTime} – {c.endTime}</span>
-                        <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>{todIcon(sh)} {tod(sh)} to {todIcon(eh)} {tod(eh)}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: 4, font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}><TodLabel hour={sh} /> to <TodLabel hour={eh} /></span>
                       </span>
                     );
                   })()}</SRRow>
-                  <SRRow label="Surveying Days">{c.surveyDays?.length ? c.surveyDays.join(", ") : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
+                  <SRRow label="Surveying Days" divider>{c.surveyDays?.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(", ") : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
                   <SRRow label="Agent selection">{c.agentMode === "skills" ? "By skills" : "By teams / groups"}</SRRow>
                   {c.agentMode === "teams" && <>
                     <SRRow label="Teams">{c.queues?.length ? truncateList(c.queues) : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
-                    <SRRow label="Groups">{truncateList(c.teams) || "All groups"}</SRRow>
+                    <SRRow label="Groups" divider>{truncateList(c.teams) || "All groups"}</SRRow>
                   </>}
                   {c.agentMode === "skills" && (
-                    <SRRow label="Skills">{c.skills?.length ? truncateList(c.skills) : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
+                    <SRRow label="Skills" divider>{c.skills?.length ? truncateList(c.skills) : <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
                   )}
                   <SRRow label="Interaction channel">{c.interactionChannel === "digital" ? "Digital" : "Voice"}</SRRow>
                   {c.interactionChannel === "digital" && (
-                    <SRRow label="Digital channel">{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
+                    <SRRow label="Interaction digital channel" divider>{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
                   )}
                   <SRRow label="Survey channel">{c.surveyChannel === "digital" ? "Digital" : "Voice"}</SRRow>
                   {c.surveyChannel === "digital" && (
-                    <SRRow label="Survey digital channel">{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
+                    <SRRow label="Survey digital channel" divider>{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</SRRow>
                   )}
-                  <SRRow label="Language">English (Default)</SRRow>
+                  <SRRow label="Language" divider>English (Default)</SRRow>
                   <SRRow label="Interaction Length">Minimum {c.interactionLength ?? 2} mins</SRRow>
                 </SRSection>
 
@@ -9113,8 +9170,12 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
         <span style={{ flex: 1 }}/>
         {activeStep < 4 ? (
           <>
-            <button className="btn" disabled={!canDraft} onClick={() => onSave({ ...c, status: "draft" })}>Save as draft</button>
-            <div style={{ width: 1, height: 20, background: "var(--color-border-soft)", margin: "0 var(--space-1)" }}/>
+            {activeStep === 3 && (
+              <>
+                <button className="btn" disabled={!canDraft} onClick={() => onSave({ ...c, status: "draft" })}>Save as draft</button>
+                <div style={{ width: 1, height: 20, background: "var(--color-border-soft)", margin: "0 var(--space-1)" }}/>
+              </>
+            )}
             {activeStep > 0 && (
               <button className="btn" onClick={goBack}>← Back</button>
             )}
@@ -9571,27 +9632,25 @@ function FloatingMetrics({ campaign: c }) {
     ? (c.ongoing ? `${c.startDate} — Ongoing` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
     : "Not set";
 
-  const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
-  const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
   const surveyHours = (() => {
-    if (c.allDay) return { main: "00:00 – 23:59 · 23 hr 59 min", sub: "🌑 Midnight to 🌙 Night · All Day" };
-    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
+    if (c.allDay) return { isHours: true, startTime: "00:00", endTime: "23:59", startHour: 0, endHour: 23, duration: "23 hr 59 min" };
+    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set" };
     const totalMins = (parseInt(c.endTime) * 60 + parseInt(c.endTime.split(":")[1])) - (parseInt(c.startTime) * 60 + parseInt(c.startTime.split(":")[1]));
     const hrs = Math.floor(totalMins / 60), mins = totalMins % 60;
     const duration = totalMins > 0 ? (hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`) : null;
-    return {
-      main: `${c.startTime} – ${c.endTime}${duration ? ` · ${duration}` : ""}`,
-      sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}`,
-    };
+    return { isHours: true, startTime: c.startTime, endTime: c.endTime, startHour: sh, endHour: eh, duration };
   })();
-  const surveyDays  = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
+  const surveyDays  = c.surveyDays?.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(", ") : "Not set";
+  const survey = SURVEY_DESIGNS?.find(s => s.id === c.surveyDesignId);
+  const surveyTemplate = survey ? survey.name : "Not set";
 
   const rows = [
     { icon: "calendar", label: "Active Date Range", value: dateRange },
     { icon: "clock",    label: "Survey Hours",      value: surveyHours },
     { icon: "days",     label: "Surveying Days",    value: surveyDays },
+    { icon: "survey",   label: "Survey Template",   value: surveyTemplate },
   ];
 
   return (
@@ -9610,9 +9669,23 @@ function FloatingMetrics({ campaign: c }) {
             </div>
             <div className="summary-card-row-body">
               <div className="summary-card-label">{r.label}</div>
-              <div className="summary-card-value">{typeof r.value === "object" && r.value !== null ? r.value.main : r.value}</div>
-              {typeof r.value === "object" && r.value !== null && r.value.sub && (
-                <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>{r.value.sub}</div>
+              {r.value?.isHours ? (
+                <>
+                  <div className="summary-card-value" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap", whiteSpace: "nowrap" }}>
+                    <span>{r.value.startTime}</span>
+                    <TodDot hour={r.value.startHour} /><span style={{ font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>{TOD_LABEL(r.value.startHour)}</span>
+                    <svg viewBox="0 0 16 6" width="16" height="6" fill="none" style={{ flexShrink: 0, color: "var(--lyra-color-fg-disabled)" }}><path d="M0 3h14M11 1l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <span>{r.value.endTime}</span>
+                    <TodDot hour={r.value.endHour} /><span style={{ font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>{TOD_LABEL(r.value.endHour)}</span>
+                  </div>
+                  {r.value.duration && (
+                    <div style={{ marginTop: 2 }}>
+                      <span style={{ display: "inline-block", padding: "2px 8px", background: "var(--lyra-color-bg-active-subtle)", color: "var(--lyra-color-fg-active-strong)", borderRadius: "var(--radius-full)", font: "500 12px/16px var(--font-sans)" }}>{r.value.duration}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="summary-card-value">{r.value?.main ?? r.value}</div>
               )}
             </div>
           </div>
@@ -9856,26 +9929,24 @@ function CampaignDetail({ campaign, onBack, onEdit }) {
 /* Campaign Summary sidebar card */
 function CampaignSummaryCard({ campaign: c }) {
   /* ── Config info ── */
-  const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
-  const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
   const sh = c.startTime ? parseInt(c.startTime) : null;
   const eh = c.endTime ? parseInt(c.endTime) : null;
   const surveyHoursValue = (() => {
-    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set", sub: null };
+    if (c.allDay) return { isHours: true, startTime: "00:00", endTime: "23:59", startHour: 0, endHour: 23, duration: "23 hr 59 min" };
+    if (!c.startTime || !c.endTime) return { main: c.startTime || "Not set" };
     const totalMins = (sh * 60 + parseInt(c.startTime.split(":")[1]));
     const endMins = (eh * 60 + parseInt(c.endTime.split(":")[1]));
     const diff = endMins - totalMins;
     const hrs = Math.floor(diff / 60), mins = diff % 60;
     const duration = diff > 0 ? (hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`) : null;
-    return {
-      main: `${c.startTime} – ${c.endTime}${duration ? ` · ${duration}` : ""}`,
-      sub: `${todIcon(sh)} ${tod(sh)} to ${todIcon(eh)} ${tod(eh)}`,
-    };
+    return { isHours: true, startTime: c.startTime, endTime: c.endTime, startHour: sh, endHour: eh, duration };
   })();
-  const surveyDays = c.surveyDays?.length ? c.surveyDays.join(", ") : "Not set";
+  const surveyDays = c.surveyDays?.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(", ") : "Not set";
   const dateRange = c.startDate
     ? (c.ongoing ? `Ongoing from ${c.startDate}` : c.endDate ? `${c.startDate} — ${c.endDate}` : `${c.startDate} — No end date`)
     : c.endDate ? `${c.created} — ${c.endDate}` : `Ongoing from ${c.created}`;
+  const survey = (window.SEED_DESIGNS || SURVEY_DESIGNS)?.find(s => s.id === c.surveyDesignId);
+  const surveyTemplate = survey ? survey.name : "Not set";
 
   const configRows = [
     {
@@ -9890,6 +9961,10 @@ function CampaignSummaryCard({ campaign: c }) {
       icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><line x1="5" y1="1.5" x2="5" y2="4.5"/><line x1="11" y1="1.5" x2="11" y2="4.5"/><line x1="2" y1="7" x2="14" y2="7"/><line x1="5" y1="10" x2="5" y2="10"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="11" y1="10" x2="11" y2="10"/></svg>,
       label: "Surveying Days", value: surveyDays,
     },
+    {
+      icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="1.5" width="10" height="13" rx="1.5"/><line x1="6" y1="5" x2="10" y2="5"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="11" x2="8.5" y2="11"/></svg>,
+      label: "Survey Template", value: surveyTemplate,
+    },
   ];
 
   const rows = configRows;
@@ -9903,9 +9978,23 @@ function CampaignSummaryCard({ campaign: c }) {
             <div className="summary-card-icon">{r.icon}</div>
             <div className="summary-card-row-body">
               <div className="summary-card-label">{r.label}</div>
-              <div className="summary-card-value">{typeof r.value === "object" && r.value !== null ? r.value.main : r.value}</div>
-              {typeof r.value === "object" && r.value !== null && r.value.sub && (
-                <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>{r.value.sub}</div>
+              {r.value?.isHours ? (
+                <>
+                  <div className="summary-card-value" style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "nowrap", whiteSpace: "nowrap" }}>
+                    <span>{r.value.startTime}</span>
+                    <TodDot hour={r.value.startHour} /><span style={{ font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>{TOD_LABEL(r.value.startHour)}</span>
+                    <svg viewBox="0 0 16 6" width="16" height="6" fill="none" style={{ flexShrink: 0, color: "var(--lyra-color-fg-disabled)" }}><path d="M0 3h14M11 1l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <span>{r.value.endTime}</span>
+                    <TodDot hour={r.value.endHour} /><span style={{ font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>{TOD_LABEL(r.value.endHour)}</span>
+                  </div>
+                  {r.value.duration && (
+                    <div style={{ marginTop: 2 }}>
+                      <span style={{ display: "inline-block", padding: "2px 8px", background: "var(--lyra-color-bg-active-subtle)", color: "var(--lyra-color-fg-active-strong)", borderRadius: "var(--radius-full)", font: "500 12px/16px var(--font-sans)" }}>{r.value.duration}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="summary-card-value">{r.value?.main ?? r.value}</div>
               )}
             </div>
           </div>
@@ -9915,9 +10004,9 @@ function CampaignSummaryCard({ campaign: c }) {
   );
 }
 
-function DefRow({ label, tooltip, children }) {
+function DefRow({ label, tooltip, children, divider }) {
   return (
-    <div className="def-row">
+    <div className="def-row" style={divider ? { paddingBottom: "var(--space-5)", borderBottom: "1px solid var(--lyra-color-border-subtle)" } : undefined}>
       <div className="def-row-label" style={{ display: "flex", alignItems: "center", gap: 5 }}>
         {label}
         {tooltip && (
@@ -9979,15 +10068,13 @@ function ConfigurationView({ campaign: rawC }) {
       {/* Step 0 mirror: Template, Identity &amp; Scope */}
       <ConfigGroup num="1" title="Campaign Identity & Scope">
         <DefRow label="Campaign Name">{c.name}</DefRow>
-        {c.description && <DefRow label="Description">{c.description}</DefRow>}
+        {c.description && <DefRow label="Description" divider>{c.description}</DefRow>}
         <DefRow label="Active Date Range">{dateRange}</DefRow>
         <DefRow label="Survey Hours">{(() => {
-          const tod = h => h < 5 ? "Midnight" : h < 12 ? "Morning" : h < 17 ? "Afternoon" : h < 21 ? "Evening" : "Night";
-          const todIcon = h => h < 5 ? "🌑" : h < 12 ? "🌅" : h < 17 ? "☀️" : h < 21 ? "🌇" : "🌙";
           if (c.allDay) return (
             <span>
-              <span style={{ fontWeight: 500 }}>All Day</span>
-              <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>🌑 Midnight to 🌙 Night · 23 hr 59 min</span>
+              <span style={{ fontWeight: 500 }}>All Day (24hrs)</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 4, font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}><TodLabel hour={0} /> to <TodLabel hour={23} /> · 23 hr 59 min</span>
             </span>
           );
           if (!c.startTime && !c.endTime) return <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>;
@@ -9996,28 +10083,28 @@ function ConfigurationView({ campaign: rawC }) {
           return (
             <span>
               <span style={{ fontWeight: 500 }}>{c.startTime} – {c.endTime}</span>
-              <span style={{ display: "block", font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>{todIcon(sh)} {tod(sh)} to {todIcon(eh)} {tod(eh)}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: 4, font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}><TodLabel hour={sh} /> to <TodLabel hour={eh} /></span>
             </span>
           );
         })()}</DefRow>
-        <DefRow label="Surveying Days">{c.surveyDays?.length ? c.surveyDays.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+        <DefRow label="Surveying Days" divider>{c.surveyDays?.length ? c.surveyDays.map(d => DAY_LABELS[d]).join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         <DefRow label="Agent selection">{c.agentMode === "skills" ? "By skills" : "By teams / groups"}</DefRow>
         {(c.agentMode !== "skills") && <>
           <DefRow label="Teams">{c.queues?.length ? truncateList(c.queues) : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
-          <DefRow label="Groups">{truncateList(c.teams) || "All groups"}</DefRow>
+          <DefRow label="Groups" divider>{truncateList(c.teams) || "All groups"}</DefRow>
         </>}
         {c.agentMode === "skills" && (
-          <DefRow label="Skills">{c.skills?.length ? truncateList(c.skills) : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+          <DefRow label="Skills" divider>{c.skills?.length ? truncateList(c.skills) : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         )}
         <DefRow label="Interaction channel">{c.interactionChannel === "digital" ? "Digital" : "Voice"}</DefRow>
         {c.interactionChannel === "digital" && (
-          <DefRow label="Digital channel">{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+          <DefRow label="Interaction digital channel" divider>{(c.digitalChannels || []).length ? c.digitalChannels.join(", ") : <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         )}
         <DefRow label="Survey channel">{c.surveyChannel === "digital" ? "Digital" : "Voice"}</DefRow>
         {c.surveyChannel === "digital" && (
-          <DefRow label="Survey digital channel">{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
+          <DefRow label="Survey digital channel" divider>{c.surveyDigitalChannels || <span style={{ color: "var(--color-fg-secondary)" }}>Not set</span>}</DefRow>
         )}
-        <DefRow label="Language">English (Default)</DefRow>
+        <DefRow label="Language" divider>English (Default)</DefRow>
         <DefRow label="Interaction Length">Minimum {c.interactionLength ?? 2} mins</DefRow>
       </ConfigGroup>
 
@@ -11236,8 +11323,8 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
                 <div className="sr-section-body">{children}</div>
               </div>
             );
-            const SRRow = ({ label, children }) => (
-              <div className="sr-row">
+            const SRRow = ({ label, children, divider }) => (
+              <div className="sr-row" style={divider ? { paddingBottom: "var(--space-5)", borderBottom: "1px solid var(--lyra-color-border-subtle)" } : undefined}>
                 <div className="sr-row-label">{label}</div>
                 <div className="sr-row-value">{children || <span style={{ color: "var(--color-fg-secondary)" }}>—</span>}</div>
               </div>
