@@ -193,55 +193,92 @@ const DEFAULT_DESIGN = {
   realtimeAlerts: true,
 };
 
+const STANDARD_QUESTION_BANK = [
+  { id: "qb1", text: "What do you think about the speed of the responses you received?",                                                   type: "Free Text"     },
+  { id: "qb2", text: "How many times before have you contacted NICE CXone about this query?",                                              type: "Single Select" },
+  { id: "qb3", text: "Did you get in touch with us in any other way before using live chat?",                                              type: "Yes/No"        },
+  { id: "qb4", text: "How else did you contact NICE CXone with your query?",                                                               type: "Single Select" },
+  { id: "qb5", text: "What are the key pieces of feedback you'd like us to take away about your chat experience with NICE CXone?",         type: "Free Text"     },
+  { id: "qb6", text: "How likely are you to contact us again if you had a similar issue?",                                                 type: "1-5 Scale"     },
+  { id: "qb7", text: "Was the information provided clear and easy to understand?",                                                         type: "Yes/No"        },
+  { id: "qb8", text: "Which best describes the nature of your enquiry today?",                                                             type: "Single Select" },
+  { id: "qb9", text: "Is there anything else you would like to share about your experience?",                                              type: "Free Text"     },
+];
+
+function QTypeBadge({ type }) {
+  const map = {
+    "1-5 Scale":     { background: "var(--color-bg-active-subtle)",  color: "var(--color-fg-active-strong)" },
+    "Yes/No":        { background: "var(--fi-green-bg)",              color: "var(--fi-green)"               },
+    "Free Text":     { background: "var(--lyra-slate-100)",           color: "var(--lyra-slate-600)"         },
+    "Single Select": { background: "var(--fi-amber-bg)",              color: "var(--fi-amber)"               },
+  };
+  const s = map[type] || map["Free Text"];
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center",
+      padding: "2px 10px", borderRadius: "var(--radius-full)",
+      fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+      lineHeight: "16px", letterSpacing: "0.01em", whiteSpace: "nowrap",
+      background: s.background, color: s.color,
+    }}>{type}</span>
+  );
+}
+
 function CreateSurveyDesign({ onCancel, onSave, initial }) {
   const [d, setD] = React.useState(initial || DEFAULT_DESIGN);
   const set = (k, v) => setD(prev => ({ ...prev, [k]: v }));
   const isEdit = !!initial;
-  const [activeStep, setActiveStep] = React.useState(1);
 
-  // Linked campaigns: seed from any campaign whose surveyDesignId matches this design's id.
-  const initialLinkedIds = React.useMemo(() => {
-    if (!initial || !window.CAMPAIGNS) return [];
-    return window.CAMPAIGNS.filter(c => c.surveyDesignId === initial.id).map(c => c.id);
-  }, [initial]);
-  const [linkedIds, setLinkedIds] = React.useState(initialLinkedIds);
-  const toggleLink = (id) => setLinkedIds(prev =>
-    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-  );
+  /* ── Questions Mode ── */
+  const [questionMode, setQuestionMode] = React.useState("standard");
+  const [selectedQuestions, setSelectedQuestions] = React.useState([
+    { id: "sq1", text: "How do you rate your overall chat experience with us today?",                                       type: "1-5 Scale" },
+    { id: "sq2", text: "How satisfied were you with the level of effort required to resolve your question or issue?",      type: "1-5 Scale" },
+    { id: "sq3", text: "Did we fully resolve the reason(s) you got in touch with us?",                                     type: "Yes/No"    },
+  ]);
+  const [questionBankOpen, setQuestionBankOpen] = React.useState(true);
 
-  const STEPS = [
-    { n: 1, label: "Identity",         id: "dsec-1", done: !!d.name },
-    { n: 2, label: "Survey Content",   id: "dsec-2", done: !!d.defaultScaleQuestion },
-    { n: 3, label: "Delivery",         id: "dsec-3", done: true },
-    { n: 4, label: "Linked Campaigns", id: "dsec-4", done: linkedIds.length > 0 },
-  ];
+  /* ── Survey Introduction ── */
+  const [introMode, setIntroMode] = React.useState("with-optout");
 
-  function TemplateFloatingSummary() {
+  /* ── Channel Configuration ── */
+  const [digitalOpen, setDigitalOpen] = React.useState(false);
+  const [ivrOpen, setIvrOpen]         = React.useState(false);
+
+  const bankAvailable = STANDARD_QUESTION_BANK.filter(q => !selectedQuestions.find(s => s.id === q.id));
+
+  const introLabel = introMode === "with-optout"    ? "Invitation with opt out"
+                   : introMode === "without-optout" ? "Invitation without opt out"
+                   : "None";
+
+  function TemplateSummary() {
+    const modeLabel = questionMode === "standard" ? "Standard Questions"
+                    : questionMode === "ai"        ? "AI Generated"
+                    : questionMode === "hybrid"    ? "Hybrid Mode"
+                    : "Brand Reputation";
     const rows = [
-      {
-        icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="1.5" width="10" height="13" rx="1.5"/><line x1="6" y1="5" x2="10" y2="5"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="11" x2="8.5" y2="11"/></svg>,
-        label: "Name",
-        value: d.name || <span style={{ color: "var(--color-fg-disabled)", fontStyle: "italic" }}>Not set</span>,
-      },
-      {
-        icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2 11.5C2 9.5 3.5 8 5.5 8h5C12.5 8 14 9.5 14 11.5"/><circle cx="8" cy="4.5" r="2.5"/></svg>,
-        label: "Channel",
-        value: d.channel || "Digital",
-      },
-      {
-        icon: <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/></svg>,
-        label: "Survey type",
-        value: d.surveyType || "—",
-      },
+      { done: !!d.name,  label: "Template Name",       value: d.name || "—"                              },
+      { done: false,     label: "Question Mode",        value: modeLabel                                  },
+      { done: false,     label: "Question Added",       value: `${selectedQuestions.length} of 5 max`     },
+      { done: false,     label: "Survey Introduction",  value: introLabel                                 },
+      { done: false,     label: "Digital",              value: "Setup completed"                          },
+      { done: false,     label: "IVR",                  value: "Setup completed"                          },
     ];
-
     return (
       <div className="summary-card">
         <div className="summary-card-head">Template Summary</div>
         <div className="summary-card-rows">
           {rows.map((r, i) => (
             <div className="summary-card-row" key={i}>
-              <div className="summary-card-icon">{r.icon}</div>
+              <div className="summary-card-icon" style={r.done
+                ? { background: "var(--fi-green-bg)",    color: "var(--fi-green)"       }
+                : { background: "var(--lyra-slate-200)", color: "var(--lyra-slate-500)" }
+              }>
+                {r.done
+                  ? <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 5"/></svg>
+                  : <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+                }
+              </div>
               <div className="summary-card-row-body">
                 <div className="summary-card-label">{r.label}</div>
                 <div className="summary-card-value">{r.value}</div>
@@ -249,290 +286,278 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
             </div>
           ))}
         </div>
+        <div style={{ padding: "var(--space-4)" }}>
+          <button className="btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            Test on Emulator
+            <svg viewBox="0 0 16 16" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="pane" style={{ overflow: "hidden" }}>
+
+      {/* Breadcrumb */}
       <div className="crumbs">
-        <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Feedback Intelligence</a>
-        <span className="sep">/</span>
         <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Survey Templates</a>
         <span className="sep">/</span>
-        <span className="last">{isEdit ? d.name : "New Survey Template"}</span>
+        <span className="last">Create New Survey Template</span>
       </div>
 
+      {/* Page header */}
       <div className="pane-head" style={{ paddingTop: 6 }}>
-        <h1>{isEdit ? d.name : "New Survey Template"}</h1>
-        <div className="head-actions">
-          <button className="btn" onClick={onCancel}>Cancel</button>
-          <button className="btn primary" disabled={!d.name}
-            onClick={() => onSave(d)}>
-            <svg viewBox="0 0 24 24"><polyline points="4 13 10 19 20 5"/></svg>
-            {isEdit ? "Save changes" : "Save template"}
-          </button>
-        </div>
+        <h1>{isEdit ? d.name : "Create New Survey Template"}</h1>
       </div>
 
-      <div className="create-grid">
-        {/* Side TOC */}
-        <nav className="form-toc">
-          {STEPS.map(s => (
-            <div key={s.n}
-              className={`toc-item ${activeStep === s.n ? "on" : ""} ${s.done ? "done" : ""}`}
-              onClick={() => {
-                setActiveStep(s.n);
-                document.getElementById(s.id)?.scrollIntoView({ block: "start", behavior: "smooth" });
-              }}>
-              <span className="num">{s.n}</span>
-              {s.label}
-            </div>
-          ))}
-        </nav>
+      {/* Scrollable body */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+        <div className="create-grid" style={{ gridTemplateColumns: "1fr 280px" }}>
 
-        {/* Form pane */}
-        <div className="form-pane">
+          {/* Form pane */}
+          <div className="form-pane">
 
-        <FormSection num={1} title="Identity"
-          sub="Name this template so your team knows when to use it."
-          id="dsec-1" complete={!!d.name}>
-          <FieldRow label="Name" req hint="Use a name your team will recognise, e.g. 'Post-Chat CSAT'.">
-            <input className="fi-input" placeholder="Type here"
-              value={d.name} onChange={e => set("name", e.target.value)}/>
-          </FieldRow>
-          <FieldRow label="Description" hint="What this template is for and which campaigns should use it.">
-            <textarea className="fi-input"
-              placeholder="Type here"
-              value={d.description} onChange={e => set("description", e.target.value)}/>
-          </FieldRow>
-        </FormSection>
+            {/* ── Section 1: Identity ── */}
+            <FormSection num={1} title="Identity"
+              sub="Give this template a name so it can be found in campaigns"
+              id="dsec-1" complete={!!d.name}>
 
-        <FormSection num={2} title="Survey Content"
-          sub="Set the questions customers will see and how they will answer."
-          id="dsec-2" complete={!!d.defaultScaleQuestion}>
-
-          {/* Survey Channel */}
-          <FieldRow label="Survey channel" req
-            tooltip="Choose where this survey will be delivered. This affects which display options are available below."
-            hint={
-              d.channel === "Digital" ? "Survey will be delivered on digital channels like: chat, AI sessions, social & email." :
-              d.channel === "IVR"     ? "Survey will be sent after a phone call. Customers respond using their keypad." :
-                                        "Survey will be delivered on both phone and digital channels."
-            }>
-            <Segmented options={["Digital", "IVR", "Both"]}
-              value={d.channel} onChange={v => set("channel", v)}/>
-          </FieldRow>
-
-          {/* Welcome Message */}
-          <FieldRow label={`Welcome Message (the first thing customer ${d.channel === "IVR" ? "hear" : "see"} before the survey starts)`} req
-            tooltip="The opening screen before question 1. Offering an opt-out is recommended — customers who choose to respond give more honest feedback.">
-            <div className="welcome-mode-radio">
-              {(d.channel === "IVR" ? [
-                { v: "with-optout",    label: "Invitation with Opt Out",    desc: "After hearing the message, the customer can press 1 to decline." },
-                { v: "without-optout", label: "Invitation without Opt Out", desc: "The customer hears the message, then goes to the survey." },
-                { v: "none",           label: "None",                       desc: "Survey starts immediately with no introduction." },
-              ] : [
-                { v: "with-optout",    label: "Invitation with Opt Out",    desc: "Customer can read the invitation & choose to decline it." },
-                { v: "without-optout", label: "Invitation without Opt Out", desc: "Customer see the invitation & start button only." },
-                { v: "none",           label: "None",                       desc: "Survey starts immediately with no introduction." },
-              ]).map(opt => (
-                <label key={opt.v} className={`welcome-mode-option ${d.welcomeMode === opt.v ? "on" : ""}`}>
-                  <input type="radio" name="welcomeMode" value={opt.v}
-                    checked={d.welcomeMode === opt.v}
-                    onChange={() => set("welcomeMode", opt.v)}/>
-                  <span className="dot"/>
-                  <span className="body">
-                    <span className="title">{opt.label}</span>
-                    <span className="desc">{opt.desc}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-
-            {d.welcomeMode !== "none" ? (
-              <div style={{ marginTop: 12, padding: 16, borderRadius: 8, background: "var(--lyra-slate-100)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div className="kicker">Invitation Text</div>
-                  <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.welcomeMessage || "").length > 220 ? "var(--fi-amber)" : "var(--lyra-slate-400)" }}>
-                    {(d.welcomeMessage || "").length}/240
-                  </span>
+              <FieldRow label="Template Name" req>
+                <div style={{ position: "relative" }}>
+                  <input className="fi-input" placeholder="Type here" maxLength={50}
+                    value={d.name} onChange={e => set("name", e.target.value)}
+                    style={{ paddingRight: 52 }}/>
+                  <span style={{
+                    position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 400, lineHeight: "16px",
+                    color: "var(--color-fg-secondary)", pointerEvents: "none",
+                  }}>{d.name.length}/50</span>
                 </div>
-                <textarea className="fi-input" rows={3} maxLength={240}
-                  style={{ resize: "vertical", minHeight: 72, font: "400 14px/20px Inter", background: "var(--lyra-white)" }}
-                  placeholder={`"{{First Name}}", we'd love to hear about your experience today. We have just a few quick questions, just two minutes of your time.`}
-                  value={d.welcomeMessage}
-                  onChange={e => set("welcomeMessage", e.target.value)}/>
-                <div className="help" style={{ marginTop: 6 }}>
-                  Use <code style={{ background: "var(--lyra-white)", padding: "1px 5px", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 3, font: "500 12px/16px Inter", color: "var(--lyra-slate-700)" }}>{"{{First Name}}"}</code> to personalise.
-                </div>
-
-                {/* Button labels — shown for Digital/Both */}
-                {(d.channel === "Digital" || d.channel === "Both") ? (
-                  <div style={{ display: "grid", gridTemplateColumns: d.welcomeMode === "with-optout" ? "1fr 1fr" : "1fr", gap: 12, marginTop: 14 }}>
-                    <div>
-                      <div className="kicker" style={{ marginBottom: 4 }}>Button label to get started with survey</div>
-                      <input className="fi-input" disabled readOnly value={d.buttonToStart}
-                        style={{ background: "var(--lyra-slate-200)", color: "var(--lyra-slate-600)", cursor: "not-allowed" }}/>
-                    </div>
-                    {d.welcomeMode === "with-optout" ? (
-                      <div>
-                        <div className="kicker" style={{ marginBottom: 4 }}>Button label to opt out / decline the survey</div>
-                        <input className="fi-input" disabled readOnly value={d.buttonToOptOut}
-                          style={{ background: "var(--lyra-slate-200)", color: "var(--lyra-slate-600)", cursor: "not-allowed" }}/>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {/* IVR note */}
-                {d.channel === "IVR" ? (
-                  <div className="help" style={{ marginTop: 10, padding: "8px 10px", borderRadius: 4, background: "rgba(0,0,0,0.03)" }}>
-                    On phone surveys, this message is read aloud. The customer presses 1 to start or hangs up to skip.
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </FieldRow>
-
-          {/* Survey Type */}
-          <FieldRow label="Survey type" req>
-            <Segmented options={["CSAT (1–5 Star)", "Like / Dislike", "Both"]}
-              value={d.surveyType} onChange={v => set("surveyType", v)}/>
-          </FieldRow>
-
-          {/* Digital Display Style — only for Digital/Both */}
-          {(d.channel === "Digital" || d.channel === "Both") ? (
-            <>
-              <FieldRow label="Digital display style" req
-                tooltip="Controls how the rating options appear to the customer in the chat window."
-                hint={
-                  d.displayStyle === "Quick Reply"
-                    ? "Inline tappable bubbles below the question. Fastest to answer, best for ≤ 5 options on mobile."
-                    : "Rating options appear as a list the customer can scroll through. Good for desktop and longer scales."
-                }>
-                <Segmented options={["Quick Reply", "List Picker"]}
-                  value={d.displayStyle} onChange={v => set("displayStyle", v)}/>
               </FieldRow>
-              {d.displayStyle === "List Picker" ? (
-                <FieldRow label="List picker label" req
-                  hint="Short heading shown above the dropdown, e.g. 'Rate your experience'.">
-                  <input className="fi-input" maxLength={48}
-                    placeholder="Rate your experience"
-                    value={d.listPickerLabel}
-                    onChange={e => set("listPickerLabel", e.target.value)}/>
-                  <div className="help">{(d.listPickerLabel || "").length}/48 characters</div>
-                </FieldRow>
-              ) : null}
-            </>
-          ) : null}
 
-          {/* AI-Generated Contextual Questions */}
-          <FieldRow label="AI-Generated Contextual Questions">
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <label className="switch" style={{ flexShrink: 0 }}>
-                <input type="checkbox" checked={d.aiQuestions} onChange={e => set("aiQuestions", e.target.checked)}/>
-                <span className="slider" style={{ background: d.aiQuestions ? "var(--lyra-brand-600)" : undefined }}/>
-              </label>
-              <span style={{ font: "500 14px/20px var(--font-sans)", color: d.aiQuestions ? "var(--lyra-brand-600)" : "var(--color-fg-secondary)" }}>
-                {d.aiQuestions ? "On - Question Adapts To Each Interaction" : "Off - Same questions for every customer"}
-              </span>
-            </div>
-            <span className="hint">
-              When on, the AI writes questions based on what happened in each call or chat. When off, every customer gets the same fixed questions.
-            </span>
-            {d.aiQuestions ? (
-              <div style={{ padding: "12px 14px", borderRadius: 8, background: "var(--lyra-slate-100)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", gap: 8 }}>
-                {[
-                  { dot: "var(--fi-green)",       text: "If configured category is found, then AI writes questions specific to that category." },
-                  { dot: "var(--fi-purple)",       text: "If unmatched category is found, then AI still writes questions, but the new category is flagged for your review." },
-                  { dot: "var(--lyra-slate-400)",  text: "If no category is identified, then it falls back to the default questions you set below." },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: item.dot, flexShrink: 0, marginTop: 7 }}/>
-                    <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{item.text}</span>
+              <FieldRow label="Description">
+                <div style={{ position: "relative" }}>
+                  <textarea className="fi-input" rows={3} maxLength={200}
+                    placeholder="Type here"
+                    style={{ paddingRight: 52 }}
+                    value={d.description} onChange={e => set("description", e.target.value)}/>
+                  <span style={{
+                    position: "absolute", right: 10, top: 10,
+                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 400, lineHeight: "16px",
+                    color: "var(--color-fg-secondary)", pointerEvents: "none",
+                  }}>{(d.description || "").length}/200</span>
+                </div>
+              </FieldRow>
+            </FormSection>
+
+            {/* ── Section 2: Questions Mode ── */}
+            <FormSection num={2} title="Questions Mode"
+              sub="Choose how questions are created for this survey"
+              id="dsec-2" complete={selectedQuestions.length > 0}>
+
+              <FieldRow label="Select Question Mode" req>
+                {/* 4-column radio card grid — reuses welcome-mode-option pattern */}
+                <div className="welcome-mode-radio" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                  {[
+                    { v: "ai",       title: "AI Generated Questions",  desc: "Questions adapt to each interaction. The AI writes the most relevant questions for every customer" },
+                    { v: "standard", title: "Standard Questions",       desc: "Every customer answers the same fixed set of questions you build below" },
+                    { v: "hybrid",   title: "Hybrid Mode",              desc: "Combination of AI generated & Standards Questionnaire" },
+                    { v: "brand",    title: "Brand Reputation Quest.",   desc: "Ask customers how they feel about your brand, not just their recent experience." },
+                  ].map(opt => (
+                    <label key={opt.v} className={`welcome-mode-option ${questionMode === opt.v ? "on" : ""}`}
+                      onClick={() => setQuestionMode(opt.v)}>
+                      <input type="radio" name="questionMode" value={opt.v}
+                        checked={questionMode === opt.v} onChange={() => setQuestionMode(opt.v)}/>
+                      <span className="dot"/>
+                      <span className="body">
+                        <span className="title">{opt.title}</span>
+                        <span className="desc">{opt.desc}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </FieldRow>
+
+              {/* Standard questions sub-panel */}
+              {questionMode === "standard" && (
+                <FieldRow label="Select Standard Questions" req
+                  hint="Add questions from the bank below. Every customer who takes this survey will answer these questions.">
+
+                  {/* Selected questions */}
+                  <div className="cfg-group" style={{ border: "1px solid var(--color-fg-active-strong)" }}>
+                    <div className="cfg-group-head" style={{ cursor: "default", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                      <span style={{ flex: 1, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, lineHeight: "20px", color: "var(--color-fg-default)" }}>
+                        Selected Standard Survey Questions — {String(selectedQuestions.length).padStart(2, "0")}
+                      </span>
+                      <button className="btn" style={{ fontSize: 12, padding: "4px 10px", height: "auto" }}>
+                        Preview – How Customer Will See It
+                      </button>
+                    </div>
+                    <div>
+                      {selectedQuestions.map((q, i) => (
+                        <div key={q.id} style={{
+                          display: "flex", alignItems: "center", gap: "var(--space-3)",
+                          padding: "10px var(--space-5)",
+                          borderTop: i === 0 ? "none" : "1px solid var(--color-border-subtle)",
+                        }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-default)", flex: 1 }}>
+                            <strong style={{ fontWeight: 500 }}>Q{i + 1}:</strong> {q.text}
+                          </span>
+                          <QTypeBadge type={q.type}/>
+                          <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", height: "auto", color: "var(--color-fg-secondary)" }}>
+                            <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 2.5l2.5 2.5-8 8L3 14l.5-2.5 8-8z"/></svg>
+                            Edit
+                          </button>
+                          <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", height: "auto", color: "var(--color-fg-secondary)" }}
+                            onClick={() => setSelectedQuestions(prev => prev.filter(x => x.id !== q.id))}>
+                            <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 4 13 4"/><path d="M5 4V3h6v1M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="9" rx="1"/></svg>
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+
+                  {/* Question bank */}
+                  {questionBankOpen && (
+                    <div className="cfg-group" style={{ marginTop: "var(--space-3)" }}>
+                      <div className="cfg-group-head" style={{ cursor: "default", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                        <span style={{ flex: 1, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, lineHeight: "20px", color: "var(--color-fg-default)" }}>
+                          Standard Question Bank — {String(bankAvailable.length).padStart(2, "0")} Available
+                        </span>
+                        <button className="btn ghost" style={{ fontSize: 13, padding: "4px 8px", height: "auto" }}
+                          onClick={() => setQuestionBankOpen(false)}>Close</button>
+                      </div>
+                      <div>
+                        {bankAvailable.map((q, i) => (
+                          <div key={q.id} style={{
+                            display: "flex", alignItems: "center", gap: "var(--space-3)",
+                            padding: "10px var(--space-5)",
+                            borderTop: i === 0 ? "none" : "1px solid var(--color-border-subtle)",
+                          }}>
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-default)", flex: 1 }}>
+                              <strong style={{ fontWeight: 500 }}>Q{i + 1}:</strong> {q.text}
+                            </span>
+                            <QTypeBadge type={q.type}/>
+                            <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, padding: "4px 8px", height: "auto", color: "var(--color-fg-active-strong)" }}
+                              onClick={() => {
+                                if (selectedQuestions.length >= 5) return;
+                                setSelectedQuestions(prev => [...prev, q]);
+                              }}>
+                              <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.8" strokeLinecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+                              Add
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!questionBankOpen && (
+                    <button className="btn ghost" style={{ marginTop: "var(--space-2)", fontSize: 13, color: "var(--color-fg-active-strong)" }}
+                      onClick={() => setQuestionBankOpen(true)}>
+                      + Add from question bank
+                    </button>
+                  )}
+                </FieldRow>
+              )}
+            </FormSection>
+
+            {/* ── Section 3: Survey Introduction ── */}
+            <FormSection num={3} title="Survey Introduction"
+              sub="Optionally greet the customer before the first question starts"
+              id="dsec-3" complete>
+
+              <FieldRow label="Select Introduction Mode" req>
+                <div className="welcome-mode-radio">
+                  {[
+                    { v: "with-optout",    title: "Invitation with Opt Out",    desc: "The customer sees your invitation message & can choose to start the survey or decline it."       },
+                    { v: "without-optout", title: "Invitation without Opt Out", desc: "The customer sees your invitation message but cannot skip it. They must tap Start to proceed."   },
+                    { v: "none",           title: "None",                       desc: "The survey starts immediately with the first question. No greeting is shown."                    },
+                  ].map(opt => (
+                    <label key={opt.v} className={`welcome-mode-option ${introMode === opt.v ? "on" : ""}`}
+                      onClick={() => setIntroMode(opt.v)}>
+                      <input type="radio" name="introMode" value={opt.v}
+                        checked={introMode === opt.v} onChange={() => setIntroMode(opt.v)}/>
+                      <span className="dot"/>
+                      <span className="body">
+                        <span className="title">{opt.title}</span>
+                        <span className="desc">{opt.desc}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </FieldRow>
+            </FormSection>
+
+            {/* ── Section 4: Channel Configuration ── */}
+            <FormSection num={4} title="Channel Configuration"
+              sub="Configure whichever channels you need. What you configure here becomes available in campaigns."
+              id="dsec-4" complete>
+
+              {/* Digital accordion */}
+              <div className={`cfg-group ${digitalOpen ? "" : "cfg-group--closed"}`}>
+                <div className="cfg-group-head" onClick={() => setDigitalOpen(!digitalOpen)}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-fg-secondary)", flexShrink: 0 }}>
+                    <rect x="2" y="3" width="16" height="11" rx="2"/><line x1="7" y1="17" x2="13" y2="17"/><line x1="10" y1="14" x2="10" y2="17"/>
+                  </svg>
+                  <span className="cfg-group-title">Digital Survey – Chat, Message, Email</span>
+                  <svg className="cfg-group-chev" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                {digitalOpen && (
+                  <div className="cfg-group-body">
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-secondary)", margin: 0 }}>
+                      Configure display style, question set, and opt-out behaviour for digital channels.
+                    </p>
+                  </div>
+                )}
               </div>
-            ) : null}
-          </FieldRow>
 
-          {/* Default Fallback / Preconfigured Questions */}
-          <FieldRow label={d.aiQuestions ? "Default Fallback Questions" : "Preconfigured Questions"} req>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div>
-                <div style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginBottom: 6 }}>Scale: Rating Question</div>
-                <input className="fi-input" maxLength={120}
-                  placeholder="On a scale of 1 to 5, how would you rate your experience today?"
-                  value={d.defaultScaleQuestion}
-                  onChange={e => set("defaultScaleQuestion", e.target.value)}/>
+              {/* IVR accordion */}
+              <div className={`cfg-group ${ivrOpen ? "" : "cfg-group--closed"}`} style={{ marginTop: "var(--space-2)" }}>
+                <div className="cfg-group-head" onClick={() => setIvrOpen(!ivrOpen)}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-fg-secondary)", flexShrink: 0 }}>
+                    <path d="M4 4a2 2 0 0 1 2-2h2l2 4-2 2a12 12 0 0 0 4 4l2-2 4 2v2a2 2 0 0 1-2 2A16 16 0 0 1 4 4z"/>
+                  </svg>
+                  <span className="cfg-group-title">IVR Survey – Call</span>
+                  <svg className="cfg-group-chev" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                {ivrOpen && (
+                  <div className="cfg-group-body">
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-secondary)", margin: 0 }}>
+                      Configure IVR keypad prompts and survey flow for phone call interactions.
+                    </p>
+                  </div>
+                )}
               </div>
-              <div>
-                <div style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginBottom: 6 }}>Text: Comment Question</div>
-                <input className="fi-input" maxLength={120}
-                  placeholder="What could we have done better?"
-                  value={d.defaultCommentQuestion}
-                  onChange={e => set("defaultCommentQuestion", e.target.value)}/>
-              </div>
-              <span className="hint">
-                {d.aiQuestions
-                  ? "This is sent when AI can't match the interaction to a topic. Keep these broad so they work for any conversation."
-                  : "Every customer will receive these questions. Update them to reflect what your team wants to learn."}
-              </span>
-            </div>
-          </FieldRow>
+            </FormSection>
 
-          {/* Free Text Comment Box */}
-          <FieldRow label="Free Text Comment Box"
-            hint={
-              d.freeText === "Always On"  ? "Let customers write their own feedback in addition to the rating." :
-              d.freeText === "Conditional" ? "Free text only appears when the rating is ≤ 2 stars." :
-              null
-            }>
-            <Segmented options={["Always On", "Conditional", "Always Off"]}
-              value={d.freeText}
-              onChange={v => set("freeText", v)}/>
-          </FieldRow>
-        </FormSection>
+          </div>{/* /form-pane */}
 
-        <FormSection num={3} title="Delivery"
-          sub="Set how long the survey stays open and who gets notified on a poor score."
-          id="dsec-3" complete>
+          {/* Right-rail summary */}
+          <aside className="summary-pane">
+            <TemplateSummary/>
+          </aside>
 
-          {/* Real-time Alerting */}
-          <FieldRow label="Real time response alerting"
-            hint="Notify a supervisor straight away when a customer gives 1 or 2 stars.">
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <label className="switch" style={{ flexShrink: 0 }}>
-                <input type="checkbox" checked={d.realtimeAlerts} onChange={e => set("realtimeAlerts", e.target.checked)}/>
-                <span className="slider" style={{ background: d.realtimeAlerts ? "var(--lyra-brand-600)" : undefined }}/>
-              </label>
-              <span style={{ font: "500 14px/20px var(--font-sans)", color: d.realtimeAlerts ? "var(--lyra-brand-600)" : "var(--color-fg-secondary)" }}>
-                {d.realtimeAlerts
-                  ? "On - Alert supervisor immediately on low ratings (1–2 stars)"
-                  : "Off — supervisors are not notified on low ratings"}
-              </span>
-            </div>
-          </FieldRow>
-        </FormSection>
+        </div>{/* /create-grid */}
+      </div>{/* /scroll area */}
 
-        <FormSection num={4} title="Linked Campaigns"
-          sub="Choose which campaigns use this template. Any edits you make here will automatically apply to all linked campaigns."
-          id="dsec-4" complete>
-          <LinkedCampaignsTable
-            linkedIds={linkedIds}
-            currentDesignId={initial?.id}
-            onToggle={toggleLink}
-          />
-        </FormSection>
-
-        </div>
-
-        {/* Right-rail summary */}
-        <aside className="summary-pane">
-          <TemplateFloatingSummary/>
-        </aside>
+      {/* Sticky footer */}
+      <div className="wz-footer">
+        <button className="btn" onClick={onCancel}>Cancel</button>
+        <span style={{ flex: 1 }}/>
+        <button className="btn" disabled={!d.name}
+          onClick={() => onSave({ ...d, status: "draft" })}>
+          Save as draft
+        </button>
+        <button className="btn primary" disabled={!d.name}
+          onClick={() => onSave(d)}>
+          Save Template
+          <svg viewBox="0 0 16 16" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 4 }}><path d="M6 3.5L10.5 8 6 12.5"/></svg>
+        </button>
       </div>
+
     </div>
   );
 }

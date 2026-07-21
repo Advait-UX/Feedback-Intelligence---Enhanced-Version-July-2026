@@ -9753,7 +9753,6 @@ const DEFAULT_DESIGN = {
   buttonToStart: "Get started",
   buttonToOptOut: "Not today",
   aiQuestions: true,
-  sendGenericQuestion: true,
   defaultScaleQuestion: "On a scale of 1 to 5, how would you rate your experience today?",
   defaultCommentQuestion: "What could we have done better?",
   maxQuestions: 2,
@@ -9762,582 +9761,366 @@ const DEFAULT_DESIGN = {
   realtimeAlerts: true,
 };
 
+const STANDARD_QUESTION_BANK = [
+  { id: "qb1", text: "What do you think about the speed of the responses you received?",                                                   type: "Free Text"     },
+  { id: "qb2", text: "How many times before have you contacted NICE CXone about this query?",                                              type: "Single Select" },
+  { id: "qb3", text: "Did you get in touch with us in any other way before using live chat?",                                              type: "Yes/No"        },
+  { id: "qb4", text: "How else did you contact NICE CXone with your query?",                                                               type: "Single Select" },
+  { id: "qb5", text: "What are the key pieces of feedback you\'d like us to take away about your chat experience with NICE CXone?",       type: "Free Text"     },
+  { id: "qb6", text: "How likely are you to contact us again if you had a similar issue?",                                                 type: "1-5 Scale"     },
+  { id: "qb7", text: "Was the information provided clear and easy to understand?",                                                         type: "Yes/No"        },
+  { id: "qb8", text: "Which best describes the nature of your enquiry today?",                                                             type: "Single Select" },
+  { id: "qb9", text: "Is there anything else you would like to share about your experience?",                                              type: "Free Text"     },
+];
+
+function QTypeBadge({ type }) {
+  const map = {
+    "1-5 Scale":     { background: "var(--color-bg-active-subtle)",  color: "var(--color-fg-active-strong)" },
+    "Yes/No":        { background: "var(--fi-green-bg)",              color: "var(--fi-green)"               },
+    "Free Text":     { background: "var(--lyra-slate-100)",           color: "var(--lyra-slate-600)"         },
+    "Single Select": { background: "var(--fi-amber-bg)",              color: "var(--fi-amber)"               },
+  };
+  const s = map[type] || map["Free Text"];
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center",
+      padding: "2px 10px", borderRadius: "var(--radius-full)",
+      fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+      lineHeight: "16px", letterSpacing: "0.01em", whiteSpace: "nowrap",
+      background: s.background, color: s.color,
+    }}>{type}</span>
+  );
+}
+
 function CreateSurveyDesign({ onCancel, onSave, initial }) {
   const [d, setD] = React.useState(initial || DEFAULT_DESIGN);
   const set = (k, v) => setD(prev => ({ ...prev, [k]: v }));
   const isEdit = !!initial;
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [visitedSteps, setVisitedSteps] = React.useState(new Set());
-  const [triedSteps, setTriedSteps] = React.useState(new Set());
-  const [saving, setSaving] = React.useState(false);
-  const [showPreview, setShowPreview] = React.useState(false);
+  /* Question Mode */
+  const [questionMode, setQuestionMode] = React.useState("standard");
+  const [selectedQuestions, setSelectedQuestions] = React.useState([
+    { id: "sq1", text: "How do you rate your overall chat experience with us today?",                                       type: "1-5 Scale" },
+    { id: "sq2", text: "How satisfied were you with the level of effort required to resolve your question or issue?",      type: "1-5 Scale" },
+    { id: "sq3", text: "Did we fully resolve the reason(s) you got in touch with us?",                                     type: "Yes/No"    },
+  ]);
+  const [questionBankOpen, setQuestionBankOpen] = React.useState(true);
 
-  function handleSaveTemplate() {
-    setSaving(true);
-    setTimeout(() => { onSave(d); }, 2500);
+  /* Survey Introduction */
+  const [introMode, setIntroMode] = React.useState("with-optout");
+
+  /* Channel Configuration */
+  const [digitalOpen, setDigitalOpen] = React.useState(false);
+  const [ivrOpen, setIvrOpen]         = React.useState(false);
+
+  const bankAvailable = STANDARD_QUESTION_BANK.filter(q => !selectedQuestions.find(s => s.id === q.id));
+
+  const introLabel = introMode === "with-optout"    ? "Invitation with opt out"
+                   : introMode === "without-optout" ? "Invitation without opt out"
+                   : "None";
+
+  function TemplateSummary() {
+    const modeLabel = questionMode === "standard" ? "Standard Questions"
+                    : questionMode === "ai"        ? "AI Generated"
+                    : questionMode === "hybrid"    ? "Hybrid Mode"
+                    : "Brand Reputation";
+    const rows = [
+      { done: !!d.name,  label: "Template Name",       value: d.name || "—"                              },
+      { done: false,     label: "Question Mode",        value: modeLabel                                  },
+      { done: false,     label: "Question Added",       value: `${selectedQuestions.length} of 5 max`     },
+      { done: false,     label: "Survey Introduction",  value: introLabel                                 },
+      { done: false,     label: "Digital",              value: "Setup completed"                          },
+      { done: false,     label: "IVR",                  value: "Setup completed"                          },
+    ];
+    return (
+      <div className="summary-card">
+        <div className="summary-card-head">Template Summary</div>
+        <div className="summary-card-rows">
+          {rows.map((r, i) => (
+            <div className="summary-card-row" key={i}>
+              <div className="summary-card-icon" style={r.done
+                ? { background: "var(--fi-green-bg)",    color: "var(--fi-green)"       }
+                : { background: "var(--lyra-slate-200)", color: "var(--lyra-slate-500)" }
+              }>
+                {r.done
+                  ? <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 5"/></svg>
+                  : <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></svg>
+                }
+              </div>
+              <div className="summary-card-row-body">
+                <div className="summary-card-label">{r.label}</div>
+                <div className="summary-card-value">{r.value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: "var(--space-4)" }}>
+          <button className="btn" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            Test on Emulator
+            <svg viewBox="0 0 16 16" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3.5L10.5 8 6 12.5"/></svg>
+          </button>
+        </div>
+      </div>
+    );
   }
-
-  const initialLinkedIds = React.useMemo(() => {
-    if (!window.CAMPAIGNS) return [];
-    if (initial) return window.CAMPAIGNS.filter(c => c.surveyDesignId === initial.id).map(c => c.id);
-    return [1, 2, 7, 10, 5]; // default preview: 3 active, 1 expired, 1 inactive
-  }, [initial]);
-  const [linkedIds, setLinkedIds] = React.useState(initialLinkedIds);
-  const toggleLink = (id) => setLinkedIds(prev =>
-    prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
-  );
-
-  const STEPS = [
-    { n: 0, label: "Identity",         desc: "Name this template and set ownership so your team knows when to use it.", valid: !!d.name },
-    { n: 1, label: "Survey Content",   desc: "Configure the questions, channel, display style, and delivery rules for this template.", valid: !!d.defaultScaleQuestion },
-    { n: 2, label: "Linked Campaigns", desc: "Review campaigns that use this template. Changes here will affect all linked campaigns.", valid: true },
-    { n: 3, label: "Summary & Review", desc: "Review all settings before publishing your survey template.", valid: true },
-  ];
-
-  function stepState(s) {
-    if (s.n === activeStep) {
-      if (triedSteps.has(s.n) && !s.valid) return "error";
-      return "active";
-    }
-    if (triedSteps.has(s.n) && !s.valid) return "error";
-    if (visitedSteps.has(s.n) && s.valid) return "done";
-    if (visitedSteps.has(s.n) && !s.valid) return "error";
-    return "default";
-  }
-
-  function goNext() {
-    setTriedSteps(prev => new Set([...prev, activeStep]));
-    setVisitedSteps(prev => new Set([...prev, activeStep]));
-    setActiveStep(prev => Math.min(prev + 1, 4));
-  }
-
-  function goBack() {
-    setActiveStep(prev => Math.max(prev - 1, 0));
-  }
-
-  const canSave = !!(d.name && d.defaultScaleQuestion);
 
   return (
     <div className="pane" style={{ overflow: "hidden" }}>
+
       {/* Breadcrumb */}
       <div className="crumbs">
         <a href="#" onClick={e => { e.preventDefault(); onCancel(); }}>Survey Templates</a>
         <span className="sep">/</span>
-        <span className="last">{isEdit ? d.name : "New Survey Template"}</span>
+        <span className="last">Create New Survey Template</span>
       </div>
 
       {/* Page header */}
-      <div className="pane-head">
-        <h1>{isEdit ? d.name : "New Survey Template"}</h1>
+      <div className="pane-head" style={{ paddingTop: 6 }}>
+        <h1>{isEdit ? d.name : "Create New Survey Template"}</h1>
       </div>
 
-      {/* ── Horizontal Wizard Bar ── */}
-      <div className="wz-bar">
-        <div className="wz-bar-inner">
-          {STEPS.map((s, i) => {
-            const st = stepState(s);
-            const prevSt = i > 0 ? stepState(STEPS[i - 1]) : null;
-            const lineClass = prevSt === "done" ? "done" : prevSt === "error" ? "error" : "";
-            return (
-              <React.Fragment key={s.n}>
-                {i > 0 && <div className={`wz-line ${lineClass}`}/>}
-                <div className={`wz-step ${st}`} onClick={() => setActiveStep(s.n)}>
-                  <div className="wz-node">
-                    {st === "done" ? (
-                      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 6 5 9.5 10 2.5"/></svg>
-                    ) : st === "error" ? (
-                      <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>
-                    ) : s.n + 1}
-                  </div>
-                  <div className="wz-label">{s.label}</div>
+      {/* Scrollable body */}
+      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+        <div className="create-grid" style={{ gridTemplateColumns: "1fr 280px" }}>
+
+          {/* Form pane */}
+          <div className="form-pane">
+
+            {/* Section 1: Identity */}
+            <FormSection num={1} title="Identity"
+              sub="Give this template a name so it can be found in campaigns"
+              id="dsec-1" complete={!!d.name}>
+
+              <FieldRow label="Template Name" req>
+                <div style={{ position: "relative" }}>
+                  <input className="fi-input" placeholder="Type here" maxLength={50}
+                    value={d.name} onChange={e => set("name", e.target.value)}
+                    style={{ paddingRight: 52 }}/>
+                  <span style={{
+                    position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 400, lineHeight: "16px",
+                    color: "var(--color-fg-secondary)", pointerEvents: "none",
+                  }}>{d.name.length}/50</span>
                 </div>
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </div>
+              </FieldRow>
 
-      {/* ── Wizard body — section header + form both scroll together ── */}
-      <div className="wz-scroll-area">
-        {(() => { const s = STEPS[activeStep]; return s ? (
-          <div className="wz-section-header">
-            <h2>{s.label}</h2>
-            <p>{s.desc}</p>
-          </div>
-        ) : null; })()}
+              <FieldRow label="Description">
+                <div style={{ position: "relative" }}>
+                  <textarea className="fi-input" rows={3} maxLength={200}
+                    placeholder="Type here"
+                    style={{ paddingRight: 52 }}
+                    value={d.description} onChange={e => set("description", e.target.value)}/>
+                  <span style={{
+                    position: "absolute", right: 10, top: 10,
+                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 400, lineHeight: "16px",
+                    color: "var(--color-fg-secondary)", pointerEvents: "none",
+                  }}>{(d.description || "").length}/200</span>
+                </div>
+              </FieldRow>
+            </FormSection>
 
-        <div className="wz-body" style={{ gridTemplateColumns: "1fr" }}>
-          <div className="form-pane sv-form">
+            {/* Section 2: Questions Mode */}
+            <FormSection num={2} title="Questions Mode"
+              sub="Choose how questions are created for this survey"
+              id="dsec-2" complete={selectedQuestions.length > 0}>
 
-          {/* ── Step 0: Identity ── */}
-          {activeStep === 0 && (()=>{
-            const showErr = triedSteps.has(0);
-            const nameErr = showErr && !d.name;
-            return <div className="wz-step-content">
-              <div className="setup-section">
-                <div className="setup-section-body" style={{ display: "flex", flexDirection: "column", gap: "var(--space-8)" }}>
-                  <div className="field-cell" style={{ maxWidth: 400 }}>
-                    <label className="field-label">Template Name<span className="req">*</span><span className="char-counter">{(d.name || "").length}/50</span></label>
-                    <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="e.g. Post-Chat CSAT" maxLength={50}
-                      aria-invalid={nameErr || undefined}
-                      value={d.name} onChange={e => set("name", e.target.value)}/>
-                    {nameErr && <div className="field-control"><span className="error-msg">
-                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                      Template name is required
-                    </span></div>}
-                  </div>
-                  <div className="field-cell" style={{ maxWidth: 600 }}>
-                    <label className="field-label">
-                      Description
-                      <span className="char-counter">{(d.description || "").length}/200</span>
+              <FieldRow label="Select Question Mode" req>
+                <div className="welcome-mode-radio" style={{ gridTemplateColumns: "repeat(4, 1fr)" }}>
+                  {[
+                    { v: "ai",       title: "AI Generated Questions",  desc: "Questions adapt to each interaction. The AI writes the most relevant questions for every customer" },
+                    { v: "standard", title: "Standard Questions",       desc: "Every customer answers the same fixed set of questions you build below" },
+                    { v: "hybrid",   title: "Hybrid Mode",              desc: "Combination of AI generated & Standards Questionnaire" },
+                    { v: "brand",    title: "Brand Reputation Quest.",   desc: "Ask customers how they feel about your brand, not just their recent experience." },
+                  ].map(opt => (
+                    <label key={opt.v} className={`welcome-mode-option ${questionMode === opt.v ? "on" : ""}`}
+                      onClick={() => setQuestionMode(opt.v)}>
+                      <input type="radio" name="questionMode" value={opt.v}
+                        checked={questionMode === opt.v} onChange={() => setQuestionMode(opt.v)}/>
+                      <span className="dot"/>
+                      <span className="body">
+                        <span className="title">{opt.title}</span>
+                        <span className="desc">{opt.desc}</span>
+                      </span>
                     </label>
-                    <textarea className="fi-input" rows={3} maxLength={200} placeholder="What this template is for and which campaigns should use it."
-                      value={d.description} onChange={e => set("description", e.target.value)}/>
-                    <div className="help">Help your team understand when to apply this template.</div>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            </div>;
-          })()}
+              </FieldRow>
 
-          {/* ── Step 1: Survey Content ── */}
-          {activeStep === 1 && (()=>{
-            const showErr = triedSteps.has(1);
-            const scaleErr = showErr && !d.defaultScaleQuestion;
-            return <div className="wz-step-content">
+              {questionMode === "standard" && (
+                <FieldRow label="Select Standard Questions" req
+                  hint="Add questions from the bank below. Every customer who takes this survey will answer these questions.">
 
-              {/* ── Channel ── */}
-              <div className="setup-section">
-                <div className="setup-section-head">
-                  <div>
-                    <h2 className="setup-section-title">Channel</h2>
-                    <p className="setup-section-sub">Choose how this survey is delivered to customers.</p>
+                  {/* Selected questions panel */}
+                  <div className="cfg-group" style={{ border: "1px solid var(--color-fg-active-strong)" }}>
+                    <div className="cfg-group-head" style={{ cursor: "default", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                      <span style={{ flex: 1, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, lineHeight: "20px", color: "var(--color-fg-default)" }}>
+                        Selected Standard Survey Questions — {String(selectedQuestions.length).padStart(2, "0")}
+                      </span>
+                      <button className="btn" style={{ fontSize: 12, padding: "4px 10px", height: "auto" }}>
+                        Preview – How Customer Will See It
+                      </button>
+                    </div>
+                    <div>
+                      {selectedQuestions.map((q, i) => (
+                        <div key={q.id} style={{
+                          display: "flex", alignItems: "center", gap: "var(--space-3)",
+                          padding: "10px var(--space-5)",
+                          borderTop: i === 0 ? "none" : "1px solid var(--color-border-subtle)",
+                        }}>
+                          <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-default)", flex: 1 }}>
+                            <strong style={{ fontWeight: 500 }}>Q{i + 1}:</strong> {q.text}
+                          </span>
+                          <QTypeBadge type={q.type}/>
+                          <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", height: "auto", color: "var(--color-fg-secondary)" }}>
+                            <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 2.5l2.5 2.5-8 8L3 14l.5-2.5 8-8z"/></svg>
+                            Edit
+                          </button>
+                          <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 12, padding: "4px 8px", height: "auto", color: "var(--color-fg-secondary)" }}
+                            onClick={() => setSelectedQuestions(prev => prev.filter(x => x.id !== q.id))}>
+                            <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 4 13 4"/><path d="M5 4V3h6v1M6 7v5M10 7v5"/><rect x="3" y="4" width="10" height="9" rx="1"/></svg>
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="setup-section-body">
-                  <div className="field-cell" style={{ maxWidth: 400 }}>
-                      <label className="field-label">Survey Channel<span className="req">*</span></label>
-                      <Segmented options={["Digital", "IVR", "All"]}
-                        disabled={["All"]}
-                        value={d.channel} onChange={v => set("channel", v)}/>
-                      <div className="help">
-                        {d.channel === "Digital" ? "Delivered on chat, AI sessions, social & email." :
-                         d.channel === "IVR"     ? "Sent after a phone call — customers respond using their keypad." :
-                                                   "Delivered on both phone and digital channels."}
+
+                  {/* Question bank */}
+                  {questionBankOpen && (
+                    <div className="cfg-group" style={{ marginTop: "var(--space-3)" }}>
+                      <div className="cfg-group-head" style={{ cursor: "default", borderBottom: "1px solid var(--color-border-subtle)" }}>
+                        <span style={{ flex: 1, fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 500, lineHeight: "20px", color: "var(--color-fg-default)" }}>
+                          Standard Question Bank — {String(bankAvailable.length).padStart(2, "0")} Available
+                        </span>
+                        <button className="btn ghost" style={{ fontSize: 13, padding: "4px 8px", height: "auto" }}
+                          onClick={() => setQuestionBankOpen(false)}>Close</button>
                       </div>
-                  </div>
-                </div>
-              </div>
-
-              <hr style={{ border: "none", borderTop: "1px solid var(--color-border-subtle)", margin: "var(--space-8) 0" }}/>
-
-              {/* ── Card 2: Welcome Message ── */}
-              <div className="setup-section">
-                <div className="setup-section-head">
-                  <div>
-                    <h2 className="setup-section-title">Welcome Message</h2>
-                    <p className="setup-section-sub">Optionally introduce the survey before the first question.</p>
-                  </div>
-                </div>
-                <div className="setup-section-body">
-                  <div className="field-cell">
-                      <label className="field-label">Message Mode<span className="req">*</span></label>
-                      <div className="welcome-mode-radio">
-                        {(d.channel === "IVR" ? [
-                          { v: "with-optout",    label: "Invitation with Opt Out",    desc: "After hearing the message, the customer can press 1 to decline." },
-                          { v: "without-optout", label: "Invitation without Opt Out", desc: "The customer hears the message, then goes to the survey." },
-                          { v: "none",           label: "None",                       desc: "Survey starts immediately with no introduction." },
-                        ] : [
-                          { v: "with-optout",    label: "Invitation with Opt Out",    desc: "Customer can read the invitation & choose to decline it." },
-                          { v: "without-optout", label: "Invitation without Opt Out", desc: "Customer sees the invitation & start button only." },
-                          { v: "none",           label: "None",                       desc: "Survey starts immediately with no introduction." },
-                        ]).map(opt => (
-                          <label key={opt.v} className={`welcome-mode-option ${d.welcomeMode === opt.v ? "on" : ""}`}>
-                            <input type="radio" name="welcomeMode" value={opt.v}
-                              checked={d.welcomeMode === opt.v}
-                              onChange={() => set("welcomeMode", opt.v)}/>
-                            <span className="dot"/>
-                            <span className="body">
-                              <span className="title">{opt.label}</span>
-                              <span className="desc">{opt.desc}</span>
+                      <div>
+                        {bankAvailable.map((q, i) => (
+                          <div key={q.id} style={{
+                            display: "flex", alignItems: "center", gap: "var(--space-3)",
+                            padding: "10px var(--space-5)",
+                            borderTop: i === 0 ? "none" : "1px solid var(--color-border-subtle)",
+                          }}>
+                            <span style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-default)", flex: 1 }}>
+                              <strong style={{ fontWeight: 500 }}>Q{i + 1}:</strong> {q.text}
                             </span>
-                          </label>
+                            <QTypeBadge type={q.type}/>
+                            <button className="btn ghost" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, padding: "4px 8px", height: "auto", color: "var(--color-fg-active-strong)" }}
+                              onClick={() => {
+                                if (selectedQuestions.length >= 5) return;
+                                setSelectedQuestions(prev => [...prev, q]);
+                              }}>
+                              <svg viewBox="0 0 16 16" width="12" height="12" stroke="currentColor" fill="none" strokeWidth="1.8" strokeLinecap="round"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+                              Add
+                            </button>
+                          </div>
                         ))}
                       </div>
                     </div>
-                    {d.welcomeMode !== "none" && (
-                      <div className="field-cell" style={{ marginTop: "var(--space-6)" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
-                          <label className="field-label" style={{ margin: 0 }}>Invitation Text</label>
-                          <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.welcomeMessage || "").length > 220 ? "var(--fi-amber)" : "var(--color-fg-disabled)" }}>
-                            {(d.welcomeMessage || "").length}/240
-                          </span>
-                        </div>
-                        <textarea className="fi-input" rows={4} maxLength={240}
-                          style={{ resize: "vertical", minHeight: 88 }}
-                          placeholder={`"{{First Name}}", we'd love to hear about your experience today. Just two minutes of your time.`}
-                          value={d.welcomeMessage}
-                          onChange={e => set("welcomeMessage", e.target.value)}/>
-                        {(d.channel === "Digital" || d.channel === "Both") && (
-                          <div style={{ display: "grid", gridTemplateColumns: d.welcomeMode === "with-optout" ? "1fr 1fr" : "1fr", gap: "var(--space-4)", marginTop: "var(--space-5)" }}>
-                            <div className="field-cell">
-                              <label className="field-label">Start survey button label</label>
-                              <input className="fi-input" disabled readOnly value={d.buttonToStart}
-                                style={{ background: "var(--lyra-slate-100)", color: "var(--color-fg-disabled)", cursor: "not-allowed" }}/>
-                            </div>
-                            {d.welcomeMode === "with-optout" && (
-                              <div className="field-cell">
-                                <label className="field-label">Opt-out button label</label>
-                                <input className="fi-input" disabled readOnly value={d.buttonToOptOut}
-                                  style={{ background: "var(--lyra-slate-100)", color: "var(--color-fg-disabled)", cursor: "not-allowed" }}/>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        {d.channel === "IVR" && (
-                          <div className="help" style={{ marginTop: "var(--space-3)" }}>
-                            On phone surveys, this message is read aloud. The customer presses 1 to start or hangs up to skip.
-                          </div>
-                        )}
-                      </div>
-                    )}
-                </div>
-              </div>
-
-              <hr style={{ border: "none", borderTop: "1px solid var(--color-border-subtle)", margin: "var(--space-8) 0" }}/>
-
-              {/* ── Card 3: Rating Format ── */}
-              <div className="setup-section">
-                <div className="setup-section-head">
-                  <div>
-                    <h2 className="setup-section-title">Rating Format</h2>
-                    <p className="setup-section-sub">Choose the rating scale and how answer options are displayed.</p>
-                  </div>
-                </div>
-                <div className="setup-section-body">
-                    {(d.channel === "Digital" || d.channel === "Both") && (
-                      <>
-                        <div className="field-cell" style={{ maxWidth: 400, marginBottom: d.displayStyle === "List Picker" ? "var(--space-5)" : 0 }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
-                            <label className="field-label" style={{ margin: 0 }}>Digital Display Style<span className="req">*</span></label>
-                            <button className="clear-link" style={{ fontSize: 13, color: "var(--color-fg-action)", display: "flex", alignItems: "center", gap: 5 }}
-                              onClick={() => setShowPreview(true)}>
-                              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/>
-                              </svg>
-                              Preview
-                            </button>
-                          </div>
-                          <Segmented options={["Quick Reply", "List Picker"]}
-                            value={d.displayStyle} onChange={v => set("displayStyle", v)}/>
-                          <div className="help">
-                            {d.displayStyle === "Quick Reply"
-                              ? "Inline tappable bubbles — fastest to answer, best for mobile."
-                              : "Rating options as a scrollable list — good for desktop."}
-                          </div>
-                        </div>
-                        {d.displayStyle === "List Picker" && (
-                          <div className="field-cell">
-                            <label className="field-label">List Picker Label<span className="req">*</span></label>
-                            <input className="fi-input" maxLength={20}
-                              placeholder="Rate your experience"
-                              value={d.listPickerLabel}
-                              onChange={e => set("listPickerLabel", e.target.value)}/>
-                            <div className="help">{(d.listPickerLabel || "").length}/20 characters</div>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    {/* ── Rating Question (required) ── */}
-                    <div className="field-cell" style={{ maxWidth: 600, marginTop: "var(--space-5)" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
-                        <label className="field-label" style={{ margin: 0 }}>Rating Question<span className="req">*</span></label>
-                        <span style={{ font: "400 12px/16px var(--font-sans)", color: (d.defaultScaleQuestion || "").length > 100 ? "var(--fi-amber)" : "var(--color-fg-disabled)" }}>
-                          {(d.defaultScaleQuestion || "").length}/120
-                        </span>
-                      </div>
-                      <textarea className={`fi-input${scaleErr ? " error" : ""}`} rows={2} maxLength={120}
-                        aria-invalid={scaleErr || undefined}
-                        style={{ resize: "vertical", minHeight: 64 }}
-                        placeholder="On a scale of 1 to 5, how would you rate your experience today?"
-                        value={d.defaultScaleQuestion}
-                        onChange={e => set("defaultScaleQuestion", e.target.value)}/>
-                      {scaleErr && <div className="field-control"><span className="error-msg">
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        Rating question is required
-                      </span></div>}
-                      <div className="help">This is the primary question customers will answer.</div>
-                    </div>
-
-                    {/* ── Follow-up Question (optional) ── */}
-                    <div className="field-cell" style={{ maxWidth: 600, marginTop: "var(--space-4)" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
-                        <label className="field-label" style={{ margin: 0 }}>Follow-up Question <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)" }}>(optional)</span></label>
-                        <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-disabled)" }}>
-                          {(d.defaultCommentQuestion || "").length}/120
-                        </span>
-                      </div>
-                      <textarea className="fi-input" rows={2} maxLength={120}
-                        style={{ resize: "vertical", minHeight: 64 }}
-                        placeholder="What could we have done better?"
-                        value={d.defaultCommentQuestion}
-                        onChange={e => set("defaultCommentQuestion", e.target.value)}/>
-                      <div className="help">An open-text follow-up shown after the rating response.</div>
-                    </div>
-
-                    {showPreview && ReactDOM.createPortal(
-                      <div style={{ position: "fixed", inset: 0, zIndex: 900, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.40)" }}
-                        onClick={() => setShowPreview(false)}>
-                        <div style={{ background: "var(--lyra-white)", borderRadius: 16, padding: "28px 28px 24px", width: 380, boxShadow: "0px 12px 24px rgba(0,0,0,0.12)" }}
-                          onClick={e => e.stopPropagation()}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                            <div>
-                              <div style={{ font: "600 15px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>
-                                {d.displayStyle === "Quick Reply" ? "Quick Reply" : "List Picker"} Preview
-                              </div>
-                              <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", marginTop: 2 }}>How customers will see the survey</div>
-                            </div>
-                            <button onClick={() => setShowPreview(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-fg-secondary)", padding: 4 }}>
-                              <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><line x1="12" y1="4" x2="4" y2="12"/><line x1="4" y1="4" x2="12" y2="12"/></svg>
-                            </button>
-                          </div>
-                          <div style={{ background: "#f5f7f9", borderRadius: 12, padding: "16px 14px", border: "1px solid rgba(0,0,0,0.08)" }}>
-                            <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
-                              <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--lyra-brand-500)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                <svg viewBox="0 0 16 16" width="14" height="14" fill="white"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" fill="white"/></svg>
-                              </div>
-                              <div style={{ background: "var(--lyra-white)", borderRadius: "4px 12px 12px 12px", padding: "10px 12px", font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-default)", boxShadow: "0 1px 2px rgba(0,0,0,0.06)", maxWidth: 260 }}>
-                                {d.defaultScaleQuestion || "On a scale of 1 to 5, how would you rate your experience today?"}
-                              </div>
-                            </div>
-                            {d.displayStyle === "Quick Reply" ? (
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, paddingLeft: 36 }}>
-                                {["1", "2", "3", "4", "5"].map(n => (
-                                  <div key={n} style={{ background: "var(--lyra-white)", border: "1px solid var(--lyra-brand-500)", borderRadius: 20, padding: "6px 14px", font: "500 13px/18px var(--font-sans)", color: "var(--lyra-brand-600)", cursor: "pointer" }}>{n}</div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div style={{ paddingLeft: 36 }}>
-                                <div style={{ background: "var(--lyra-white)", borderRadius: 10, overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
-                                  {d.listPickerLabel && (
-                                    <div style={{ padding: "8px 14px", font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", borderBottom: "1px solid rgba(0,0,0,0.06)", background: "#f5f7f9" }}>
-                                      {d.listPickerLabel}
-                                    </div>
-                                  )}
-                                  {["1 — Poor", "2 — Fair", "3 — Good", "4 — Very Good", "5 — Excellent"].map((r, i, arr) => (
-                                    <div key={r} style={{ padding: "10px 14px", font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-default)", borderBottom: i < arr.length - 1 ? "1px solid rgba(0,0,0,0.06)" : "none", cursor: "pointer" }}>{r}</div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div style={{ marginTop: 16, font: "400 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textAlign: "center" }}>
-                            Click outside or press × to close
-                          </div>
-                        </div>
-                      </div>,
-                      document.body
-                    )}
-                </div>
-              </div>
-
-            </div>;
-          })()}
-
-          {/* ── Step 2: Linked Campaigns ── */}
-          {activeStep === 2 && (
-            <div className="wz-step-content">
-              <div className="setup-section">
-                <div className="setup-section-body">
-                  {(!isEdit || d.isDefault) ? (
-                    <div style={{
-                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                      padding: "var(--space-10) var(--space-8)", textAlign: "center",
-                      background: "var(--lyra-slate-50)", borderRadius: "var(--radius-md)",
-                      border: "1px dashed var(--color-border-soft)"
-                    }}>
-                      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--lyra-slate-400)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                      </svg>
-                      <p style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)", margin: "0 0 6px" }}>
-                        No campaigns linked yet
-                      </p>
-                      <p style={{ font: "400 13px/18px var(--font-sans)", color: "var(--color-fg-secondary)", margin: 0, maxWidth: 400 }}>
-                        Save this template first, then go to a Campaign and select this template to link it. Linked campaigns will appear here automatically.
-                      </p>
-                    </div>
-                  ) : (
-                    <LinkedCampaignsTable
-                      linkedIds={linkedIds}
-                      currentDesignId={initial?.id}
-                    />
                   )}
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* ── Step 3: Summary & Review ── */}
-          {activeStep === 3 && (() => {
-            const missingRequired = !d.name || !d.defaultScaleQuestion;
-            const SRSection = ({ title, num, children, noEdit }) => (
-              <div className="sr-section">
-                <div className="sr-section-head">
-                  <span className="sr-section-num">{num}</span>
-                  <span className="sr-section-title">{title}</span>
-                  {!noEdit && (
-                    <button className="btn btn-ghost" style={{ marginLeft: "auto", font: "var(--text-body-sm)", color: "var(--color-fg-action)" }}
-                      onClick={() => setActiveStep(num - 1)}>
-                      <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M11 2.5a2 2 0 0 1 2.8 2.8L5 14l-3.5.8.8-3.5z"/></svg>
-                      Edit
+                  {!questionBankOpen && (
+                    <button className="btn ghost" style={{ marginTop: "var(--space-2)", fontSize: 13, color: "var(--color-fg-active-strong)" }}
+                      onClick={() => setQuestionBankOpen(true)}>
+                      + Add from question bank
                     </button>
                   )}
+                </FieldRow>
+              )}
+            </FormSection>
+
+            {/* Section 3: Survey Introduction */}
+            <FormSection num={3} title="Survey Introduction"
+              sub="Optionally greet the customer before the first question starts"
+              id="dsec-3" complete>
+
+              <FieldRow label="Select Introduction Mode" req>
+                <div className="welcome-mode-radio">
+                  {[
+                    { v: "with-optout",    title: "Invitation with Opt Out",    desc: "The customer sees your invitation message & can choose to start the survey or decline it."       },
+                    { v: "without-optout", title: "Invitation without Opt Out", desc: "The customer sees your invitation message but cannot skip it. They must tap Start to proceed."   },
+                    { v: "none",           title: "None",                       desc: "The survey starts immediately with the first question. No greeting is shown."                    },
+                  ].map(opt => (
+                    <label key={opt.v} className={`welcome-mode-option ${introMode === opt.v ? "on" : ""}`}
+                      onClick={() => setIntroMode(opt.v)}>
+                      <input type="radio" name="introMode" value={opt.v}
+                        checked={introMode === opt.v} onChange={() => setIntroMode(opt.v)}/>
+                      <span className="dot"/>
+                      <span className="body">
+                        <span className="title">{opt.title}</span>
+                        <span className="desc">{opt.desc}</span>
+                      </span>
+                    </label>
+                  ))}
                 </div>
-                <div className="sr-section-body">{children}</div>
-              </div>
-            );
-            const SRRow = ({ label, children }) => (
-              <div className="sr-row">
-                <div className="sr-row-label">{label}</div>
-                <div className="sr-row-value">{children || <span style={{ color: "var(--color-fg-secondary)" }}>—</span>}</div>
-              </div>
-            );
-            return (
-              <div className="wz-step-content" style={{ marginTop: "calc(-1 * var(--space-6))" }}>
-                {missingRequired && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-status-critical-subtle, #fff0f0)", border: "1px solid var(--color-status-error)", borderRadius: "var(--radius-md)", marginBottom: "var(--space-8)", font: "var(--text-body-sm)", color: "var(--color-status-error)" }}>
-                    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                    Some required fields are incomplete. Return to the relevant steps to fill them in.
+              </FieldRow>
+            </FormSection>
+
+            {/* Section 4: Channel Configuration */}
+            <FormSection num={4} title="Channel Configuration"
+              sub="Configure whichever channels you need. What you configure here becomes available in campaigns."
+              id="dsec-4" complete>
+
+              <div className={`cfg-group ${digitalOpen ? "" : "cfg-group--closed"}`}>
+                <div className="cfg-group-head" onClick={() => setDigitalOpen(!digitalOpen)}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-fg-secondary)", flexShrink: 0 }}>
+                    <rect x="2" y="3" width="16" height="11" rx="2"/><line x1="7" y1="17" x2="13" y2="17"/><line x1="10" y1="14" x2="10" y2="17"/>
+                  </svg>
+                  <span className="cfg-group-title">Digital Survey – Chat, Message, Email</span>
+                  <svg className="cfg-group-chev" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                {digitalOpen && (
+                  <div className="cfg-group-body">
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-secondary)", margin: 0 }}>
+                      Configure display style, question set, and opt-out behaviour for digital channels.
+                    </p>
                   </div>
                 )}
-
-                <SRSection title="Identity" num={1}>
-                  <SRRow label="Template Name">{d.name || <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
-                  {d.description && <SRRow label="Description">{d.description}</SRRow>}
-                </SRSection>
-
-                <SRSection title="Survey Content" num={2}>
-                  <SRRow label="Survey Channel">{d.channel || "Digital"}</SRRow>
-                  <SRRow label="Welcome Message">
-                    {d.welcomeMode === "with-optout"    ? "Invitation with Opt Out" :
-                     d.welcomeMode === "without-optout" ? "Invitation without Opt Out" : "None"}
-                  </SRRow>
-                  {d.welcomeMode !== "none" && d.welcomeMessage && (
-                    <SRRow label="Invitation Text">
-                      <span style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{d.welcomeMessage}</span>
-                    </SRRow>
-                  )}
-                  {(d.channel === "Digital" || d.channel === "Both") && (
-                    <SRRow label="Display Style">{d.displayStyle || "Quick Reply"}</SRRow>
-                  )}
-                  {true && <>
-                    <SRRow label="Rating Question">{d.defaultScaleQuestion || <span style={{ color: "var(--color-status-error)" }}>Required</span>}</SRRow>
-                    {d.defaultCommentQuestion && <SRRow label="Follow-up Question">{d.defaultCommentQuestion}</SRRow>}
-                  </>}
-                </SRSection>
-
-                <SRSection title="Linked Campaigns" num={3} noEdit>
-                  <div style={{ margin: "0 calc(-1 * var(--space-4)) calc(-1 * var(--space-3))" }}>
-                    <LinkedCampaignsTable linkedIds={linkedIds} currentDesignId={initial?.id} />
-                  </div>
-                </SRSection>
               </div>
-            );
-          })()}
 
-          </div>
+              <div className={`cfg-group ${ivrOpen ? "" : "cfg-group--closed"}`} style={{ marginTop: "var(--space-2)" }}>
+                <div className="cfg-group-head" onClick={() => setIvrOpen(!ivrOpen)}>
+                  <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-fg-secondary)", flexShrink: 0 }}>
+                    <path d="M4 4a2 2 0 0 1 2-2h2l2 4-2 2a12 12 0 0 0 4 4l2-2 4 2v2a2 2 0 0 1-2 2A16 16 0 0 1 4 4z"/>
+                  </svg>
+                  <span className="cfg-group-title">IVR Survey – Call</span>
+                  <svg className="cfg-group-chev" viewBox="0 0 16 16"><path d="M3.5 6 8 10.5 12.5 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                {ivrOpen && (
+                  <div className="cfg-group-body">
+                    <p style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 400, lineHeight: "20px", color: "var(--color-fg-secondary)", margin: 0 }}>
+                      Configure IVR keypad prompts and survey flow for phone call interactions.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </FormSection>
 
-        </div>
-      </div>
+          </div>{/* /form-pane */}
 
-      {/* ── Wizard Footer ── */}
+          {/* Right-rail summary */}
+          <aside className="summary-pane">
+            <TemplateSummary/>
+          </aside>
+
+        </div>{/* /create-grid */}
+      </div>{/* /scroll area */}
+
+      {/* Sticky footer */}
       <div className="wz-footer">
         <button className="btn" onClick={onCancel}>Cancel</button>
         <span style={{ flex: 1 }}/>
-        {activeStep < 3 ? (
-          <>
-            {activeStep > 0 && (
-              <button className="btn" onClick={goBack}>← Back</button>
-            )}
-            <button className="btn primary" onClick={goNext}>
-              {activeStep === 2 ? "Review →" : "Next →"}
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="btn" onClick={goBack}>← Back</button>
-            <button className="btn primary" disabled={!canSave} onClick={handleSaveTemplate}>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 13 10 19 20 5"/></svg>
-              {isEdit ? "Save changes" : "Save template"}
-            </button>
-          </>
-        )}
+        <button className="btn" disabled={!d.name}
+          onClick={() => onSave({ ...d, status: "draft" })}>
+          Save as draft
+        </button>
+        <button className="btn primary" disabled={!d.name}
+          onClick={() => onSave(d)}>
+          Save Template
+          <svg viewBox="0 0 16 16" width="14" height="14" stroke="currentColor" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 4 }}><path d="M6 3.5L10.5 8 6 12.5"/></svg>
+        </button>
       </div>
 
-      {/* Save success overlay */}
-      {saving && ReactDOM.createPortal(
-        <div className="activate-overlay">
-          <div className="activate-card">
-            <div className="activate-ring">
-              <svg viewBox="0 0 24 24" width="40" height="40" fill="none"
-                stroke="var(--lyra-green-500)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="4 13 10 19 20 5" className="activate-check"/>
-              </svg>
-            </div>
-            <h2 className="activate-title">Template Saved!</h2>
-            <p className="activate-sub">"{d.name}" is ready to use in campaigns.</p>
-          </div>
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-}
-
-function LinkedCampaignsTable({ linkedIds, currentDesignId }) {
-  const all = window.CAMPAIGNS || [];
-  const rows = all.filter(c => linkedIds.includes(c.id) && c.status !== "draft" && c.status !== "inactive");
-
-  return (
-    <div>
-      {rows.length === 0 ? (
-        <div style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--color-fg-secondary)", font: "400 14px/20px var(--font-sans)", background: "var(--lyra-slate-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border-subtle)" }}>
-          No campaigns are linked to this template yet.
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-lg)", overflow: "hidden", boxShadow: "var(--shadow-sm)" }}>
-          {/* Header */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "1fr 140px",
-            padding: "var(--space-2) var(--space-5)",
-            background: "var(--lyra-slate-50)",
-            borderBottom: "1px solid var(--color-border-subtle)",
-          }}>
-            <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Campaign</span>
-            <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Status</span>
-          </div>
-          {/* Rows */}
-          {rows.map((c, i) => (
-            <div key={c.id} style={{
-              display: "grid", gridTemplateColumns: "1fr 140px",
-              alignItems: "center",
-              padding: "var(--space-4) var(--space-5)",
-              borderBottom: i < rows.length - 1 ? "1px solid var(--color-border-subtle)" : "none",
-              background: "var(--lyra-white)",
-            }}>
-              <div>
-                <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{c.name}</div>
-                <div style={{ marginTop: "var(--space-1)" }}>
-                  <CampaignStateInline status={c.status} hasWorkingCopy={c.hasWorkingCopy}/>
-                </div>
-              </div>
-              <div><StatusPill s={c.status}/></div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
