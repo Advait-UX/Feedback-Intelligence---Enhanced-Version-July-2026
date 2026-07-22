@@ -1144,7 +1144,7 @@ select.fi-input {
 
 /* ── Survey template canvas — shell grey behind white section cards ── */
 .sv-wz {
-  background: var(--lyra-color-bg-surface-shell);
+  background: var(--lyra-color-bg-surface-base);
 }
 
 /* ── Survey template — each step section is a white card, no border ── */
@@ -1346,7 +1346,7 @@ select.fi-input {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
 }
 .summary-card-row {
   display: flex; align-items: flex-start; gap: var(--space-3);
@@ -4767,7 +4767,7 @@ select.fi-input {
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-4) var(--space-4);
 }
 .summary-card-row {
   display: flex; align-items: flex-start; gap: var(--space-3);
@@ -8704,47 +8704,17 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
         </div>
       )}
 
-      {/* ── Horizontal Wizard Bar ── */}
-      <div className="wz-bar">
-        <div className="wz-bar-inner">
-          {ALL_STEPS.map((s, i) => {
-            const st = stepState(s);
-            const prevSt = i > 0 ? stepState(ALL_STEPS[i - 1]) : null;
-            const lineClass = (prevSt === "done" || prevSt === "active-done") ? "done" : prevSt === "error" ? "error" : "";
-            return (
-              <React.Fragment key={s.n}>
-                {i > 0 && <div className={`wz-line ${lineClass}`}/>}
-                <div className={`wz-step ${st === "active-done" ? "active" : st}`} onClick={() => scrollToStep(s.n)}>
-                  <div className="wz-node">
-                    {(st === "done" || st === "active-done") ? (
-                      <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 6 5 9.5 10 2.5"/></svg>
-                    ) : st === "error" ? (
-                      <svg viewBox="0 0 12 12" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="3" x2="9" y2="9"/><line x1="9" y1="3" x2="3" y2="9"/></svg>
-                    ) : s.n + 1}
-                  </div>
-                  <div className="wz-label">{s.label}</div>
-                </div>
-              </React.Fragment>
-            );
-          })}
-        </div>
-      </div>
-
       {/* ── Content area: left = scrollable form, right = sticky summary ── */}
-      <div className="wz-content-area">
+      <div className="wz-content-area sv-wz">
 
         {/* Left: scrollable — all sections stacked, stepper highlights whichever is in view */}
         <div className="wz-content-left">
           <div className="wz-scroll-area" ref={scrollAreaRef}>
             <div className="wz-body">
-              <div className="form-pane">
+              <div className="form-pane sv-form">
 
           {/* ── Step 0: Campaign, Identity & Scope ── */}
           <section ref={campaignSectionRefs[0]} data-step={0} className="wz-section">
-            <div className="wz-section-header">
-              <h2>{ALL_STEPS[0].label}</h2>
-              <p>{ALL_STEPS[0].desc}</p>
-            </div>
             {(()=>{
             const SPECIAL_CHARS_RE = /[\\\/!+<>?#&,%"]/;
             const nameVal      = c.name || "";
@@ -8763,6 +8733,10 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const nameMsg = nameBlankErr ? "Required" : nameSpecialErr ? "Only alphanumeric characters are allowed" : "";
             const nameCounterRed = nameVal.length >= 50;
             return <div className="wz-step-content">
+              <div className="wz-section-header">
+                <h2>{ALL_STEPS[0].label}</h2>
+                <p>{ALL_STEPS[0].desc}</p>
+              </div>
 
               {/* ── Campaign Identity ── */}
               <div className="setup-section">
@@ -9231,11 +9205,11 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
           {/* ── Step 1: Suppression Rules ── */}
           <section ref={campaignSectionRefs[1]} data-step={1} className="wz-section">
-            <div className="wz-section-header">
-              <h2>{ALL_STEPS[1].label}</h2>
-              <p>{ALL_STEPS[1].desc}</p>
-            </div>
             <div className="wz-step-content">
+              <div className="wz-section-header">
+                <h2>{ALL_STEPS[1].label}</h2>
+                <p>{ALL_STEPS[1].desc}</p>
+              </div>
               <div className="wz-content-card">
               <div className="sup-row">
                 <Toggle checked={c.suppressOptOut} onChange={v => set("suppressOptOut", v)}/>
@@ -9269,11 +9243,11 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
           {/* ── Step 2: Topic AI Model & Survey Template ── */}
           <section ref={campaignSectionRefs[2]} data-step={2} className="wz-section">
-            <div className="wz-section-header">
-              <h2>{ALL_STEPS[2].label}</h2>
-              <p>{ALL_STEPS[2].desc}</p>
-            </div>
             <div className="wz-step-content">
+              <div className="wz-section-header">
+                <h2>{ALL_STEPS[2].label}</h2>
+                <p>{ALL_STEPS[2].desc}</p>
+              </div>
               <div className="wz-content-card">
               <div className="intel-sub-section">
                 {(() => {
@@ -10623,34 +10597,56 @@ function TemplateSummaryCard({ d, questionMode, onNavigate }) {
       <div className="summary-card-rows">
         {rows.map((r, i) => (
           <React.Fragment key={r.label + i}>
-            <div className="summary-card-row"
-              onClick={onNavigate ? () => onNavigate(r.step) : undefined}
-              style={{ cursor: onNavigate ? "pointer" : "default" }}
-              onMouseEnter={e => { if (onNavigate) e.currentTarget.style.background = "var(--color-state-bg-hover)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
-              <div className="summary-card-icon">{r.icon}</div>
-              <div className="summary-card-row-body">
-                <div className="summary-card-label">{r.label}</div>
-                {r.value && <div className="summary-card-value">{r.value}</div>}
-              </div>
-            </div>
-            {r.subrows && r.subrows.map((sr) => (
-              <div key={sr.label} className="summary-card-row"
-                onClick={onNavigate ? () => onNavigate(r.step) : undefined}
-                style={{
+            {r.subrows !== undefined ? (
+              <>
+                {/* Digital / IVR — grey section header chip */}
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "var(--space-3)",
+                  padding: "var(--space-3) var(--space-3)",
+                  background: "var(--lyra-color-bg-surface-shell)",
+                  borderRadius: "var(--radius-md)",
+                  marginTop: "var(--space-3)",
                   cursor: onNavigate ? "pointer" : "default",
-                  background: "var(--lyra-slate-50)",
-                  paddingLeft: "var(--space-2)",
-                }}
-                onMouseEnter={e => { if (onNavigate) e.currentTarget.style.background = "var(--lyra-slate-100)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "var(--lyra-slate-50)"; }}>
-                <div className="summary-card-icon" style={{ background: "var(--lyra-slate-100)", color: "var(--lyra-slate-600)" }}>{digitalIcon}</div>
+                }} onClick={onNavigate ? () => onNavigate(r.step) : undefined}>
+                  <div style={{
+                    width: 30, height: 30, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "var(--lyra-color-bg-surface-shell)",
+                    color: "var(--lyra-color-fg-secondary)",
+                    borderRadius: "var(--radius-md)",
+                    marginTop: 1,
+                  }}>{r.icon}</div>
+                  <span style={{ font: "500 12px/16px var(--font-sans)", letterSpacing: "0.06em", color: "var(--lyra-color-fg-secondary)" }}>{r.label}</span>
+                </div>
+                {/* Child rows — regular blue-icon rows */}
+                {r.subrows.map((sr) => (
+                  <div key={sr.label} className="summary-card-row"
+                    onClick={onNavigate ? () => onNavigate(r.step) : undefined}
+                    style={{ cursor: onNavigate ? "pointer" : "default" }}
+                    onMouseEnter={e => { if (onNavigate) e.currentTarget.style.background = "var(--color-state-bg-hover)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
+                    <div className="summary-card-icon">{r.icon}</div>
+                    <div className="summary-card-row-body">
+                      <div className="summary-card-label">{sr.label}</div>
+                      <div className="summary-card-value">{sr.value}</div>
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              /* Regular data row */
+              <div className="summary-card-row"
+                onClick={onNavigate ? () => onNavigate(r.step) : undefined}
+                style={{ cursor: onNavigate ? "pointer" : "default" }}
+                onMouseEnter={e => { if (onNavigate) e.currentTarget.style.background = "var(--color-state-bg-hover)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = ""; }}>
+                <div className="summary-card-icon">{r.icon}</div>
                 <div className="summary-card-row-body">
-                  <div className="summary-card-label">{sr.label}</div>
-                  <div className="summary-card-value">{sr.value}</div>
+                  <div className="summary-card-label">{r.label}</div>
+                  {r.value && <div className="summary-card-value">{r.value}</div>}
                 </div>
               </div>
-            ))}
+            )}
           </React.Fragment>
         ))}
       </div>
