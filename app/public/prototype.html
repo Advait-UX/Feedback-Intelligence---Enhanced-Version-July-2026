@@ -8731,11 +8731,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const nameMsg = nameBlankErr ? "Required" : nameSpecialErr ? "Only alphanumeric characters are allowed" : "";
             const nameCounterRed = nameVal.length >= 50;
             return <div className="wz-step-content">
-              <div className="wz-section-header">
-                <h2>{ALL_STEPS[0].label}</h2>
-                <p>{ALL_STEPS[0].desc}</p>
-              </div>
-
               {/* ── Campaign Identity ── */}
               <div className="setup-section">
                 <div className="setup-section-body">
