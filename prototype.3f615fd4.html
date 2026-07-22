@@ -8747,7 +8747,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                         Campaign Name<span className="req">*</span>
                         <span className="char-counter" style={{ marginLeft: "auto", color: nameCounterRed ? "var(--color-status-error)" : undefined }}>{nameVal.length}/50</span>
                       </label>
-                      <input className={`fi-input${nameErr ? " error" : ""}`} style={{ maxWidth: 480 }}
+                      <input className={`fi-input${nameErr ? " error" : ""}`}
                         placeholder="e.g. Post-Chat CSAT Q4" maxLength={50}
                         aria-invalid={nameErr || undefined}
                         value={c.name} onChange={e => set("name", e.target.value)}/>
