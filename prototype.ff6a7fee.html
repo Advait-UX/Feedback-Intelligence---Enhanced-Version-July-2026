@@ -8740,31 +8740,38 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               <div className="setup-section">
                 <div className="setup-section-body">
 
-                  {/* Name */}
-                  <div className="field-cell" style={{ maxWidth: 480 }}>
-                    <label className="field-label">Campaign Name<span className="req">*</span><span className="char-counter" style={{ marginLeft: "auto", color: nameCounterRed ? "var(--color-status-error)" : undefined }}>{nameVal.length}/50</span></label>
-                    <input className={`fi-input${nameErr ? " error" : ""}`} placeholder="Type" maxLength={50}
-                      aria-invalid={nameErr || undefined}
-                      value={c.name} onChange={e => set("name", e.target.value)}/>
-                    {nameErr && <div className="field-control"><span className="error-msg">
-                      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                      {nameMsg}
-                    </span></div>}
+                  {/* Name + Description */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
+                    <div className="field-cell">
+                      <label className="field-label" style={{ display: "flex", alignItems: "center" }}>
+                        Campaign Name<span className="req">*</span>
+                        <span className="char-counter" style={{ marginLeft: "auto", color: nameCounterRed ? "var(--color-status-error)" : undefined }}>{nameVal.length}/50</span>
+                      </label>
+                      <input className={`fi-input${nameErr ? " error" : ""}`} style={{ maxWidth: 480 }}
+                        placeholder="e.g. Post-Chat CSAT Q4" maxLength={50}
+                        aria-invalid={nameErr || undefined}
+                        value={c.name} onChange={e => set("name", e.target.value)}/>
+                      {nameErr && <div className="field-control"><span className="error-msg">
+                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                        {nameMsg}
+                      </span></div>}
+                    </div>
+                    <div className="field-cell">
+                      <label className="field-label" style={{ display: "flex", alignItems: "center" }}>
+                        Description
+                        <span className="char-counter" style={{ marginLeft: "auto" }}>{(c.description || "").length}/200</span>
+                      </label>
+                      <textarea className="fi-input" rows={3} maxLength={200}
+                        style={{ resize: "vertical", minHeight: 88 }}
+                        placeholder="What this campaign is for and who it targets."
+                        value={c.description} onChange={e => set("description", e.target.value)}/>
+                    </div>
                   </div>
 
-                  {/* Description — full width, wraps instead of clipping */}
-                  <div className="field-cell" style={{ maxWidth: 720, marginTop: "var(--space-5)" }}>
-                    <label className="field-label">Description<span className="char-counter" style={{ marginLeft: "auto" }}>{(c.description || "").length}/200</span></label>
-                    <textarea className="fi-input" rows={4} maxLength={200}
-                      style={{ resize: "vertical", minHeight: 104 }}
-                      placeholder="What this campaign is for and who it targets."
-                      value={c.description} onChange={e => set("description", e.target.value)}/>
-                  </div>
-
-                  {/* Active Date Range */}
-                  <div className="wz-form-section" style={{ borderTop: "1px solid var(--lyra-color-border-subtle)", paddingTop: "38px" }}>
-                    <div className="wz-form-section-head">
-                      <span className="section-heading" style={{ padding: 0 }}>Active Date Range</span>
+                  {/* ACTIVE DATE RANGE */}
+                  <div className="sc-group">
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
+                      <div className="sc-group-label" style={{ marginBottom: 0 }}>Active Date Range</div>
                       <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)", cursor: "pointer" }}>
                         <Toggle checked={c.ongoing} onChange={v => set("ongoing", v)}/>
                         <span>Ongoing</span>
@@ -8788,122 +8795,125 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                         </span></div>}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Survey Hours label + All Day toggle */}
-                    <div style={{ marginTop: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Survey Hours</span>
-                      <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
-                        <span
-                          role="switch"
-                          aria-checked={!!c.allDay}
-                          onClick={() => {
-                            const next = !c.allDay;
-                            set("allDay", next);
-                            if (next) { set("startTime", "00:00"); set("endTime", "23:59"); }
-                            else { set("startTime", ""); set("endTime", ""); }
-                          }}
-                          style={{
-                            display: "inline-flex", alignItems: "center",
-                            width: 44, height: 24, borderRadius: "var(--radius-full)",
-                            background: c.allDay ? "var(--lyra-color-bg-primary)" : "var(--lyra-slate-300)",
-                            transition: "background 160ms",
-                            position: "relative", cursor: "pointer", flexShrink: 0,
-                          }}>
-                          <span style={{
-                            position: "absolute",
-                            left: c.allDay ? 22 : 2,
-                            top: 2,
-                            width: 20, height: 20,
-                            borderRadius: "var(--radius-full)",
-                            background: "#fff",
-                            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                            transition: "left 160ms",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                          }}>
-                            {c.allDay ? (
-                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-color-bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>
-                            ) : (
-                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-slate-400)" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="8" x2="13" y2="8"/></svg>
-                            )}
-                          </span>
-                        </span>
-                        <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>All Day (24hrs)</span>
-                      </label>
-                    </div>
-                    <div className="field-grid-2" style={{ marginTop: "var(--space-2)", borderTop: "none" }}>
-                      <div className="field-cell">
-                        <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>Start Time{!c.allDay && <span className="req">*</span>}</label>
-                        <FiTimePicker value={c.allDay ? "00:00" : c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={!c.allDay && startTimeErr} maxTime={c.allDay ? undefined : c.endTime} disabled={c.allDay}/>
-                        {!c.allDay && startTimeErr && <div className="field-control"><span className="error-msg">
-                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                          Start time is required
-                        </span></div>}
-                      </div>
-                      <div className="field-cell">
-                        <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>End Time{!c.allDay && <span className="req">*</span>}</label>
-                        <FiTimePicker value={c.allDay ? "23:59" : c.endTime} onChange={v => set("endTime", v)} error={!c.allDay && endTimeErr} minTime={c.allDay ? undefined : c.startTime} disabled={c.allDay}/>
-                        {!c.allDay && endTimeErr && <div className="field-control"><span className="error-msg">
-                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                          End time is required
-                        </span></div>}
-                      </div>
-                    </div>
+                  {/* SURVEY SCHEDULE */}
+                  <div className="sc-group">
+                    <div className="sc-group-label">Survey Schedule</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-5)" }}>
 
-                    {/* Survey hours summary */}
-                    {(c.allDay || (c.startTime && c.endTime)) && (() => {
-                      const startT = c.allDay ? "00:00" : c.startTime;
-                      const endT   = c.allDay ? "23:59" : c.endTime;
-                      const [sh, sm] = startT.split(":").map(Number);
-                      const [eh, em] = endT.split(":").map(Number);
-                      const totalMins = (eh * 60 + em) - (sh * 60 + sm);
-                      if (totalMins <= 0) return null;
-                      const hrs = Math.floor(totalMins / 60);
-                      const mins = totalMins % 60;
-                      const duration = hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`;
-                      const sameLabel = TOD_LABEL(sh) === TOD_LABEL(eh);
-                      return (
-                        <div style={{ marginTop: "12px", display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "8px 12px", background: "var(--lyra-color-bg-surface-shell)", borderRadius: "var(--radius-md)" }}>
-                          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>
-                            <circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10.5 9.5"/>
-                          </svg>
-                          <span style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-                            <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.startTime}</strong>
-                            <span style={{ fontSize: 12 }}><TodLabel hour={sh} /></span>
-                            <svg viewBox="0 0 16 6" width="20" height="6" fill="none" style={{ flexShrink: 0, color: "var(--lyra-color-fg-disabled)" }}><path d="M0 3h14M11 1l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.endTime}</strong>
-                            {!sameLabel && <span style={{ fontSize: 12 }}><TodLabel hour={eh} /></span>}
-                            <span style={{ width: 1, height: 12, background: "var(--lyra-color-border-soft)", flexShrink: 0 }}/>
-                            <span style={{ fontSize: 12, color: "var(--lyra-color-fg-default)" }}>{duration}</span>
-                          </span>
+                      {/* Survey Hours */}
+                      <div className="field-cell">
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-2)" }}>
+                          <label className="field-label" style={{ marginBottom: 0 }}>Survey Hours</label>
+                          <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", cursor: "pointer", userSelect: "none" }}>
+                            <span
+                              role="switch"
+                              aria-checked={!!c.allDay}
+                              onClick={() => {
+                                const next = !c.allDay;
+                                set("allDay", next);
+                                if (next) { set("startTime", "00:00"); set("endTime", "23:59"); }
+                                else { set("startTime", ""); set("endTime", ""); }
+                              }}
+                              style={{
+                                display: "inline-flex", alignItems: "center",
+                                width: 44, height: 24, borderRadius: "var(--radius-full)",
+                                background: c.allDay ? "var(--lyra-color-bg-primary)" : "var(--lyra-slate-300)",
+                                transition: "background 160ms",
+                                position: "relative", cursor: "pointer", flexShrink: 0,
+                              }}>
+                              <span style={{
+                                position: "absolute",
+                                left: c.allDay ? 22 : 2,
+                                top: 2,
+                                width: 20, height: 20,
+                                borderRadius: "var(--radius-full)",
+                                background: "#fff",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                transition: "left 160ms",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}>
+                                {c.allDay ? (
+                                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-color-bg-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 8 6.5 11.5 13 4.5"/></svg>
+                                ) : (
+                                  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--lyra-slate-400)" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="8" x2="13" y2="8"/></svg>
+                                )}
+                              </span>
+                            </span>
+                            <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>All Day (24hrs)</span>
+                          </label>
                         </div>
-                      );
-                    })()}
+                        <div className="field-grid-2">
+                          <div className="field-cell">
+                            <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>Start Time{!c.allDay && <span className="req">*</span>}</label>
+                            <FiTimePicker value={c.allDay ? "00:00" : c.startTime} onChange={v => { set("startTime", v); if (c.endTime && v && c.endTime <= v) set("endTime", ""); }} error={!c.allDay && startTimeErr} maxTime={c.allDay ? undefined : c.endTime} disabled={c.allDay}/>
+                            {!c.allDay && startTimeErr && <div className="field-control"><span className="error-msg">
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                              Start time is required
+                            </span></div>}
+                          </div>
+                          <div className="field-cell">
+                            <label className="field-label" style={{ color: c.allDay ? "var(--lyra-color-fg-disabled)" : undefined }}>End Time{!c.allDay && <span className="req">*</span>}</label>
+                            <FiTimePicker value={c.allDay ? "23:59" : c.endTime} onChange={v => set("endTime", v)} error={!c.allDay && endTimeErr} minTime={c.allDay ? undefined : c.startTime} disabled={c.allDay}/>
+                            {!c.allDay && endTimeErr && <div className="field-control"><span className="error-msg">
+                              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                              End time is required
+                            </span></div>}
+                          </div>
+                        </div>
+                        {(c.allDay || (c.startTime && c.endTime)) && (() => {
+                          const startT = c.allDay ? "00:00" : c.startTime;
+                          const endT   = c.allDay ? "23:59" : c.endTime;
+                          const [sh, sm] = startT.split(":").map(Number);
+                          const [eh, em] = endT.split(":").map(Number);
+                          const totalMins = (eh * 60 + em) - (sh * 60 + sm);
+                          if (totalMins <= 0) return null;
+                          const hrs = Math.floor(totalMins / 60);
+                          const mins = totalMins % 60;
+                          const duration = hrs > 0 && mins > 0 ? `${hrs} hr ${mins} min` : hrs > 0 ? `${hrs} hr` : `${mins} min`;
+                          const sameLabel = TOD_LABEL(sh) === TOD_LABEL(eh);
+                          return (
+                            <div style={{ marginTop: "var(--space-2)", display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "8px 12px", background: "var(--lyra-color-bg-surface-shell)", borderRadius: "var(--radius-md)" }}>
+                              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>
+                                <circle cx="8" cy="8" r="6"/><polyline points="8 5 8 8 10.5 9.5"/>
+                              </svg>
+                              <span style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                                <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.startTime}</strong>
+                                <span style={{ fontSize: 12 }}><TodLabel hour={sh} /></span>
+                                <svg viewBox="0 0 16 6" width="20" height="6" fill="none" style={{ flexShrink: 0, color: "var(--lyra-color-fg-disabled)" }}><path d="M0 3h14M11 1l3 2-3 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                <strong style={{ fontWeight: 500, color: "var(--lyra-color-fg-default)", fontSize: 12 }}>{c.endTime}</strong>
+                                {!sameLabel && <span style={{ fontSize: 12 }}><TodLabel hour={eh} /></span>}
+                                <span style={{ width: 1, height: 12, background: "var(--lyra-color-border-soft)", flexShrink: 0 }}/>
+                                <span style={{ fontSize: 12, color: "var(--lyra-color-fg-default)" }}>{duration}</span>
+                              </span>
+                            </div>
+                          );
+                        })()}
+                      </div>
 
-                    {/* Surveying Days */}
-                    <div style={{ marginTop: "16px" }}>
-                      <label className="field-label" style={{ marginBottom: "var(--space-2)", display: "block" }}>Select Surveying Days<span className="req">*</span></label>
-                      <SurveyingDays value={c.surveyDays || []} onChange={v => set("surveyDays", v)}/>
-                      {surveyDaysErr && <div className="field-control" style={{ marginTop: "var(--space-1)" }}><span className="error-msg">
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                        Select at least one surveying day
-                      </span></div>}
-                    </div>
+                      {/* Surveying Days */}
+                      <div className="field-cell">
+                        <label className="field-label">Surveying Days<span className="req">*</span></label>
+                        <SurveyingDays value={c.surveyDays || []} onChange={v => set("surveyDays", v)}/>
+                        {surveyDaysErr && <div className="field-control" style={{ marginTop: "var(--space-1)" }}><span className="error-msg">
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          Select at least one surveying day
+                        </span></div>}
+                      </div>
 
-                    {/* Divider before Interaction Length */}
-                    <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "var(--space-5) 0 var(--space-5)" }}/>
-
-                    {/* Interaction Length — directly after surveying days */}
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
-                        <span style={{ font: "500 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)", flexShrink: 0 }}>Minimum interaction length</span>
+                      {/* Minimum Interaction Length */}
+                      <div className="field-cell">
+                        <label className="field-label">Minimum Interaction Length</label>
                         <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
                           <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2}
                             onChange={e => set("interactionLength", parseInt(e.target.value) || 1)}
-                            style={{ width: 72, textAlign: "center" }}/>
-                          <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
+                            style={{ width: 80, textAlign: "center", flexShrink: 0 }}/>
+                          <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
                         </div>
+                        <div className="field-control"><span className="help">Only include interactions that lasted at least this long.</span></div>
                       </div>
-                      <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: "var(--space-1)" }}>Only include interactions that lasted at least this long.</div>
+
                     </div>
                   </div>
 
@@ -8918,115 +8928,98 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               <div className="setup-section">
                 <div className="setup-section-body">
 
-                    {/* Sub-section 1: Teams & Groups */}
-                    <div style={{ paddingBottom: "var(--space-6)" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 12px/24px var(--font-sans)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>1</div>
-                        <div>
-                          <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Teams &amp; Groups</div>
-                          <div style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>Target interactions from specific agent teams or groups.</div>
-                        </div>
-                      </div>
-                      <div className="field-grid-2">
-                        <div className="field-cell">
-                          <label className="field-label">Teams<span className="req">*</span></label>
-                          <MultiSelectField
-                            options={ALL_TEAMS}
-                            value={c.queues || []}
-                            onChange={v => set("queues", v)}
-                            placeholder="Select Teams"
-                            error={teamsErr}
-                          />
-                          {teamsErr && <div className="field-control"><span className="error-msg">
-                            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
-                            Select at least one team
-                          </span></div>}
-                        </div>
-                        <div className="field-cell">
-                          <label className="field-label">Groups <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Optional</span></label>
-                          <MultiSelectField
-                            options={["North America", "EMEA", "APAC"]}
-                            value={c.teams || []}
-                            onChange={v => set("teams", v)}
-                            placeholder="All groups"
-                          />
-                        </div>
-                      </div>
+                  {/* 1 — Teams & Groups */}
+                  <div className="sc-group">
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>1</span>
+                      <span className="sc-group-label" style={{ marginBottom: 0 }}>Teams &amp; Groups</span>
                     </div>
-
-                    <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "0 0 var(--space-6)" }}/>
-
-                    {/* Sub-section 2: Agent Skills */}
-                    <div style={{ paddingBottom: "var(--space-6)" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 12px/24px var(--font-sans)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>2</div>
-                        <div>
-                          <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>Agent Skills</div>
-                          <div style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>Filter by the skills assigned to agents handling the interactions.</div>
-                        </div>
-                      </div>
-                      <div style={{ maxWidth: 420 }}>
-                        <label className="field-label">Skills <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Optional</span></label>
+                    <div className="field-grid-2">
+                      <div className="field-cell">
+                        <label className="field-label">Teams<span className="req">*</span></label>
                         <MultiSelectField
-                          options={ALL_SKILLS}
-                          value={c.skills || []}
-                          onChange={v => set("skills", v)}
-                          placeholder="Any skill"
+                          options={ALL_TEAMS}
+                          value={c.queues || []}
+                          onChange={v => set("queues", v)}
+                          placeholder="Select Teams"
+                          error={teamsErr}
+                        />
+                        {teamsErr && <div className="field-control"><span className="error-msg">
+                          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>
+                          Select at least one team
+                        </span></div>}
+                      </div>
+                      <div className="field-cell">
+                        <label className="field-label">Groups <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                        <MultiSelectField
+                          options={["North America", "EMEA", "APAC"]}
+                          value={c.teams || []}
+                          onChange={v => set("teams", v)}
+                          placeholder="All groups"
                         />
                       </div>
                     </div>
+                  </div>
 
-                    <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "0 0 var(--space-6)" }}/>
+                  {/* 2 — Agent Skills */}
+                  <div className="sc-group">
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>2</span>
+                      <span className="sc-group-label" style={{ marginBottom: 0 }}>Agent Skills</span>
+                    </div>
+                    <div className="field-cell" style={{ maxWidth: 420 }}>
+                      <label className="field-label">Skills <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                      <MultiSelectField
+                        options={ALL_SKILLS}
+                        value={c.skills || []}
+                        onChange={v => set("skills", v)}
+                        placeholder="Any skill"
+                      />
+                    </div>
+                  </div>
 
-                    {/* Sub-section 3: Category */}
-                    <div style={{ paddingBottom: "var(--space-2)" }}>
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: "var(--space-3)", marginBottom: "var(--space-4)" }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 12px/24px var(--font-sans)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>3</div>
-                        <div>
-                          <div style={{ font: "500 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)", display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                            Category
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "var(--lyra-color-bg-ai)", color: "var(--lyra-purple-700)", font: "600 10px/14px var(--font-sans)" }}>
-                              <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/></svg>
-                              AI
-                            </span>
-                          </div>
-                          <div style={{ font: "400 12px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 2 }}>Narrow to interactions matching specific topics, intents, or AI agent types.</div>
-                        </div>
+                  {/* 3 — Category */}
+                  <div className="sc-group">
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-3)" }}>
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>3</span>
+                      <span className="sc-group-label" style={{ marginBottom: 0 }}>Category</span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "var(--lyra-color-bg-ai)", color: "var(--lyra-purple-700)", font: "600 10px/14px var(--font-sans)" }}>
+                        <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/></svg>
+                        AI
+                      </span>
+                    </div>
+                    <div className="field-grid-2">
+                      <div className="field-cell">
+                        <label className="field-label">Topics &amp; Intent <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                        <MultiSelectField
+                          options={ALL_AI_TOPICS}
+                          value={c.aiTopics || []}
+                          onChange={v => set("aiTopics", v)}
+                          placeholder="Any topic or intent"
+                        />
                       </div>
-                      <div className="field-grid-2">
-                        <div className="field-cell">
-                          <label className="field-label" style={{ display: "flex", alignItems: "center", gap: "var(--space-1)" }}>
-                            Topics &amp; Intent <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Optional</span>
-                          </label>
-                          <MultiSelectField
-                            options={ALL_AI_TOPICS}
-                            value={c.aiTopics || []}
-                            onChange={v => set("aiTopics", v)}
-                            placeholder="Any topic or intent"
-                          />
-                        </div>
-                        <div className="field-cell" style={{ padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-bg-ai)", borderRadius: "var(--radius-md)", border: "1px solid rgba(78,57,168,0.15)" }}>
-                          <label className="field-label" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", color: "var(--lyra-purple-700)", marginBottom: "var(--space-2)" }}>
-                            <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/><path d="M12.5 10l.47 1.3L14.3 11.8l-1.33.47L12.5 13.6l-.47-1.33L10.7 11.8l1.33-.5z"/></svg>
-                            Cognigy AI Agents
-                          </label>
-                          <MultiSelectField
-                            options={ALL_AI_AGENTS}
-                            value={c.aiAgents || []}
-                            onChange={v => set("aiAgents", v)}
-                            placeholder="Any AI agent"
-                          />
-                          <div style={{ font: "400 11px/16px var(--font-sans)", color: "var(--lyra-purple-700)", marginTop: "var(--space-2)", opacity: 0.8 }}>
-                            Include interactions handled by Cognigy bots.
-                          </div>
+                      <div className="field-cell" style={{ padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-bg-ai)", borderRadius: "var(--radius-md)", border: "1px solid rgba(78,57,168,0.15)" }}>
+                        <label className="field-label" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", color: "var(--lyra-purple-700)", marginBottom: "var(--space-2)" }}>
+                          <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/><path d="M12.5 10l.47 1.3L14.3 11.8l-1.33.47L12.5 13.6l-.47-1.33L10.7 11.8l1.33-.5z"/></svg>
+                          Cognigy AI Agents
+                        </label>
+                        <MultiSelectField
+                          options={ALL_AI_AGENTS}
+                          value={c.aiAgents || []}
+                          onChange={v => set("aiAgents", v)}
+                          placeholder="Any AI agent"
+                        />
+                        <div style={{ font: "400 11px/16px var(--font-sans)", color: "var(--lyra-purple-700)", marginTop: "var(--space-2)", opacity: 0.8 }}>
+                          Include interactions handled by Cognigy bots.
                         </div>
                       </div>
                     </div>
-
                   </div>
 
+                </div>
+
                   {/* Interaction Channel + Survey Channel — grey panel */}
-                  <div style={{ marginTop: "38px" }}>
+                  <div className="sc-group">
                     <div style={{
                       background: "var(--lyra-color-bg-surface-shell)",
                       borderRadius: "var(--radius-lg)",
@@ -9035,9 +9028,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
                       {/* Interaction Channel */}
                       <div style={{ padding: "24px 28px" }}>
-                        <div style={{ marginBottom: "var(--space-3)" }}>
-                          <span className="section-heading" style={{ padding: 0 }}>Select interaction channel</span>
-                        </div>
+                        <div className="sc-group-label" style={{ marginBottom: "var(--space-3)" }}>Interaction channel</div>
                         <div style={{
                           display: "inline-flex", alignItems: "stretch",
                           border: "1px solid var(--lyra-color-border-soft)",
@@ -9123,9 +9114,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
                       {/* Survey Channel */}
                       <div style={{ padding: "24px 28px" }}>
-                        <div style={{ marginBottom: "var(--space-3)" }}>
-                          <span className="section-heading" style={{ padding: 0 }}>Select survey channel</span>
-                        </div>
+                        <div className="sc-group-label" style={{ marginBottom: "var(--space-3)" }}>Survey channel</div>
                         <div style={{
                           display: "inline-flex", alignItems: "stretch",
                           border: "1px solid var(--lyra-color-border-soft)",
@@ -9200,13 +9189,12 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                   {/* Language */}
-                  <div className="wz-form-section" style={{ marginTop: "38px" }}>
-                    <FieldRow label="Language">
-                      <label className="lyra-check disabled" style={{ pointerEvents: "none" }}>
-                        <input type="checkbox" checked readOnly disabled/>
-                        <span>English (Default)</span>
-                      </label>
-                    </FieldRow>
+                  <div className="sc-group">
+                    <div className="sc-group-label">Language</div>
+                    <label className="lyra-check disabled" style={{ pointerEvents: "none", display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                      <input type="checkbox" checked readOnly disabled/>
+                      <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>English (Default)</span>
+                    </label>
                   </div>
 
                 </div>{/* /setup-section-body */}
