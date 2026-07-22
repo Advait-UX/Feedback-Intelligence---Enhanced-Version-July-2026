@@ -8907,22 +8907,16 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
                   </div>
 
-                  {/* ── Coverage ── */}
-                  <div style={{ marginTop: "var(--space-8)" }}>
+                </div>{/* /setup-section-body */}
+              </div>{/* /setup-section */}
 
-                    {/* Coverage header — full-bleed blue tint */}
-                    <div style={{
-                      margin: "0 calc(var(--space-6) * -1) var(--space-6)",
-                      padding: "var(--space-4) var(--space-6)",
-                      background: "var(--lyra-color-bg-active-subtle)",
-                      borderTop: "1px solid var(--lyra-brand-200)",
-                      borderBottom: "1px solid var(--lyra-brand-200)",
-                    }}>
-                      <div style={{ font: "600 12px/16px var(--font-sans)", textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--lyra-color-fg-active-strong)" }}>Coverage</div>
-                      <div style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: 3 }}>
-                        Define which agent interactions qualify for this survey. Filters combine — leave any blank to include all.
-                      </div>
-                    </div>
+              {/* ── Coverage ── */}
+              <div className="wz-section-header">
+                <h2>Coverage</h2>
+                <p>Define which agent interactions qualify for this survey. Filters combine — leave any blank to include all.</p>
+              </div>
+              <div className="setup-section">
+                <div className="setup-section-body">
 
                     {/* Sub-section 1: Teams & Groups */}
                     <div style={{ paddingBottom: "var(--space-6)" }}>
