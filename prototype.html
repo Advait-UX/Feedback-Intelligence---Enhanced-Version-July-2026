@@ -8781,7 +8781,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     background: "var(--lyra-color-bg-surface-shell)",
                     borderRadius: "var(--radius-md)",
                     padding: "var(--space-4)",
-                    border: "1px solid var(--lyra-color-border-subtle)",
                     display: "flex", alignItems: "center", gap: "var(--space-6)",
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flex: 1, minWidth: 0 }}>
@@ -8800,9 +8799,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>mins</span>
                     </div>
                   </div>
-
-                  {/* divider */}
-                  <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "var(--space-6) 0" }}/>
 
                   {/* ACTIVE DATE RANGE */}
                   <div className="sc-group" style={{ marginTop: 0 }}>
@@ -8958,12 +8954,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                   <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
 
                     {/* Filter 1: Teams & Groups */}
-                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)", overflow: "hidden" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>1</span>
-                        <span className="sc-group-label" style={{ marginBottom: 0 }}>Teams &amp; Groups</span>
-                      </div>
+                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
+                        <div className="sc-group-label">Teams &amp; Groups</div>
                         <div className="field-grid-2">
                           <div className="field-cell">
                             <label className="field-label">Teams<span className="req">*</span></label>
@@ -8979,12 +8972,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Filter 2: Agent Skills */}
-                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)", overflow: "hidden" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>2</span>
-                        <span className="sc-group-label" style={{ marginBottom: 0 }}>Agent Skills</span>
-                      </div>
+                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
+                        <div className="sc-group-label">Agent Skills</div>
                         <div className="field-cell" style={{ maxWidth: 420 }}>
                           <label className="field-label">Skills <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
                           <MultiSelectField options={ALL_SKILLS} value={c.skills || []} onChange={v => set("skills", v)} placeholder="Any skill"/>
@@ -8993,16 +8983,15 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Filter 3: Category */}
-                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)", overflow: "hidden" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
-                        <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 20, height: 20, borderRadius: "var(--radius-full)", background: "var(--lyra-color-bg-active-moderate)", color: "var(--lyra-color-fg-active-strong)", font: "600 11px/20px var(--font-sans)", flexShrink: 0 }}>3</span>
-                        <span className="sc-group-label" style={{ marginBottom: 0 }}>Category</span>
-                        <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "var(--lyra-color-bg-ai)", color: "var(--lyra-purple-700)", font: "600 10px/14px var(--font-sans)" }}>
-                          <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/></svg>
-                          AI
-                        </span>
-                      </div>
+                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: 10 }}>
+                          <div className="sc-group-label" style={{ marginBottom: 0 }}>Category</div>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 3, padding: "1px 6px", borderRadius: "var(--radius-xs)", background: "var(--lyra-color-bg-ai)", color: "var(--lyra-purple-700)", font: "600 10px/14px var(--font-sans)" }}>
+                            <svg viewBox="0 0 16 16" width="9" height="9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/></svg>
+                            AI
+                          </span>
+                        </div>
                         <div className="field-grid-2">
                           <div className="field-cell">
                             <label className="field-label">Topics &amp; Intent <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
@@ -9022,12 +9011,12 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
 
                     {/* Filter 4: Interaction & Survey Channels */}
                     <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)", overflow: "hidden" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
+                      <div style={{ padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
                         <span className="sc-group-label" style={{ marginBottom: 0 }}>Interaction &amp; Survey Channels</span>
                       </div>
 
                       {/* Interaction Channel */}
-                      <div style={{ padding: "var(--space-4)" }}>
+                      <div style={{ padding: "var(--space-4)", background: "var(--lyra-color-bg-surface-shell)" }}>
                         <div className="sc-group-label" style={{ marginBottom: "var(--space-3)" }}>Interaction channel</div>
                         <div style={{
                           display: "inline-flex", alignItems: "stretch",
@@ -9110,10 +9099,10 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
 
                       {/* Divider between the two channel rows */}
-                      <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "0 28px" }}/>
+                      <div style={{ height: 1, background: "var(--lyra-color-border-subtle)" }}/>
 
                       {/* Survey Channel */}
-                      <div style={{ padding: "24px 28px" }}>
+                      <div style={{ padding: "var(--space-4)", background: "var(--lyra-color-bg-surface-shell)" }}>
                         <div className="sc-group-label" style={{ marginBottom: "var(--space-3)" }}>Survey channel</div>
                         <div style={{
                           display: "inline-flex", alignItems: "stretch",
@@ -9189,11 +9178,9 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     </div>
 
                     {/* Filter 5: Language */}
-                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)", overflow: "hidden" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", padding: "10px var(--space-4)", background: "var(--lyra-color-bg-surface-shell)", borderBottom: "1px solid var(--lyra-color-border-subtle)" }}>
-                        <span className="sc-group-label" style={{ marginBottom: 0 }}>Language</span>
-                      </div>
+                    <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
+                        <div className="sc-group-label">Language</div>
                         <label className="lyra-check disabled" style={{ pointerEvents: "none", display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
                           <input type="checkbox" checked readOnly disabled/>
                           <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)" }}>English (Default)</span>
