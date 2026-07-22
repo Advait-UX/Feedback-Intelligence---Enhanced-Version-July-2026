@@ -30,7 +30,7 @@ export default defineConfig(({ command }) => {
     : 'prototype.html'
 
   return {
-    base: '/MVP-Feedback-Intelligence--30th-May/',
+    base: '/Feedback-Intelligence---Enhanced-Version-July-2026/',
     plugins: [react(), tailwindcss(), protoHashPlugin()],
     define: {
       __BUILD_TIME__: JSON.stringify(Date.now()),
