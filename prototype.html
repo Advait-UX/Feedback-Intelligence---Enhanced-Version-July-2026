@@ -8767,15 +8767,30 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               </div>{/* /setup-section */}
 
               {/* ── Scope of Campaign ── */}
-              <div className="wz-section-header">
+              <div className="wz-section-header" style={{ marginTop: "38px" }}>
                 <h2>Scope of Campaign</h2>
                 <p>Set the active dates and define when survey interactions should be captured.</p>
               </div>
               <div className="setup-section">
                 <div className="setup-section-body">
 
+                  {/* MINIMUM INTERACTION LENGTH */}
+                  <div className="field-cell">
+                    <label className="field-label">Minimum Interaction Length</label>
+                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                      <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2}
+                        onChange={e => set("interactionLength", parseInt(e.target.value) || 1)}
+                        style={{ width: 80, textAlign: "center", flexShrink: 0 }}/>
+                      <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
+                    </div>
+                    <div className="field-control"><span className="help">Only include interactions that lasted at least this long.</span></div>
+                  </div>
+
+                  {/* divider */}
+                  <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "var(--space-6) 0" }}/>
+
                   {/* ACTIVE DATE RANGE */}
-                  <div className="sc-group">
+                  <div className="sc-group" style={{ marginTop: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
                       <div style={{ font: "var(--text-h-md)", color: "var(--lyra-color-fg-default)", letterSpacing: "-0.01em" }}>Active Date Range</div>
                       <label style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", font: "400 13px/20px var(--font-sans)", color: "var(--color-fg-secondary)", cursor: "pointer" }}>
@@ -8912,21 +8927,6 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
 
                     </div>
-                  </div>
-
-                  {/* divider */}
-                  <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "var(--space-6) 0" }}/>
-
-                  {/* MINIMUM INTERACTION LENGTH */}
-                  <div className="field-cell">
-                    <label className="field-label">Minimum Interaction Length</label>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                      <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2}
-                        onChange={e => set("interactionLength", parseInt(e.target.value) || 1)}
-                        style={{ width: 80, textAlign: "center", flexShrink: 0 }}/>
-                      <span style={{ font: "400 14px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
-                    </div>
-                    <div className="field-control"><span className="help">Only include interactions that lasted at least this long.</span></div>
                   </div>
 
                 </div>{/* /setup-section-body */}
