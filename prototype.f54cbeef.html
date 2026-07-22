@@ -8889,16 +8889,21 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </span></div>}
                     </div>
 
+                    {/* Divider before Interaction Length */}
+                    <div style={{ height: 1, background: "var(--lyra-color-border-subtle)", margin: "var(--space-5) 0 var(--space-5)" }}/>
+
                     {/* Interaction Length — directly after surveying days */}
-                    <div style={{ marginTop: "var(--space-5)", display: "flex", alignItems: "center", gap: "var(--space-3)", flexWrap: "wrap" }}>
-                      <span style={{ font: "500 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)", flexShrink: 0 }}>Minimum interaction length</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
-                        <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2}
-                          onChange={e => set("interactionLength", parseInt(e.target.value) || 1)}
-                          style={{ width: 72, textAlign: "center" }}/>
-                        <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)" }}>
+                        <span style={{ font: "500 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-default)", flexShrink: 0 }}>Minimum interaction length</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
+                          <input type="number" className="fi-input" min={1} value={c.interactionLength ?? 2}
+                            onChange={e => set("interactionLength", parseInt(e.target.value) || 1)}
+                            style={{ width: 72, textAlign: "center" }}/>
+                          <span style={{ font: "400 13px/20px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", flexShrink: 0 }}>mins</span>
+                        </div>
                       </div>
-                      <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Only include interactions that lasted at least this long.</span>
+                      <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: "var(--space-1)" }}>Only include interactions that lasted at least this long.</div>
                     </div>
                   </div>
 
