@@ -5922,6 +5922,35 @@ select.fi-input {
   background: var(--lyra-white);
 }
 
+/* Survey template "View details" toggle + expanded panel */
+.view-details-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: none; border: none; padding: 2px 6px; cursor: pointer;
+  font: 500 12px/16px var(--font-sans); color: var(--color-fg-secondary);
+  border-radius: var(--radius-xs); white-space: nowrap; flex-shrink: 0;
+  transition: color 0.12s, background 0.12s;
+}
+.view-details-btn:hover { color: var(--color-fg-link); background: var(--color-state-bg-hover); }
+.view-details-btn svg { transition: transform 0.18s; }
+.view-details-btn.open svg { transform: rotate(180deg); }
+.survey-details-panel {
+  border-top: 1px solid var(--color-border-subtle);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--lyra-slate-50);
+}
+.survey-details-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2) var(--space-4);
+}
+.survey-detail-label {
+  font: 500 11px/14px var(--font-sans);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--color-fg-secondary); margin-bottom: 3px;
+}
+.survey-detail-value {
+  font: 500 13px/18px var(--font-sans); color: var(--color-fg-default);
+}
+
 /* ─── Selectable card (AI Model + Survey Design sections) ─────────────────── */
 .selectable-card {
   border: 1.5px solid var(--color-border-subtle);
@@ -7412,7 +7441,7 @@ const SURVEY_DESIGNS = [
   {
     id: "csat-quick", name: "Post-Chat CSAT", category: "Customer Satisfaction",
     why: "Best for digital interactions where the conversation just ended. Short surveys (2–3 questions) get the highest response rates.",
-    channels: "Digital",
+    channels: "Digital", questionMode: "AI Generated", introduction: "Invitation with Opt Out", displayStyle: "Quick Reply", questionCount: 3,
     intents: [
       { group: "Primary",   tags: ["Resolution quality", "Agent friendliness"] },
       { group: "Secondary", tags: ["Response time", "First-contact resolution"] },
@@ -7421,7 +7450,7 @@ const SURVEY_DESIGNS = [
   {
     id: "bot-simple", name: "Bot Handoff Audit", category: "AI Quality",
     why: "Use after virtual agent transfers to measure where AI confidence dropped and human escalation was needed.",
-    channels: "Digital",
+    channels: "Digital", questionMode: "AI Generated", introduction: "Without Opt Out", displayStyle: "Quick Reply", questionCount: 2,
     intents: [
       { group: "Primary",   tags: ["Bot containment", "Handoff smoothness"] },
       { group: "Secondary", tags: ["Escalation trigger", "AI confidence"] },
@@ -7430,7 +7459,7 @@ const SURVEY_DESIGNS = [
   {
     id: "vip-followup", name: "VIP Escalation Follow-Up", category: "Retention",
     why: "Deploy after high-priority escalations. VIP customers churn silently — a personal survey shows the brand cares.",
-    channels: "Digital · Voice",
+    channels: "Digital · Voice", questionMode: "Standard Questions", introduction: "Invitation with Opt Out", displayStyle: "Conversational", questionCount: 4,
     intents: [
       { group: "Primary",   tags: ["Satisfaction", "Relationship recovery"] },
       { group: "Secondary", tags: ["Churn risk", "Brand perception"] },
@@ -7439,7 +7468,7 @@ const SURVEY_DESIGNS = [
   {
     id: "nps-pulse", name: "NPS Pulse Survey", category: "Net Promoter",
     why: "Captures likelihood to recommend after any significant interaction. Pairs well with open-text follow-up for promoter and detractor classification.",
-    channels: "Digital · Voice",
+    channels: "Digital · Voice", questionMode: "Standard Questions", introduction: "Without Opt Out", displayStyle: "Quick Reply", questionCount: 2,
     intents: [
       { group: "Primary",   tags: ["Recommend likelihood", "Promoter signal"] },
       { group: "Secondary", tags: ["Detractor risk", "Passive conversion"] },
@@ -7448,7 +7477,7 @@ const SURVEY_DESIGNS = [
   {
     id: "fcr-check", name: "First Contact Resolution", category: "Resolution Quality",
     why: "One focused question on whether the issue was fully resolved. High correlation with loyalty — ideal for QA teams tracking resolution rates.",
-    channels: "Digital · Voice",
+    channels: "Digital · Voice", questionMode: "Standard Questions", introduction: "None", displayStyle: "Quick Reply", questionCount: 1,
     intents: [
       { group: "Primary",   tags: ["Issue resolved", "Follow-up needed"] },
       { group: "Secondary", tags: ["Root cause", "Knowledge gap flag"] },
@@ -7457,7 +7486,7 @@ const SURVEY_DESIGNS = [
   {
     id: "email-quality", name: "Email Support Quality", category: "Email Channel",
     why: "Optimised for async email threads. Measures clarity, helpfulness and tone — signals often lost in real-time chat surveys.",
-    channels: "Digital",
+    channels: "Digital", questionMode: "AI Generated", introduction: "Invitation with Opt Out", displayStyle: "Conversational", questionCount: 3,
     intents: [
       { group: "Primary",   tags: ["Response clarity", "Helpfulness"] },
       { group: "Secondary", tags: ["Tone quality", "Resolution satisfaction"] },
@@ -7466,7 +7495,7 @@ const SURVEY_DESIGNS = [
   {
     id: "ivr-postcall", name: "IVR Post-Call Survey", category: "Voice Channel",
     why: "Triggers immediately after an IVR-assisted call ends. Captures in-the-moment effort and resolution signals before the customer disengages.",
-    channels: "Voice",
+    channels: "Voice", questionMode: "Standard Questions", introduction: "Without Opt Out", displayStyle: "Form", questionCount: 3,
     intents: [
       { group: "Primary",   tags: ["Call resolution", "IVR ease of use"] },
       { group: "Secondary", tags: ["Hold time satisfaction", "Agent handoff quality"] },
@@ -7475,7 +7504,7 @@ const SURVEY_DESIGNS = [
   {
     id: "ivr-nps", name: "IVR NPS Survey", category: "Net Promoter",
     why: "Short NPS delivered post-call via IVR keypad input. High completion rates due to low friction — single question, single keypress.",
-    channels: "Voice",
+    channels: "Voice", questionMode: "Standard Questions", introduction: "None", displayStyle: "Quick Reply", questionCount: 1,
     intents: [
       { group: "Primary",   tags: ["Recommend likelihood", "Loyalty signal"] },
       { group: "Secondary", tags: ["Detractor flag", "Promoter identification"] },
@@ -7484,7 +7513,7 @@ const SURVEY_DESIGNS = [
   {
     id: "csat-list", name: "CSAT Ranked List", category: "Customer Satisfaction",
     why: "Multi-question CSAT covering resolution, effort, and agent behaviour. Best for complex interactions where a single score misses detail.",
-    channels: "Digital · Voice",
+    channels: "Digital · Voice", questionMode: "AI Generated", introduction: "Invitation with Opt Out", displayStyle: "Quick Reply", questionCount: 5,
     intents: [
       { group: "Primary",   tags: ["Overall satisfaction", "Issue resolution"] },
       { group: "Secondary", tags: ["Agent effectiveness", "Process friction"] },
@@ -7493,7 +7522,7 @@ const SURVEY_DESIGNS = [
   {
     id: "brand-pulse", name: "Brand Perception Pulse", category: "Brand Health",
     why: "Measures brand perception beyond the single interaction. Use for loyalty programs, retention campaigns, and long-term relationship tracking.",
-    channels: "Digital · Voice",
+    channels: "Digital · Voice", questionMode: "AI Generated", introduction: "Invitation with Opt Out", displayStyle: "Conversational", questionCount: 4,
     intents: [
       { group: "Primary",   tags: ["Brand trust", "Loyalty intent"] },
       { group: "Secondary", tags: ["Perception shift", "Competitor sensitivity"] },
@@ -7502,7 +7531,7 @@ const SURVEY_DESIGNS = [
   {
     id: "voice-coaching", name: "Voice Coaching Survey", category: "Quality Assurance",
     why: "Purpose-built for QA and coaching workflows. Captures specific agent behaviour signals that map directly to coaching rubrics.",
-    channels: "Voice",
+    channels: "Voice", questionMode: "Standard Questions", introduction: "Without Opt Out", displayStyle: "Form", questionCount: 5,
     intents: [
       { group: "Primary",   tags: ["Agent clarity", "Empathy score"] },
       { group: "Secondary", tags: ["Script adherence", "Resolution ownership"] },
@@ -9611,36 +9640,60 @@ function SurveyPickerDrawer({ currentId, onClose, onSelect }) {
             </div>
           ) : filtered.map(s => {
             const isSelected = pendingId === s.id;
+            const isExpanded = expandedId === s.id;
             return (
               <div key={s.id}
                 className={`model-picker-row ${isSelected ? "selected" : ""}`}
+                style={{ padding: 0, overflow: "hidden" }}
                 onClick={() => setPendingId(s.id)}>
-                <div className="model-picker-row-head">
+                {/* Main row */}
+                <div className="model-picker-row-head" style={{ padding: "var(--space-3) var(--space-4)" }}>
                   <span className={`lyra-radio ${isSelected ? "selected" : ""}`} style={{ marginTop: 2, flexShrink: 0 }}/>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap", marginBottom: "var(--space-1)" }}>
-                      <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{s.name}</span>
-                    </div>
-                    {s.why && (
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 5, marginTop: 5 }}>
-                        <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2, color: "var(--color-fg-action)" }}><circle cx="7" cy="7" r="6"/><path d="M7 4.5v3l1.8 1.2"/></svg>
-                        <div>
-                          <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>When to use  </span>
-                          <span style={{ font: "400 12px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>{s.why}</span>
-                        </div>
+                    {/* Name row + View details button */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-2)", marginBottom: "var(--space-1)" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", flexWrap: "wrap" }}>
+                        <span style={{ font: "500 14px/20px var(--font-sans)", color: "var(--color-fg-default)" }}>{s.name}</span>
+                        <span style={{ font: "500 11px/16px var(--font-sans)", color: "var(--color-fg-secondary)", background: "var(--lyra-slate-100)", borderRadius: "var(--radius-full)", padding: "1px 8px", letterSpacing: "0.02em" }}>{s.category}</span>
                       </div>
-                    )}
-                    {s.channels && (
-                      <div style={{ display: "flex", alignItems: "flex-start", gap: 5, marginTop: 5 }}>
-                        <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2, color: "var(--color-fg-action)" }}><path d="M1 4.5C3.5 2 10.5 2 13 4.5"/><path d="M3 7c1.4-1.4 7.6-1.4 8 0"/><path d="M5.5 9.5c.8-.8 2.2-.8 3 0"/><circle cx="7" cy="12" r=".6" fill="currentColor" stroke="none"/></svg>
-                        <div>
-                          <span style={{ font: "500 12px/16px var(--font-sans)", color: "var(--color-fg-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Channels  </span>
-                          <span style={{ font: "400 12px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>{s.channels}</span>
-                        </div>
+                      <button
+                        className={`view-details-btn${isExpanded ? " open" : ""}`}
+                        onClick={e => { e.stopPropagation(); setExpandedId(isExpanded ? null : s.id); }}>
+                        View details
+                        <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="2 4 6 8 10 4"/></svg>
+                      </button>
+                    </div>
+                    {/* When to use */}
+                    {s.why && (
+                      <div style={{ font: "400 12px/18px var(--font-sans)", color: "var(--color-fg-secondary)" }}>
+                        {s.why}
                       </div>
                     )}
                   </div>
                 </div>
+                {/* Expanded details panel */}
+                {isExpanded && (
+                  <div className="survey-details-panel" ref={el => detailsRefs.current[s.id] = el} onClick={e => e.stopPropagation()}>
+                    <div className="survey-details-grid">
+                      <div className="survey-detail-item">
+                        <div className="survey-detail-label">Question Mode</div>
+                        <div className="survey-detail-value">{s.questionMode}</div>
+                      </div>
+                      <div className="survey-detail-item">
+                        <div className="survey-detail-label">Introduction</div>
+                        <div className="survey-detail-value">{s.introduction}</div>
+                      </div>
+                      <div className="survey-detail-item">
+                        <div className="survey-detail-label">Display Style</div>
+                        <div className="survey-detail-value">{s.displayStyle}</div>
+                      </div>
+                      <div className="survey-detail-item">
+                        <div className="survey-detail-label">Channels</div>
+                        <div className="survey-detail-value">{s.channels}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
