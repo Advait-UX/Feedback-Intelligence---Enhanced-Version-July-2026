@@ -1,0 +1,21 @@
+{
+  "name": "mvp-feedback-intelligence-git",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Advait-UX/MVP-Feedback-Intelligence--30th-May.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Advait-UX/MVP-Feedback-Intelligence--30th-May/issues"
+  },
+  "homepage": "https://github.com/Advait-UX/MVP-Feedback-Intelligence--30th-May#readme"
+}
