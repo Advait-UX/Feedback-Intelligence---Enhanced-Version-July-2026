@@ -10636,7 +10636,7 @@ function TemplateSummaryCard({ d, questionMode, onNavigate }) {
         ] : []),
       ],
     },
-    {
+    ...(questionMode !== "ai" ? [{
       step: 3,
       label: "IVR Survey Config.",
       value: "",
@@ -10649,7 +10649,7 @@ function TemplateSummaryCard({ d, questionMode, onNavigate }) {
           { label: "Audio Upload for Questions", value: `${d.selectedQuestions.length} question${d.selectedQuestions.length === 1 ? "" : "s"}` },
         ] : []),
       ],
-    },
+    }] : []),
   ];
 
   return (
@@ -13501,9 +13501,9 @@ function CreateSurveyDesign({ onCancel, onSave, initial }) {
 
               {/* Accordions */}
 <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
-                {CHANNELS.map((ch) => {
+                {CHANNELS.filter(ch => !(ch.key === "ivr" && questionMode === "ai")).map((ch) => {
                   const open = channelOpen === ch.key;
-                  const chDisabled = questionMode === null || (ch.key === "ivr" && questionMode === "ai");
+                  const chDisabled = questionMode === null;
                   return (
                     <div key={ch.key} style={{
                       border: open ? "1px solid var(--lyra-color-border-active)" : "1px solid var(--lyra-color-border-soft)",
