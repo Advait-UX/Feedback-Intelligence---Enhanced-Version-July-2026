@@ -7877,6 +7877,12 @@ const ALL_AI_TOPICS = [
   "Complaint Handling","Product Feedback","Fraud Report","Payment Failure",
 ];
 
+const ALL_CATEGORIES = [
+  "Billing & Payments","Technical Support","General Inquiry","Complaints & Escalations",
+  "Sales & Upsell","Account Management","Returns & Refunds","Customer Onboarding",
+  "Fraud & Security","Service Disruption","Cancellation & Retention","Bot / Self-Service",
+];
+
 function MultiSelectField({ options, value = [], onChange, placeholder = "Select...", error = false }) {
   var [open, setOpen] = React.useState(false);
   var [search, setSearch] = React.useState("");
@@ -8722,7 +8728,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
             const nameBlankErr = showErr && !nameVal;
             const nameSpecialErr = nameVal.length > 0 && SPECIAL_CHARS_RE.test(nameVal);
             const nameErr      = nameBlankErr || nameSpecialErr;
-            const teamsErr     = showErr && !c.queues?.[0];
+            const teamsErr     = false;
             const startDateErr  = showErr && !c.startDate;
             const endDateErr    = showErr && !c.ongoing && !c.endDate;
             const startTimeErr  = showErr && !c.startTime;
@@ -8946,7 +8952,7 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
               {/* ── Coverage ── */}
               <div className="wz-section-header" style={{ marginTop: "var(--space-10)" }}>
                 <h2>Coverage</h2>
-                <p>Define which agent interactions qualify for this survey. Filters combine — leave any blank to include all.</p>
+                <p>Control which agent interactions trigger this survey. Each filter below narrows the pool — they stack together, so an interaction must match everything you set. Leave any filter empty to include all interactions for that dimension.</p>
               </div>
               <div className="setup-section">
                 <div className="setup-section-body">
@@ -8956,17 +8962,22 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     {/* Filter 1: Teams & Groups */}
                     <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
-                        <div className="sc-group-label">Teams &amp; Groups</div>
-                        <div className="field-grid-2">
+                        <div className="sc-group-label" style={{ marginBottom: "var(--space-1)" }}>Teams &amp; Groups</div>
+                        <p style={{ margin: "0 0 var(--space-4)", font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Choose which teams' interactions are eligible. Use Groups to narrow further within a team, and include any AI agents that handle or route interactions.</p>
+                        <div className="field-grid-2" style={{ marginBottom: "var(--space-3)" }}>
                           <div className="field-cell">
-                            <label className="field-label">Teams<span className="req">*</span></label>
-                            <MultiSelectField options={ALL_TEAMS} value={c.queues || []} onChange={v => set("queues", v)} placeholder="Select Teams" error={teamsErr}/>
-                            {teamsErr && <div className="field-control"><span className="error-msg"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg>Select at least one team</span></div>}
+                            <label className="field-label">Teams <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                            <MultiSelectField options={ALL_TEAMS} value={c.queues || []} onChange={v => set("queues", v)} placeholder="All teams"/>
                           </div>
                           <div className="field-cell">
                             <label className="field-label">Groups <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
                             <MultiSelectField options={["North America", "EMEA", "APAC"]} value={c.teams || []} onChange={v => set("teams", v)} placeholder="All groups"/>
                           </div>
+                        </div>
+                        <div className="field-cell">
+                          <label className="field-label">Cognigy AI Agents <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                          <MultiSelectField options={ALL_AI_AGENTS} value={c.aiAgents || []} onChange={v => set("aiAgents", v)} placeholder="Any AI agent"/>
+                          <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: "var(--space-2)" }}>Select specific bots to include interactions they handled or handed off to a live agent.</div>
                         </div>
                       </div>
                     </div>
@@ -8974,7 +8985,8 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                     {/* Filter 2: Agent Skills */}
                     <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
-                        <div className="sc-group-label">Agent Skills</div>
+                        <div className="sc-group-label" style={{ marginBottom: "var(--space-1)" }}>Agent Skills</div>
+                        <p style={{ margin: "0 0 var(--space-4)", font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Limit coverage to agents with particular skills — useful when you want feedback on a specific service area like Billing or Technical Support.</p>
                         <div className="field-cell" style={{ maxWidth: 420 }}>
                           <label className="field-label">Skills <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
                           <MultiSelectField options={ALL_SKILLS} value={c.skills || []} onChange={v => set("skills", v)} placeholder="Any skill"/>
@@ -8982,22 +8994,21 @@ function CreateCampaign({ template: initialTemplate, editCampaign, onCancel, onS
                       </div>
                     </div>
 
-                    {/* Filter 3: Category */}
+                    {/* Filter 3: Category & Topics */}
                     <div style={{ border: "1px solid var(--lyra-color-border-subtle)", borderRadius: "var(--radius-md)", background: "var(--lyra-color-bg-surface-base)" }}>
                       <div style={{ padding: "var(--space-4)" }}>
-                        <div className="sc-group-label">Category</div>
+                        <div className="sc-group-label" style={{ marginBottom: "var(--space-1)" }}>Category &amp; Topics</div>
+                        <p style={{ margin: "0 0 var(--space-4)", font: "400 13px/18px var(--font-sans)", color: "var(--lyra-color-fg-secondary)" }}>Filter by what the interaction was about. Start with a broad category, then optionally narrow to a specific topic or intent detected by AI.</p>
                         <div className="field-grid-2">
+                          <div className="field-cell">
+                            <label className="field-label">Category <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
+                            <MultiSelectField options={ALL_CATEGORIES} value={c.category || []} onChange={v => set("category", v)} placeholder="Any category"/>
+                            <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: "var(--space-2)" }}>Broad subject area, e.g. Billing &amp; Payments or Technical Support.</div>
+                          </div>
                           <div className="field-cell">
                             <label className="field-label">Topics &amp; Intent <span style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", fontWeight: 400 }}>Optional</span></label>
                             <MultiSelectField options={ALL_AI_TOPICS} value={c.aiTopics || []} onChange={v => set("aiTopics", v)} placeholder="Any topic or intent"/>
-                          </div>
-                          <div className="field-cell" style={{ padding: "var(--space-3) var(--space-4)", background: "var(--lyra-color-bg-ai)", borderRadius: "var(--radius-md)", border: "1px solid rgba(78,57,168,0.15)" }}>
-                            <label className="field-label" style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", color: "var(--lyra-purple-700)", marginBottom: "var(--space-2)" }}>
-                              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2l1.06 2.94L12 6l-2.94 1.06L8 10l-1.06-2.94L4 6l2.94-1.06L8 2z"/><path d="M12.5 10l.47 1.3L14.3 11.8l-1.33.47L12.5 13.6l-.47-1.33L10.7 11.8l1.33-.5z"/></svg>
-                              Cognigy AI Agents
-                            </label>
-                            <MultiSelectField options={ALL_AI_AGENTS} value={c.aiAgents || []} onChange={v => set("aiAgents", v)} placeholder="Any AI agent"/>
-                            <div style={{ font: "400 11px/16px var(--font-sans)", color: "var(--lyra-purple-700)", marginTop: "var(--space-2)", opacity: 0.8 }}>Include interactions handled by Cognigy bots.</div>
+                            <div style={{ font: "400 12px/16px var(--font-sans)", color: "var(--lyra-color-fg-secondary)", marginTop: "var(--space-2)" }}>AI-detected reason for contact within the category, e.g. Billing Dispute or Refund Processing.</div>
                           </div>
                         </div>
                       </div>
